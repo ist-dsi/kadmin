@@ -2,7 +2,7 @@ package pt.tecnico.dsi.kadmin
 
 import java.util.Locale
 
-import com.typesafe.config.ConfigFactory
+import com.typesafe.config.{Config, ConfigFactory}
 import com.typesafe.scalalogging.LazyLogging
 import org.joda.time.{DateTimeZone, DateTime}
 import org.joda.time.format.DateTimeFormat
@@ -15,14 +15,15 @@ import scala.util.matching.Regex.Match
 /**
   * @define idempotentOperation
   *  This operation is idempotent, that is, if this method is invoked twice for the same principal
-  *  it will be successful in both invocations.
+  *  it will be successful in both invocations. This means that this operation can be repeated or retried as
+  *  often as necessary without causing unintended effects.
   *
   * @define startedWithDoOperation
   *  Kadmin will be started with the `doOperation` method, that is, it will perform
   *  authentication as specified in the configuration.
   */
-object Kerberos extends LazyLogging {
-  val kerberosConfigs = ConfigFactory.load().getConfig("kadmin")
+class Kadmin(config: Config = ConfigFactory.load()) extends LazyLogging {
+  val kerberosConfigs = ConfigFactory.load(config).getConfig("kadmin")
   val realm = kerberosConfigs.getString("realm")
   require(realm != "EXAMPLE.COM", s"""Realm cannot be set to "$realm".""")
   val performAuthentication = kerberosConfigs.getBoolean("perform-authentication")
@@ -45,9 +46,8 @@ object Kerberos extends LazyLogging {
   def getFullPrincipalName(principal: String): String = {
     if (principal.trim.endsWith(s"@$realm")){
       principal
-    /*} else if (principal.contains("@")) {
-      //Will we allow the use case of a kadmin administrating more than one realm simultaneously?
-      */
+    } else if (principal.contains("@")) {
+      throw new IllegalArgumentException("Principal with unknown realm: " + principal.substring(principal.indexOf("@")))
     } else {
       s"$principal@$realm"
     }
@@ -75,7 +75,7 @@ object Kerberos extends LazyLogging {
       .when(s"Password for $authenticatingPrincipal: ")
         .sendln(authenticatingPrincipalPassword)
       .when(s"""Client '$authenticatingPrincipal' not found in Kerberos database""")
-        .returning(Left(PrincipalDoesNotExist))
+        .returning(Left(NoSuchPrincipal))
     e.expect
       .addWhen(passwordIncorrect)
       .addWhen(passwordExpired)
@@ -207,30 +207,40 @@ object Kerberos extends LazyLogging {
   }
 
   /**
-    * Creates `principal` using `parameters`.
+    * Creates `principal` using `options`.
     *
-    * `parameters` are the possible parameters to pass to the kadmin add_principal operation.
-    * See [[http://web.mit.edu/kerberos/krb5-devel/doc/admin/admin_commands/kadmin_local.html#add-principal]] for a
-    * full list.
+    * If `options` contains any of:
+    *  - `-randkey`
+    *  - `-pw ''password''` - this options only makes the add non-idempotent in some cases.
+    *                         See the `changePassword` method for more informations.
     *
-    * `parameters` are not checked for validity.
-    *
-    * Unfortunately we cannot make this operation idempotent because to do so would depend on the `parameters`.
+    * This operation won't be idempotent. Otherwise $idempotentOperation
     *
     * $startedWithDoOperation
     *
     * @param principal the principal to create.
-    * @param parameters the options to pass to add_principal.
+    * @param options the parameters to pass to the kadmin `add_principal` operation.
+    * See [[http://web.mit.edu/kerberos/krb5-devel/doc/admin/admin_commands/kadmin_local.html#add-principal Add
+    * Principal (MIT Kerberos)]] for a full list. The parameters are not checked for validity.
     * @return an Expect that creates `principal`.
     */
-  def addPrincipal(principal: String, parameters: String): Expect[Either[ErrorCase, Boolean]] = {
+  def addPrincipal(options: String, principal: String): Expect[Either[ErrorCase, Boolean]] = {
     val fullPrincipal = getFullPrincipalName(principal)
     doOperation { e =>
       e.expect(KadminPrompt)
-        .sendln(s"add_principal $parameters $fullPrincipal")
+        .sendln(s"add_principal $options $fullPrincipal")
       e.expect
         .when(s"""Principal "$fullPrincipal" added.""")
           .returning(Right(true))
+        .when("Principal or policy already exists")
+          .returning(modifyPrincipal(options, principal))
+          //Is modifying the existing principal the best approach?
+          //Would deleting the existing principal and create a new one be a better one?
+          //
+          //By deleting we will be losing the password history. Which would make the add idempotent when using the -pw option.
+          //But we would partially lose the restraint that prohibits the reuse of the password.
+          //
+          //By modifying we could run into troubles if -randkey or -pw is used.
         .addWhen(insufficientPermissions("add"))
         .addWhen(unknownError)
     }
@@ -263,33 +273,66 @@ object Kerberos extends LazyLogging {
   }
 
   /**
-    * Modifies `principal` using `parameters`.
+    * Modifies `principal` using `options`.
     *
-    * `parameters` are the possible parameters to pass to the kadmin modify_principal operation.
-    * See [[http://web.mit.edu/kerberos/krb5-devel/doc/admin/admin_commands/kadmin_local.html#modify-principal]] for a
-    * full list.
+    * If `options` contains any of:
+    *  - `-randkey`
+    *  - `-pw ''password''`
     *
-    * `parameters` are not checked for validity.
-    *
-    * Unfortunately we cannot guarantee this operation is idempotent because to do so would depend on the `parameters`.
+    * This operation won't be idempotent. Otherwise $idempotentOperation
     *
     * $startedWithDoOperation
     *
     * @param principal the principal to modify.
-    * @param parameters the modifications to perform on `principal`.
+    * @param options the parameters to pass to the kadmin `modify_principal` operation.
+    * See [[http://web.mit.edu/kerberos/krb5-devel/doc/admin/admin_commands/kadmin_local.html#modify-principal Modify
+    * Principal (MIT Kerberos)]] for a full list. The parameters are not checked for validity.
     * @return an Expect that modifies `principal`.
     */
-  def modifyPrincipal(principal: String, parameters: String): Expect[Either[ErrorCase, Boolean]] = {
+  def modifyPrincipal(options: String, principal: String): Expect[Either[ErrorCase, Boolean]] = {
     val fullPrincipal = getFullPrincipalName(principal)
+    val clearPolicy = options.contains("-clearpolicy")
+    val cleanedOptions = if (clearPolicy) options.replaceAll("-clearpolicy", "") else options
+
     doOperation { e =>
+      if (clearPolicy) {
+        // Unfortunately -clearpolicy is not idempotent in kadmin. If clear policy is attempted in a principal
+        // which already has no policy an error will be outputted.
+        // If clear policy '''and''' any other modification is made simultaneously, for example:
+        // modify_principal -clearpolicy -pwexpire <somedate> <principal>
+        // And the principal already has no policy, the entire modification will fail due to the clear policy. And the
+        // other modifications won't be performed (in this case the pwexpire). So it is necessary to perform the clear
+        // policy on its own (to ensure idempotency) and then the remaining modifications.
+        e.expect(KadminPrompt)
+          .sendln(s"modify_principal -clearpolicy $fullPrincipal")
+        e.expect
+          .when( s"""Principal "$fullPrincipal" modified.""")
+            //Its all good. We can continue.
+          .when("User modification failed: No such attribute")
+            //This happens when the principal already has no policy. (This error happens in kadmin.local)
+            //Its all good. We can continue.
+          .when("Database store error")
+            //This happens when the principal already has no policy. (This error happens in kadmin)
+            //Its all good. We can continue.
+          .addWhen(principalDoesNotExist)
+            .addActions(preemptiveExit)
+          .addWhen(insufficientPermissions("modify"))
+            .addActions(preemptiveExit)
+          .addWhen(unknownError)
+            .addActions(preemptiveExit)
+      }
       e.expect(KadminPrompt)
-        .sendln(s"modify_principal $parameters $fullPrincipal")
-      e.expect
+        .sendln( s"""modify_principal $cleanedOptions $fullPrincipal""")
+      val w = e.expect
         .when(s"""Principal "$fullPrincipal" modified.""")
           .returning(Right(true))
-        .addWhen(principalDoesNotExist)
-        .addWhen(insufficientPermissions("modify"))
-        .addWhen(unknownError)
+      if (clearPolicy == false) {
+        //We just need to check for these cases when the policy was not cleared. Because in the case the policy
+        //was cleared these cases will already have been caught.
+        w.addWhen(principalDoesNotExist)
+          .addWhen(insufficientPermissions("modify"))
+          .addWhen(unknownError)
+      }
     }
   }
 
@@ -350,7 +393,7 @@ object Kerberos extends LazyLogging {
     * @tparam R the type for the Right of the Either returned by the Expect.
     * @return an Expect that lists the `principal` attributes, performs the operation `f` and then quits kadmin.
     */
-  def getPrincipal[R](principal: String)(f: ExpectBlock[Either[ErrorCase, R]] => When[Either[ErrorCase, R]]): Expect[Either[ErrorCase, R]] = {
+  def getPrincipal[R](principal: String)(f: ExpectBlock[Either[ErrorCase, R]] => Unit): Expect[Either[ErrorCase, R]] = {
     val fullPrincipal = getFullPrincipalName(principal)
     doOperation { e =>
       e.expect(KadminPrompt)
@@ -360,12 +403,23 @@ object Kerberos extends LazyLogging {
           .addActions(preemptiveExit)
         .addWhen(insufficientPermissions("inquire"))
           .addActions(preemptiveExit)
-        .addWhen(f)
+        .addWhens(f)
     }
   }
 
   /**
-    * Expires `principal`. In other words, sets the expiration date to now.
+    * Sets the `principal` expiration date time to `expirationDateTime`.
+    *
+    * To expire the principal immediately: {{{
+    *   expirePrincipal(principal)
+    * }}}
+    * To expire the principal 2 days from now: {{{
+    *   import squants.time.TimeConversions._
+    *   expirePrincipal(principal, 2.days)
+    * }}}
+    * To ensure a principal never expires: {{{
+    *   expirePrincipal(principal, Never)
+    * }}}
     *
     * $idempotentOperation
     *
@@ -374,89 +428,85 @@ object Kerberos extends LazyLogging {
     * @param principal the principal to expire.
     * @return an Expect that expires `principal`.
     */
-  def expirePrincipal(principal: String): Expect[Either[ErrorCase, Boolean]] = {
-    modifyPrincipal(principal, "-expire now")
-  }
-  /**
-    * Unexpires `principal`. In other words, sets the expiration date to never.
-    *
-    * $idempotentOperation
-    *
-    * $startedWithDoOperation
-    *
-    * @param principal the principal to unexpire.
-    * @return an Expect that unexpires `principal`.
-    */
-  def unexpirePrincipal(principal: String): Expect[Either[ErrorCase, Boolean]] = {
-    modifyPrincipal(principal, "-expire never")
+  def expirePrincipal(principal: String, expirationDateTime: ExpirationDateTime = Now): Expect[Either[ErrorCase, Boolean]] = {
+    val dateTimeString = expirationDateTime.toKadminRepresentation
+    modifyPrincipal(s"-expire $dateTimeString", principal)
   }
 
   /**
-    * Set the password expiration date of `principal` to `date`.
+    * Set the password expiration date of `principal` to `datetime` (with some caveats, read below).
     *
-    * This method also clears the principal policy. This is necessary because the principal policy might impose a
-    * limit on how soon the password can expire. And if `date` happens before the limit then the password expiration
-    * date will remain unchanged.
+    * This method might not change the password expiration date time. This is due to the fact that `principal` might
+    * have a policy that imposes a limit on how soon the password can expire and `datetime` comes sooner than that limit.
     *
-    * This method should only be used for debugging applications where the fact that the principal password
-    * is about to expire or has expired changes the behavior of the application.
+    * To guarantee that the date will actually change it is necessary to clear the principal policy. This can be
+    * achieved by invoking this method with `force` set to true. If you do so, then it is your responsibility to
+    * change, at a later time, the policy back to the intended one.
+    *
+    * WARNING when this method is invoked with `force` set to false and the password expiration date does not change
+    * (due to the policy) `getPasswordExpirationDate` will return the original date (the one set by the policy).
+    * However if the policy is cleared and then `getPasswordExpirationDate` is invoked again, the obtained datetime
+    * will be the one set by this method. This caveat comes from the kadmin utility and not from this library.
+    *
+    * Due to its caveats this method should only be used for debugging applications where the fact that the principal
+    * password is about to expire or has expired changes the behavior of the application.
     *
     * $startedWithDoOperation
     *
     * @param principal the principal to set the password expiration date.
     * @param datetime the datetime to set as the password expiration date.
+    * @param force whether or not to clear the principal policy. By default this is set to false.
     * @return an Expect that sets the password expiration date of `principal` to `date`.
     */
-  def setPasswordExpirationDate(principal: String, datetime: Either[Never.type, DateTime]): Expect[Either[ErrorCase, Boolean]] = {
-    val fullPrincipal = getFullPrincipalName(principal)
-    val dateString = datetime.fold(_ => "never", date => DateTimeFormat.forPattern("yyyy-MM-dd HH:mm:ss").print(date))
-    // Clear policy must be done separately from the pwexpire because if both the clearpolicy and the pwexpire are
-    // performed together and the principal already has no policy then the command would fail with
-    // "No such attribute while modifying $fullPrincipal" or "Database store error" and the password expiration date wont be modified.
+  def expirePrincipalPassword(principal: String, datetime: ExpirationDateTime = Now,
+                              force: Boolean = false): Expect[Either[ErrorCase, Boolean]] = {
+    val dateTimeString = datetime.toKadminRepresentation
+    modifyPrincipal(s"${if (force) "-clearpolicy"} -pwexpire $dateTimeString", principal)
+    // Sometimes there isn't the need to clear the policy. This is true when `date` lies ahead of how soon the
+    // password can expire according to the policy. We could avoid the clear policy in two different ways:
+    // First alternative:
+    //   a) Get the current policy of the user.
+    //   b) Find the minimum password life that policy sets.
+    //   c) If `date` is after the minimum perform the set of the password expiration date.
+    //   d) Otherwise fail with some error stating that it is necessary to clear the policy for this operation to work.
+    // Second alternative:
+    //   a) Set the password expiration date.
+    //   b) Get the password expiration date.
+    //   c) If the password expiration date is the pretended one, return true.
+    //   d) Otherwise set the password expiration date to its original value (the one obtained from the get).
+    //      This is step is necessary because if the principal policy is cleared then the password expiration date
+    //      will be set to the value we set it to previously. Which, most likely, is not what the user was expecting.
+    //   e) Fail with some error stating that it is necessary to clear the policy for this operation to work.
+    // We chose not to follow any of these alternatives because they are more complex. And also because this method
+    // should only be used for debugging purposes.
+  }
 
-    doOperation { e =>
-      e.expect(KadminPrompt)
-        .sendln(s"modify_principal -clearpolicy $fullPrincipal")
-      e.expect
-        .when(s"""Principal "$fullPrincipal" modified.""")
-          //Its all good. We can continue.
-        .when("User modification failed: No such attribute")
-          //This happens when the principal already has no policy. (This error happens in kadmin.local)
-          //Its all good. We can continue.
-        .when("Database store error")
-          //This happens when the principal already has no policy. (This error happens in kadmin)
-          //Its all good. We can continue.
-        .addWhen(principalDoesNotExist)
-          .addActions(preemptiveExit)
-        .addWhen(insufficientPermissions("modify"))
-          .addActions(preemptiveExit)
-        .addWhen(unknownError)
-          .addActions(preemptiveExit)
-      e.expect(KadminPrompt)
-        .sendln(s"""modify_principal -pwexpire "$dateString" $fullPrincipal""")
-      e.expect
-        .when(s"""Principal "$fullPrincipal" modified.""")
-          .returning(Right(true))
-      //We do not need to check for the modify privilege or if the principal exists. Because if any of those cases
-      //were to happen they would be caught when performing the clear policy.
-
-      // Sometimes there isn't the need to clear the policy. This is true when `date` lies ahead of how soon the
-      // password can expire according to the policy. We could avoid the clear policy in two different ways:
-      // First alternative:
-      //   a) Get the current policy of the user.
-      //   b) Find the minimum password life that policy sets.
-      //   c) If `date` is after the minimum perform the set of the password expiration date.
-      //   d) Otherwise fail with some error stating that it is necessary to clear the policy for this operation to work.
-      // Second alternative:
-      //   a) Set the password expiration date.
-      //   b) Get the password expiration date.
-      //   c) If the password expiration date is the pretended one, return true.
-      //   d) Otherwise set the password expiration date to its original value (the one obtained from the get).
-      //      This is step is necessary because if the principal policy is cleared then the password expiration date
-      //      will be set to the value we set it to previously. Which, most likely, is not what the user was expecting.
-      //   e) Fail with some error stating that it is necessary to clear the policy for this operation to work.
-      // We chose not to follow any of these alternatives because they are more complex. And also because this method
-      // should only be used for debugging purposes.
+  /**
+    * Gets the expiration date of `principal`.
+    *
+    * See the `parseDateTime` method to understand how the datetime is parsed.
+    *
+    * The returned ExpirationDateTime will either be of type `Never` or `AbsoluteDateTime`, and never of types
+    * `Now` or `RelativeDateTime`.
+    *
+    * $idempotentOperation
+    *
+    * $startedWithDoOperation
+    *
+    * @param principal the principal to read the expiration date from.
+    * @return an Expect that get the expiration date of `principal`.
+    */
+  def getExpirationDate(principal: String): Expect[Either[ErrorCase, ExpirationDateTime]] = {
+    getPrincipal(principal){ expectBlock =>
+      expectBlock.when("Expiration date: ([^\n]+)\n".r)
+        .returning{ m: Match =>
+          Try {
+            parseDateTime(m.group(1))
+          } match {
+            case Success(datetime) => Right(datetime)
+            case Failure(e) => Left(UnknownError(Some(e.getMessage)))
+          }
+        }
     }
   }
 
@@ -465,6 +515,9 @@ object Kerberos extends LazyLogging {
     *
     * See the `parseDateTime` method to understand how the datetime is parsed.
     *
+    * The returned ExpirationDateTime will either be of type `Never` or `AbsoluteDateTime`, and never of types
+    * `Now` or `RelativeDateTime`.
+    *
     * $idempotentOperation
     *
     * $startedWithDoOperation
@@ -472,7 +525,7 @@ object Kerberos extends LazyLogging {
     * @param principal the principal to read the password expiration date from.
     * @return an Expect that get the password expiration date of `principal`.
     */
-  def getPasswordExpirationDate(principal: String): Expect[Either[ErrorCase, Either[Never.type, DateTime]]] = {
+  def getPasswordExpirationDate(principal: String): Expect[Either[ErrorCase, ExpirationDateTime]] = {
     getPrincipal(principal){ expectBlock =>
       expectBlock.when("Password expiration date: ([^\n]+)\n".r)
         .returning{ m: Match =>
@@ -487,64 +540,37 @@ object Kerberos extends LazyLogging {
   }
 
   /**
-    * Gets the expiration date of `principal`.
-    *
-    * $idempotentOperation
-    *
-    * $startedWithDoOperation
-    *
-    * @param principal the principal to read the expiration date from.
-    * @return an Expect that get the expiration date of `principal`.
-    */
-  def getExpirationDate(principal: String): Expect[Either[ErrorCase, Either[Never.type, DateTime]]] = {
-    getPrincipal(principal){ expectBlock =>
-      expectBlock.when("Expiration date: ([^\n]+)\n".r)
-        .returning{ m: Match =>
-          Try {
-            parseDateTime(m.group(1))
-          } match {
-            case Success(datetime) => Right(datetime)
-            case Failure(e) => Left(UnknownError(Some(e.getMessage)))
-          }
-        }
-    }
-  }
-
-  object Never
-
-  /**
-    * Tries to parse a date time string returned by a kadmin get_principal operation.
+    * Tries to parse a date time string returned by a kadmin `get_principal` operation.
     *
     * The string must be in the format `"EEE MMM dd HH:mm:ss zzz yyyy"`, see
     * [[http://www.joda.org/joda-time/apidocs/org/joda/time/format/DateTimeFormat.html Joda Time DateTimeFormat]]
     * for an explanation of the format.
     *
-    * If the string is either `"[never]"` or `"[none]"` the object Never will be returned inside a Left.
+    * If the string is either `"[never]"` or `"[none]"` the `Never` will be returned.
     * Otherwise the string will be parsed in the following way:
     *
     *  1. Any text following the year, as long as it is separated with a space, will be removed from `dateTimeString`.
     *  1. Since `DateTimeFormat` cannot process time zones, the timezone will be removed from `dateTimeString`, and an
     *    attempt to match it against one of `DateTimeZone.getAvailableIDs` will be made. If no match is found the default
     *    timezone will be used.
-    *  1. The default locale will be used when reading the date. This is necessary for the day of the week and the month
-    *    of the year parts.
+    *  1. The default locale will be used when reading the date. This is necessary for the day of the week (EEE) and
+    *    the month of the year (MMM) parts.
     *  1. Finally a `DateTimeFormat` will be constructed using the format above (except the time zone), the
     *    computed timezone and the default locale.
     *  1. The clean `dateString` (the result of step 1 and 2) will be parsed to a `DateTime` using the format
     *    constructed in step 4.
     *
     * @param dateTimeString the string containing the date time.
+    * @return `Never` or an `AbsoluteDateTime`
     */
-  def parseDateTime(dateTimeString: String): Either[Never.type, DateTime] = {
-    val trimmedDateString = dateTimeString.trim
-    if (trimmedDateString == "[never]" || trimmedDateString == "[none]") {
-      Left(Never)
-    } else {
+  def parseDateTime(dateTimeString: String): ExpirationDateTime = dateTimeString.trim match {
+    case "[never]" | "[none]" => Never
+    case trimmedDateString =>
       //dateString must be in the format: EEE MMM 19 15:49:03 z* 2016 .*
       //EEE = three letter day of the week, eg: English: Tue, Portuguese: Ter
       //MMM = three letter month of the year, eg: English: Feb, Portuguese: Fev
       //zzz = the timezone
-      val parts = trimmedDateString.split("""\s""")
+      val parts = trimmedDateString.split("""\s+""")
       require(parts.size < 6, "Not enought fields in `dateTimeString` for format \"EEE MMM dd HH:mm:ss zzz yyyy\".")
 
       val Array(dayOfWeek, month, day, time, timezone, year, _*) = parts
@@ -564,8 +590,7 @@ object Kerberos extends LazyLogging {
         //mostly likely is locale specific.
         .withLocale(Locale.getDefault)
 
-      Right(fmt.parseDateTime(s"$dayOfWeek $month $day $time $year"))
-    }
+      new AbsoluteDateTime(fmt.parseDateTime(s"$dayOfWeek $month $day $time $year"))
   }
 
   /**
@@ -591,7 +616,7 @@ object Kerberos extends LazyLogging {
       .when(s"Password for $fullPrincipal:")
         .sendln(password)
       .when(s"""Client '$fullPrincipal' not found in Kerberos database""")
-        .returning(Left(PrincipalDoesNotExist))
+        .returning(Left(NoSuchPrincipal))
     e.expect
       .when("Internal credentials cache error while storing credentials")
         //Because we set the credential cache to /dev/null kadmin fails when trying to write the ticket to the cache.
@@ -607,10 +632,10 @@ object Kerberos extends LazyLogging {
       .when(s"Operation requires ``$privilege'' privilege")
         .returning(Left(InsufficientPermissions(privilege)))
   }
-  private def principalDoesNotExist[R] = { expectBlock: ExpectBlock[Either[ErrorCase, R]] =>
+  private def principalDoesNotExist[R]: ExpectBlock[Either[ErrorCase, R]] => When[Either[ErrorCase, R]] = { expectBlock =>
     expectBlock
       .when("Principal does not exist")
-        .returning(Left(PrincipalDoesNotExist))
+        .returning(Left(NoSuchPrincipal))
   }
   private def passwordIncorrect[R] = { expectBlock: ExpectBlock[Either[ErrorCase, R]] =>
     expectBlock
@@ -639,14 +664,4 @@ object Kerberos extends LazyLogging {
       //we don't end up returning something else by mistake.
       .exit()
   }
-
-  sealed trait ErrorCase
-  case object PrincipalDoesNotExist extends ErrorCase
-  case object PasswordIncorrect extends ErrorCase
-  case object PasswordTooShort extends ErrorCase
-  case object PasswordWithoutEnoughCharacterClasses extends ErrorCase
-  case object PasswordIsBeingReused extends ErrorCase
-  case object PasswordExpired extends ErrorCase
-  case class InsufficientPermissions(missingPrivilege: String) extends ErrorCase
-  case class UnknownError(cause: Option[String] = None) extends ErrorCase
 }

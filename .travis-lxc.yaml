@@ -1,0 +1,30 @@
+sudo: required
+
+dist: trusty
+
+language: scala
+
+addons:
+  apt:
+    packages:
+    - lxc
+    - lxctl
+
+cache:
+  apt: true
+  directories:
+    - $HOME/.ivy2/cache
+    - $HOME/.sbt/boot/
+
+before_install:
+- dpkg-query -s lxc
+- dpkg-query -s lxctl
+#- sudo apt-get install lxc
+#- sudo apt-get install lxctl
+
+script:
+  - sbt ++$TRAVIS_SCALA_VERSION test
+
+  # Tricks to avoid unnecessary cache updates
+  - find $HOME/.sbt -name "*.lock" | xargs rm
+  - find $HOME/.ivy2 -name "ivydata-*.properties" | xargs rm

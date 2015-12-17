@@ -3,6 +3,8 @@ sudo: required
 dist: trusty
 
 language: scala
+scala: 2.11.7
+jdk: oraclejdk8
 
 # This does not work because these packages are disallowed
 #addons:
@@ -12,21 +14,20 @@ language: scala
 #    - lxctl
 
 cache:
-  apt: true
   directories:
     - $HOME/.ivy2/cache
     - $HOME/.sbt/boot/
 
 before_install:
-- sudo apt-cache search lxc
-- sudo apt-get install lxc
-- sudo apt-get install lxctl
-- dpkg-query -s lxc
-- dpkg-query -s lxctl
+ - sudo apt-cache search lxc
+ - sudo apt-get install lxc liblxcl lxc-templates
+ - dpkg-query -s lxc
+ - dpkg-query -s liblxcl
 
 script:
-  - sbt ++$TRAVIS_SCALA_VERSION test
+ - sbt ++$TRAVIS_SCALA_VERSION test
 
   # Tricks to avoid unnecessary cache updates
-  - find $HOME/.sbt -name "*.lock" | xargs rm
-  - find $HOME/.ivy2 -name "ivydata-*.properties" | xargs rm
+ - find $HOME/.sbt -name "*.lock" | xargs rm
+ - find $HOME/.ivy2 -name "ivydata-*.properties" | xargs rm
+

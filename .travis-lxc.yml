@@ -4,11 +4,12 @@ dist: trusty
 
 language: scala
 
-addons:
-  apt:
-    packages:
-    - lxc
-    - lxctl
+# This does not work because these packages are disallowed
+#addons:
+#  apt:
+#    packages:
+#    - lxc
+#    - lxctl
 
 cache:
   apt: true
@@ -18,10 +19,10 @@ cache:
 
 before_install:
 - sudo apt-cache search lxc
+- sudo apt-get install lxc
+- sudo apt-get install lxctl
 - dpkg-query -s lxc
 - dpkg-query -s lxctl
-#- sudo apt-get install lxc
-#- sudo apt-get install lxctl
 
 script:
   - sbt ++$TRAVIS_SCALA_VERSION test

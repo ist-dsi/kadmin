@@ -17,6 +17,7 @@ cache:
     - $HOME/.sbt/boot/
 
 before_install:
+- sudo apt-cache search lxc
 - dpkg-query -s lxc
 - dpkg-query -s lxctl
 #- sudo apt-get install lxc

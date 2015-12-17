@@ -20,9 +20,9 @@ cache:
 
 before_install:
  - sudo apt-cache search lxc
- - sudo apt-get install lxc liblxcl lxc-templates
+ - sudo apt-get install lxc liblxc1 lxc-templates
  - dpkg-query -s lxc
- - dpkg-query -s liblxcl
+ - dpkg-query -s liblxc1
 
 script:
  - sbt ++$TRAVIS_SCALA_VERSION test

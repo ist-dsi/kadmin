@@ -6,7 +6,7 @@ cat /etc/hostname
 
 ip a
 
-ping 8.8.8.8
+ping -c 4 8.8.8.8
 
 echo "Going to install Kerberos packages"
 

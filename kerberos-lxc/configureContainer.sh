@@ -1,11 +1,5 @@
 #!/usr/bin/env bash
 
-lxc-create -t download -n kerberos -- --dist debian --release jessie --arch amd64
-
-cat /var/lib/lxc/kerberos/config
-
-chroot /var/lib/lxc/kerberos/rootfs /bin/bash
-
 echo "Inside chroot"
 
 cat /etc/hostname
@@ -24,5 +18,3 @@ service krb5-kdc enable
 service krb5-admin-server enable
 
 exit
-
-lxc-start -n kerberos

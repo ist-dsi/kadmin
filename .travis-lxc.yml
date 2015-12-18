@@ -20,9 +20,7 @@ cache:
 
 before_install:
  - sudo apt-get install lxc liblxc1 lxc-templates
- - sudo lxc-create -t download -n kerberos -- --dist debian --release jessie --arch amd64
  - sudo ./kerberos-lxc/configureContainer.sh
- - sudo lxc-start -n kerberos
 
 script:
  - sbt ++$TRAVIS_SCALA_VERSION test

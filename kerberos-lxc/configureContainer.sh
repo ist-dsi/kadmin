@@ -1,20 +1,14 @@
 #!/usr/bin/env bash
 
-echo "Inside chroot"
+echo "\n\nInside chroot"
 
-cat /etc/hostname
-
-ip a
-
-ping -c 4 8.8.8.8
-
-echo "Going to install Kerberos packages"
-
+echo "Installing Kerberos packages"
 apt-get update
-apt-get install -y krb5-user krb5-kdc krb5-admin-server krb5-kdc-ldap
+apt-get install -y apt-utils krb5-user krb5-kdc krb5-admin-server krb5-kdc-ldap krb5-locales
 apt-get clean
 
-service krb5-kdc enable
-service krb5-admin-server enable
+echo "\nEnabling the Kerberos Services"
+systemctl enable krb5-kdc krb5-admin-server
 
+echo "\nContainer fully configured\n\n"
 exit

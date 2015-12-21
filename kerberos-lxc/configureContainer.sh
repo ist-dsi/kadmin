@@ -92,9 +92,12 @@ $ADMIN_PASSWORD
 $ADMIN_PASSWORD
 EOF
 
+# Ensure the /var/log directory exists so kerberos can make the logging there
+mkdir -p /var/log
+
 echo -e "\nEnabling the Kerberos Services"
-update-rc.d start krb5-kdc
-update-rc.d start krb5-admin-server
+update-rc.d enable krb5-kdc
+update-rc.d enable krb5-admin-server
 
 echo -e "\nContainer fully configured\n\n"
 exit

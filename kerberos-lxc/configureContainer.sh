@@ -8,12 +8,8 @@ echo -e "\n\nInside chroot"
 
 echo -e "\nInstalling Kerberos packages"
 apt-get update
-apt-get install -y apt-utils dbus
+apt-get install -y apt-utils
 apt-get install -y krb5-kdc krb5-admin-server krb5-user
-
-/etc/init.d/dbus start
-systemctl enable dbus
-systemctl start dbus
 
 echo -e "\nConfiguring Kerberos"
 
@@ -90,13 +86,12 @@ $ADMIN_PASSWORD
 $ADMIN_PASSWORD
 EOF
 
-echo -e "\nSystemctl status"
-systemctl status krb5-kdc krb5-kadmin-server
-
 echo -e "\nSystemctl enable"
+systemctl enable krb5-kdc
 #update-rc.d krb5-kdc enable
-#update-rc.d krb5-kadmin-server enable
-systemctl enable krb5-kdc krb5-kadmin-server
+
+systemctl enable krb5-kadmin-server
+update-rc.d krb5-kadmin-server enable
 
 echo -e "\nContainer fully configured\n\n"
 exit

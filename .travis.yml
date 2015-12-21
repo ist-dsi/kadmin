@@ -20,12 +20,13 @@ cache:
     - $HOME/.sbt/boot/
 
 before_install:
- - sudo apt-get install lxc liblxc1 lxc-templates
- - sudo ./kerberos-lxc/createContainer.sh
+ - sudo apt-get install lxc liblxc1 lxc-templates krb5-user
+ #- sudo ./kerberos-lxc/createContainer.sh
 
 script:
- - sbt ++$TRAVIS_SCALA_VERSION test
+ - sudo ./kerberos-lxc/createContainer.sh
+ #- sbt ++$TRAVIS_SCALA_VERSION test
  # Tricks to avoid unnecessary cache updates
- - find $HOME/.sbt -name "*.lock" | xargs rm
- - find $HOME/.ivy2 -name "ivydata-*.properties" | xargs rm
+ #- find $HOME/.sbt -name "*.lock" | xargs rm
+ #- find $HOME/.ivy2 -name "ivydata-*.properties" | xargs rm
 

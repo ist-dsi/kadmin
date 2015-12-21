@@ -19,3 +19,28 @@ tail /var/lib/lxc/kerberos/rootfs/var/log/kadmin.log
 tail /var/lib/lxc/kerberos/rootfs/var/log/krb5kdc.log
 
 echo -e "\nKerberos fully operational"
+
+cat > /etc/krb5.conf <<EOF
+[libdefaults]
+	default_realm = $REALM
+	dns_lookup_realm = false
+	dns_lookup_kdc = false
+
+[realms]
+	$REALM = {
+		kdc = localhost
+		admin_server = localhost
+		default_domain = $DOMAIN
+	}
+[domain_realm]
+	.$DOMAIN = $REALM
+	$DOMAIN = $REALM
+EOF
+
+echo -e "\nTrying kinit admin/admin@EXAMPLE.COM"
+kinit admin/admin@EXAMPLE.COM <<EOF
+MITiys4K5!
+EOF
+
+echo -e "\nKlist"
+klist

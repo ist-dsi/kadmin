@@ -72,20 +72,22 @@ EOF
 echo -e "\nFinal /etc/krb5kdc/kadm5.acl:"
 cat /etc/krb5kdc/kadm5.acl
 
-# Super mega hack to bypass the lack of entropy inside the LXC
-# rm -f /dev/random
-# mknod /dev/random c 1 9
-
-echo -e "\nGenerating master password"
-MASTER_PASSWORD=$(tr -cd '[:alnum:]' < /dev/urandom | fold -w30 | head -n1)
+# Super mega hack to bypass the lack of entropy inside the LXC/Travis environment
+rm -f /dev/random
+mknod /dev/random c 1 9
 
 echo -e "\nCreating realm"
-kdb5_util create -r $REALM -s -P $MASTER_PASSWORD
+kdb5_util create -r $REALM -s -P $(tr -cd '[:alnum:]' < /dev/urandom | fold -w30 | head -n1)
 
-echo -e "\nGenerating admin password"
-ADMIN_PASSWORD=$(tr -cd '[:alnum:]' < /dev/urandom | fold -w30 | head -n1)
-
+echo -e "\nAdding admin/admin principal"
+ADMIN_PASSWORD="MITiys4K5!"
 kadmin.local -q "addprinc admin/admin@$REALM" <<EOF
+$ADMIN_PASSWORD
+$ADMIN_PASSWORD
+EOF
+
+echo -e "\nAdding noPermissions principal"
+kadmin.local -q "addprinc noPermissions@$REALM" <<EOF
 $ADMIN_PASSWORD
 $ADMIN_PASSWORD
 EOF
@@ -93,12 +95,6 @@ EOF
 echo -e "\nEnabling the Kerberos Services"
 update-rc.d start krb5-kdc
 update-rc.d start krb5-admin-server
-
-echo -e "\nSleeping for 1 minute to allow the services to startup"
-sleep 60
-
-tail /var/log/krb5kdc.log
-tail /var/log/kadmin.log
 
 echo -e "\nContainer fully configured\n\n"
 exit

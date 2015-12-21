@@ -10,6 +10,7 @@ echo -e "\nInstalling Kerberos packages"
 apt-get update
 apt-get install -y apt-utils
 apt-get install -y krb5-kdc krb5-admin-server krb5-user
+apt-get clean
 
 echo -e "\nConfiguring Kerberos"
 

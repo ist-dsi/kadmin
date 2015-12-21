@@ -22,6 +22,7 @@ cache:
 before_install:
  - sudo apt-get update
  - sudo apt-get install -y lxc liblxc1 lxc-templates krb5-user
+ - sudo apt-get clean
  #- sudo ./kerberos-lxc/createContainer.sh
 
 script:

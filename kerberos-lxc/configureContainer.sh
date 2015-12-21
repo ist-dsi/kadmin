@@ -71,17 +71,19 @@ EOF
 echo -e "\nFinal /etc/krb5kdc/kadm5.acl:"
 cat /etc/krb5kdc/kadm5.acl
 
-echo -e "\nGenerating master password"
-MASTER_PASSWORD=$(tr -cd '[:alnum:]' < /dev/urandom | fold -w30 | head -n1)
-echo -e "\nGenerated"
-kdb5_util create -r $REALM -s <<EOF
-$MASTER_PASSWORD
-$MASTER_PASSWORD
-EOF
+# echo $(tr -cd '[:alnum:]' < /dev/urandom | fold -w15 | head -n2) | read var1 var2
+
+# echo -e "\nGenerating master password"
+# MASTER_PASSWORD=$(tr -cd '[:alnum:]' < /dev/urandom | fold -w30 | head -n1)
+# echo -e "\nGenerated: $MASTER_PASSWORD"
+
+echo -e "\nCreating realm"
+kdb5_util create -r $REALM -s -P $(tr -cd '[:alnum:]' < /dev/urandom | fold -w30 | head -n1)
 
 echo -e "\nGenerating admin password"
 ADMIN_PASSWORD=$(tr -cd '[:alnum:]' < /dev/urandom | fold -w30 | head -n1)
-echo -e "\nGenerated"
+echo -e "\nGenerated: $ADMIN_PASSWORD"
+
 kadmin.local -q "addprinc admin/admin@$REALM" <<EOF
 $ADMIN_PASSWORD
 $ADMIN_PASSWORD

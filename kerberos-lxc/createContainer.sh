@@ -22,6 +22,7 @@ echo -e "\nKerberos fully operational"
 
 REALM="EXAMPLE.COM"
 DOMAIN="example.com"
+CONTAINER_IP=$(lxc-info -n kerberos -iH)
 
 cat > /etc/krb5.conf <<EOF
 [libdefaults]
@@ -29,8 +30,8 @@ cat > /etc/krb5.conf <<EOF
 
 [realms]
 	$REALM = {
-		kdc = localhost
-		admin_server = localhost
+		kdc = $CONTAINER_IP
+		admin_server = $CONTAINER_IP
 		default_domain = $DOMAIN
 	}
 [domain_realm]

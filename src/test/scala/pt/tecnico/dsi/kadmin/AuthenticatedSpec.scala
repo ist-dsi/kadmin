@@ -139,7 +139,7 @@ class AuthenticatedSpec extends FlatSpec with Matchers with ScalaFutures {
     val principal = "test"
     deletePrincipal(principal).run().futureValue shouldBe Right(true)
     testNoSuchPrincipal {
-      getPrincipal[Boolean](principal) { e =>
+      withPrincipal[Boolean](principal) { e =>
         //Purposefully left empty
       }
     }

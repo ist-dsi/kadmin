@@ -31,7 +31,7 @@ class LackOfPrivelegesSpec extends FlatSpec with Matchers with ScalaFutures {
   import kerberos._
 
   //In kadm5.acl have an entry
-  //noPermissions/dsipanel@IST.UTL.PT X *
+  //noPermissions@IST.UTL.PT X *
   //This means the principal noPermissions@IST.UTL.PT has no permissions for every principal
 
   //Use the noPermissions principal for the following tests.

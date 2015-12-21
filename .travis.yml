@@ -1,1 +1,30 @@
-.travis-lxc.yml
+sudo: required
+
+dist: trusty
+
+language: scala
+scala: 2.11.7
+jdk: oraclejdk8
+
+# This does not work because these packages are disallowed
+#addons:
+#  apt:
+#    packages:
+#    - lxc
+#    - lxctl
+
+cache:
+  directories:
+    - $HOME/.ivy2/cache
+    - $HOME/.sbt/boot/
+
+before_install:
+ - sudo apt-get install lxc liblxc1 lxc-templates
+ - sudo ./kerberos-lxc/createContainer.sh
+
+script:
+ - sbt ++$TRAVIS_SCALA_VERSION test
+ # Tricks to avoid unnecessary cache updates
+ - find $HOME/.sbt -name "*.lock" | xargs rm
+ - find $HOME/.ivy2 -name "ivydata-*.properties" | xargs rm
+

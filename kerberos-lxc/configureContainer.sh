@@ -38,7 +38,7 @@ cat > /etc/krb5.conf <<EOF
 	$DOMAIN = $REALM
 EOF
 
-echo -e "\nFinal /etc/krb5.conf"
+echo -e "\nFinal /etc/krb5.conf:"
 cat /etc/krb5.conf
 
 cat > /etc/krb5kdc/kdc.conf<<EOF
@@ -60,7 +60,7 @@ cat > /etc/krb5kdc/kdc.conf<<EOF
 #	admin_server = FILE:/var/log/kadmin.log
 EOF
 
-echo -e "\nFinal /etc/krb5kdc/kdc.conf"
+echo -e "\nFinal /etc/krb5kdc/kdc.conf:"
 cat /etc/krb5kdc/kdc.conf
 
 cat > /etc/krb5kdc/kadm5.acl <<EOF
@@ -68,16 +68,16 @@ admin/admin@$REALM  *
 noPermissions@$REALM X
 EOF
 
-echo -e "\nFinal /etc/krb5.conf"
-cat /etc/krb5.conf
+echo -e "\nFinal /etc/krb5kdc/kadm5.acl:"
+cat /etc/krb5kdc/kadm5.acl
 
-MASTER_PASSWORD=$(openssl rand -base64 32)
+MASTER_PASSWORD=$(tr -cd '[:alnum:]' < /dev/urandom | fold -w30 | head -n1)
 kdb5_util create -r $REALM -s <<EOF
 $MASTER_PASSWORD
 $MASTER_PASSWORD
 EOF
 
-ADMIN_PASSWORD=$(openssl rand -base64 32)
+ADMIN_PASSWORD=$(tr -cd '[:alnum:]' < /dev/urandom | fold -w30 | head -n1)
 kadmin.local -q "addprinc admin/admin@$REALM" <<EOF
 $ADMIN_PASSWORD
 $ADMIN_PASSWORD
@@ -86,6 +86,7 @@ EOF
 echo -e "\nEnabling the Kerberos Services"
 systemctl enable krb5-kdc krb5-admin-server
 
+echo -e "\nSleeping for 1 minute to allow the services to startup"
 sleep 60
 
 systemctl status krb5-kdc

@@ -20,11 +20,12 @@ tail /var/lib/lxc/kerberos/rootfs/var/log/krb5kdc.log
 
 echo -e "\nKerberos fully operational"
 
+REALM="EXAMPLE.COM"
+DOMAIN="example.com"
+
 cat > /etc/krb5.conf <<EOF
 [libdefaults]
 	default_realm = $REALM
-	dns_lookup_realm = false
-	dns_lookup_kdc = false
 
 [realms]
 	$REALM = {

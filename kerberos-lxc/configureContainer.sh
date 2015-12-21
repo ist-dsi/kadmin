@@ -71,13 +71,13 @@ EOF
 echo -e "\nFinal /etc/krb5kdc/kadm5.acl:"
 cat /etc/krb5kdc/kadm5.acl
 
-MASTER_PASSWORD=$(tr -cd '[:alnum:]' < /dev/urandom | fold -w30 | head -n1)
+MASTER_PASSWORD=$(tr -cd '[:alnum:]' < /dev/random | fold -w30 | head -n1)
 kdb5_util create -r $REALM -s <<EOF
 $MASTER_PASSWORD
 $MASTER_PASSWORD
 EOF
 
-ADMIN_PASSWORD=$(tr -cd '[:alnum:]' < /dev/urandom | fold -w30 | head -n1)
+ADMIN_PASSWORD=$(tr -cd '[:alnum:]' < /dev/random | fold -w30 | head -n1)
 kadmin.local -q "addprinc admin/admin@$REALM" <<EOF
 $ADMIN_PASSWORD
 $ADMIN_PASSWORD

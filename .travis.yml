@@ -20,6 +20,7 @@ cache:
     - $HOME/.sbt/boot/
 
 before_install:
+ - sudo apt-get update
  - sudo apt-get install lxc liblxc1 lxc-templates krb5-user
  #- sudo ./kerberos-lxc/createContainer.sh
 

@@ -8,7 +8,7 @@ import org.scalatest.{FlatSpec, Matchers}
 
 import scala.concurrent.ExecutionContext.Implicits.global
 
-class LackOfPrivelegesSpec extends FlatSpec with Matchers with ScalaFutures {
+class LackOfPrivilegesSpec extends FlatSpec with Matchers with ScalaFutures {
   val defaultPatience = PatienceConfig(
     timeout = Span(1, Seconds),
     interval = Span(2, Seconds)

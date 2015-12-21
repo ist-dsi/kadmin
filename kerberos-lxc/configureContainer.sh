@@ -14,7 +14,8 @@ apt-get clean
 
 # The apt-get install will try to startup the kerberos services right away but it will fail since the services
 # are not configured, so we stop them until we configure them.
-systemctl stop krb5-kdc krb5-admin-server
+# /etc/init.d krb5-kdc stop
+# /etc/init.d krb5-admin-server stop
 
 echo -e "\nConfiguring Kerberos"
 
@@ -54,10 +55,10 @@ cat > /etc/krb5kdc/kdc.conf<<EOF
 		supported_enctypes = aes256-cts:normal aes128-cts:normal
 	}
 
-#[logging]
-#	default = FILE:/var/log/krb5libs.log
-#	kdc = FILE:/var/log/krb5kdc.log
-#	admin_server = FILE:/var/log/kadmin.log
+[logging]
+	default = FILE:/var/log/krb5libs.log
+	kdc = FILE:/var/log/krb5kdc.log
+	admin_server = FILE:/var/log/kadmin.log
 EOF
 
 echo -e "\nFinal /etc/krb5kdc/kdc.conf:"
@@ -71,18 +72,18 @@ EOF
 echo -e "\nFinal /etc/krb5kdc/kadm5.acl:"
 cat /etc/krb5kdc/kadm5.acl
 
-# echo $(tr -cd '[:alnum:]' < /dev/urandom | fold -w15 | head -n2) | read var1 var2
+# Super mega hack to bypass the lack of entropy inside the LXC
+# rm -f /dev/random
+# mknod /dev/random c 1 9
 
-# echo -e "\nGenerating master password"
-# MASTER_PASSWORD=$(tr -cd '[:alnum:]' < /dev/urandom | fold -w30 | head -n1)
-# echo -e "\nGenerated: $MASTER_PASSWORD"
+echo -e "\nGenerating master password"
+MASTER_PASSWORD=$(tr -cd '[:alnum:]' < /dev/urandom | fold -w30 | head -n1)
 
 echo -e "\nCreating realm"
-kdb5_util create -r $REALM -s -P $(tr -cd '[:alnum:]' < /dev/urandom | fold -w30 | head -n1)
+kdb5_util create -r $REALM -s -P $MASTER_PASSWORD
 
 echo -e "\nGenerating admin password"
 ADMIN_PASSWORD=$(tr -cd '[:alnum:]' < /dev/urandom | fold -w30 | head -n1)
-echo -e "\nGenerated: $ADMIN_PASSWORD"
 
 kadmin.local -q "addprinc admin/admin@$REALM" <<EOF
 $ADMIN_PASSWORD
@@ -90,13 +91,14 @@ $ADMIN_PASSWORD
 EOF
 
 echo -e "\nEnabling the Kerberos Services"
-systemctl enable krb5-kdc krb5-admin-server
+update-rc.d start krb5-kdc
+update-rc.d start krb5-admin-server
 
 echo -e "\nSleeping for 1 minute to allow the services to startup"
 sleep 60
 
-systemctl status krb5-kdc
-systemctl status krb5-admin-server
+tail /var/log/krb5kdc.log
+tail /var/log/kadmin.log
 
 echo -e "\nContainer fully configured\n\n"
 exit

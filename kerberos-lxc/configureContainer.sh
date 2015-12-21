@@ -96,8 +96,11 @@ EOF
 mkdir -p /var/log
 
 echo -e "\nEnabling the Kerberos Services"
-update-rc.d enable krb5-kdc
-update-rc.d enable krb5-admin-server
+update-rc.d krb5-kdc enable
+update-rc.d krb5-admin-server enable
+
+update-rc.d krb5-kdc start
+update-rc.d krb5-admin-server start
 
 echo -e "\nContainer fully configured\n\n"
 exit

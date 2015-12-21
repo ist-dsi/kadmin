@@ -15,14 +15,16 @@ lxc-start --name kerberos --daemon
 echo -e "\nSleeping for 30s to allow the container to start"
 sleep 30
 
-#tail /var/lib/lxc/kerberos/rootfs/var/log/kadmin.log
-#tail /var/lib/lxc/kerberos/rootfs/var/log/krb5kdc.log
+tail /var/lib/lxc/kerberos/rootfs/var/log/kadmin.log
+tail /var/lib/lxc/kerberos/rootfs/var/log/krb5kdc.log
 
 # We must configure kerberos on the local machine so we can use kadmin and kinit commands
 
-REALM="EXAMPLE.COM"
-DOMAIN="example.com"
+REALM="EXAMPLE.EXAMPLE"
+DOMAIN="example.example"
 CONTAINER_IP=$(lxc-info -n kerberos -iH)
+
+echo -e "\nContainer IP: $CONTAINER_IP"
 
 cat > /etc/krb5.conf <<EOF
 [libdefaults]
@@ -44,8 +46,14 @@ kinit admin/admin@EXAMPLE.COM <<EOF
 MITiys4K5!
 EOF
 
+
+echo -e "\nTrying kinit kadmin/admin@EXAMPLE.COM"
+kinit kadmin/admin@EXAMPLE.COM <<EOF
+MITiys4K5!
+EOF
+
 klist && echo -e "\nKerberos fully operational"
 
-kadmin -p admin/admin@EXAMPLE.COM -q "getprincipal admin/admin@EXAMPLE.COM" <<EOF
+kadmin -p kadmin/admin@EXAMPLE.COM -q "getprincipal admin/admin@EXAMPLE.COM" <<EOF
 MITiys4K5!
 EOF

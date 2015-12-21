@@ -14,8 +14,8 @@ apt-get clean
 
 echo -e "\nConfiguring Kerberos"
 
-REALM="EXAMPLE.COM"
-DOMAIN="example.com"
+REALM="EXAMPLE.EXAMPLE"
+DOMAIN="example.example"
 
 cat > /etc/krb5.conf <<EOF
 [libdefaults]
@@ -25,8 +25,8 @@ cat > /etc/krb5.conf <<EOF
 
 [realms]
 	$REALM = {
-		kdc = localhost
-		admin_server = localhost
+		kdc = localhost:88
+		admin_server = localhost:749
 		default_domain = $DOMAIN
 	}
 [domain_realm]
@@ -60,7 +60,7 @@ echo -e "\nFinal /etc/krb5kdc/kdc.conf:"
 cat /etc/krb5kdc/kdc.conf
 
 cat > /etc/krb5kdc/kadm5.acl <<EOF
-admin/admin@$REALM  *
+kadmin/admin@$REALM  *
 noPermissions@$REALM X
 EOF
 
@@ -74,9 +74,9 @@ mknod /dev/random c 1 9
 echo -e "\nCreating realm"
 kdb5_util create -r $REALM -s -P $(tr -cd '[:alnum:]' < /dev/urandom | fold -w30 | head -n1)
 
-echo -e "\nAdding admin/admin principal"
+echo -e "\nAdding kadmin/admin principal"
 ADMIN_PASSWORD="MITiys4K5!"
-kadmin.local -q "addprinc admin/admin@$REALM" <<EOF
+kadmin.local -q "addprinc kadmin/admin@$REALM" <<EOF
 $ADMIN_PASSWORD
 $ADMIN_PASSWORD
 EOF

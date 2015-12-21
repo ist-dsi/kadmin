@@ -12,8 +12,6 @@ apt-get install -y apt-utils
 apt-get install -y krb5-kdc krb5-admin-server krb5-user
 apt-get clean
 
-ls /etc/rc*
-
 echo -e "\nConfiguring Kerberos"
 
 REALM="EXAMPLE.COM"
@@ -39,7 +37,6 @@ EOF
 echo -e "\nFinal /etc/krb5.conf:"
 cat /etc/krb5.conf
 
-mkdir /etc/krb5kdc
 cat > /etc/krb5kdc/kdc.conf<<EOF
 [kdcdefaults]
     kdc_ports = 88,750
@@ -90,12 +87,13 @@ $ADMIN_PASSWORD
 $ADMIN_PASSWORD
 EOF
 
-ls -l /etc/rc.d/
+ls -l /etc/rc.d
 
-update-rc.d krb5-kdc enable
-systemctl enable krb5-kdc
-update-rc.d krb5-kadmin-server enable
-systemctl enable krb5-kadmin-server
+systemctl status krb5-kdc krb5-kadmin-server
+
+#update-rc.d krb5-kdc enable
+#update-rc.d krb5-kadmin-server enable
+systemctl enable krb5-kdc krb5-kadmin-server
 
 echo -e "\nContainer fully configured\n\n"
 exit

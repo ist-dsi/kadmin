@@ -39,6 +39,7 @@ EOF
 echo -e "\nFinal /etc/krb5.conf:"
 cat /etc/krb5.conf
 
+mkdir /etc/krb5kdc
 cat > /etc/krb5kdc/kdc.conf<<EOF
 [kdcdefaults]
     kdc_ports = 88,750
@@ -89,12 +90,8 @@ $ADMIN_PASSWORD
 $ADMIN_PASSWORD
 EOF
 
-# Ensure the /var/log directory exists so kerberos can make the logging there
-mkdir -p /var/log
-
-echo -e "\nEnabling the Kerberos Services"
 update-rc.d krb5-kdc enable
-update-rc.d krb5-admin-server enable
+update-rc.d krb5-kadmin-server enable
 
 echo -e "\nContainer fully configured\n\n"
 exit

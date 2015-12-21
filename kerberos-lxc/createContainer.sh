@@ -15,9 +15,6 @@ lxc-start --name kerberos --daemon
 echo -e "\nSleeping for 1.5 minutes to allow the container to start"
 sleep 90
 
-ls /var/lib/lxc/kerberos/rootfs/var/
-ls /var/lib/lxc/kerberos/rootfs/var/log/
-
 tail /var/lib/lxc/kerberos/rootfs/var/log/kadmin.log
 tail /var/lib/lxc/kerberos/rootfs/var/log/krb5kdc.log
 

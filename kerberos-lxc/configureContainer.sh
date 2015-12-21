@@ -12,10 +12,7 @@ apt-get install -y apt-utils
 apt-get install -y krb5-kdc krb5-admin-server krb5-user
 apt-get clean
 
-# The apt-get install will try to startup the kerberos services right away but it will fail since the services
-# are not configured, so we stop them until we configure them.
-# /etc/init.d krb5-kdc stop
-# /etc/init.d krb5-admin-server stop
+ls /etc/rc*
 
 echo -e "\nConfiguring Kerberos"
 
@@ -98,9 +95,6 @@ mkdir -p /var/log
 echo -e "\nEnabling the Kerberos Services"
 update-rc.d krb5-kdc enable
 update-rc.d krb5-admin-server enable
-
-update-rc.d krb5-kdc start
-update-rc.d krb5-admin-server start
 
 echo -e "\nContainer fully configured\n\n"
 exit

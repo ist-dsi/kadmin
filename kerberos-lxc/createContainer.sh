@@ -12,10 +12,13 @@ chroot /var/lib/lxc/kerberos/rootfs /tmp/configureContainer.sh
 echo -e "\n\nStarting the Kerberos container"
 lxc-start --name kerberos --daemon
 
-echo -e "\nSleeping for 1 minute to allow the container to start"
-sleep 60
+echo -e "\nSleeping for 1.5 minutes to allow the container to start"
+sleep 90
 
-tail /var/lib/lxc/kerberos/rootfs/var/log/krb5kdc.log
+ls /var/lib/lxc/kerberos/rootfs/var/
+ls /var/lib/lxc/kerberos/rootfs/var/log/
+
 tail /var/lib/lxc/kerberos/rootfs/var/log/kadmin.log
+tail /var/lib/lxc/kerberos/rootfs/var/log/krb5kdc.log
 
 echo -e "\nKerberos fully operational"

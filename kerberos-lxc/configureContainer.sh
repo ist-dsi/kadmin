@@ -8,10 +8,8 @@ echo -e "\n\nInside chroot"
 
 echo -e "\nInstalling Kerberos packages"
 apt-get update
-apt-get install -y apt-utils
+apt-get install -y apt-utils dbus
 apt-get install -y krb5-kdc krb5-admin-server krb5-user
-apt-get install dbus
-apt-get clean
 
 /etc/init.d/dbus start
 systemctl enable dbus

@@ -90,8 +90,12 @@ $ADMIN_PASSWORD
 $ADMIN_PASSWORD
 EOF
 
+ls -l /etc/rc.d/
+
 update-rc.d krb5-kdc enable
+systemctl enable krb5-kdc
 update-rc.d krb5-kadmin-server enable
+systemctl enable krb5-kadmin-server
 
 echo -e "\nContainer fully configured\n\n"
 exit

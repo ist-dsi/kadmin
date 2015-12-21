@@ -10,7 +10,12 @@ echo -e "\nInstalling Kerberos packages"
 apt-get update
 apt-get install -y apt-utils
 apt-get install -y krb5-kdc krb5-admin-server krb5-user
+apt-get install dbus
 apt-get clean
+
+/etc/init.d/dbus start
+systemctl enable dbus
+systemctl start dbus
 
 echo -e "\nConfiguring Kerberos"
 
@@ -87,10 +92,10 @@ $ADMIN_PASSWORD
 $ADMIN_PASSWORD
 EOF
 
-ls -l /etc/rc.d
-
+echo -e "\nSystemctl status"
 systemctl status krb5-kdc krb5-kadmin-server
 
+echo -e "\nSystemctl enable"
 #update-rc.d krb5-kdc enable
 #update-rc.d krb5-kadmin-server enable
 systemctl enable krb5-kdc krb5-kadmin-server

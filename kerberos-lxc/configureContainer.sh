@@ -12,6 +12,9 @@ apt-get install -y apt-utils
 apt-get install -y krb5-admin-server krb5-kdc
 apt-get clean
 
+service krb5-admin-server stop
+service krb5-kdc stop
+
 echo -e "\nConfiguring Kerberos"
 
 REALM="EXAMPLE.COM"
@@ -25,8 +28,8 @@ cat > /etc/krb5.conf <<EOF
 
 [realms]
 	$REALM = {
-		kdc = localhost
-		admin_server = localhost
+		kdc = localhost #:88
+		admin_server = localhost #:749
 		default_domain = $DOMAIN
 	}
 [domain_realm]
@@ -38,8 +41,13 @@ echo -e "\nFinal /etc/krb5.conf:"
 cat /etc/krb5.conf
 
 cat > /etc/krb5kdc/kdc.conf<<EOF
+#[kdcdefaults]
+#	kdc_ports = 88
+
 [realms]
 	$REALM = {
+		#kadmind_port = 749
+		admin_keytab = /etc/krb5/kadm.keytab
 		max_life = 12h 0m 0s
 		max_renewable_life = 7d 0h 0m 0s
 		master_key_type = aes256-cts
@@ -72,23 +80,32 @@ kdb5_util create -r $REALM -s -P $(tr -cd '[:alnum:]' < /dev/urandom | fold -w30
 
 echo -e "\nAdding kadmin/admin principal"
 ADMIN_PASSWORD="MITiys4K5!"
-kadmin.local -q "addprinc kadmin/admin@$REALM" <<EOF
+kadmin.local -q "addprinc -randkey kadmin/admin@$REALM" <<EOF
 $ADMIN_PASSWORD
 $ADMIN_PASSWORD
 EOF
 
 echo -e "\nAdding noPermissions principal"
-kadmin.local -q "addprinc noPermissions@$REALM" <<EOF
+kadmin.local -q "addprinc -randkey noPermissions@$REALM" <<EOF
 $ADMIN_PASSWORD
 $ADMIN_PASSWORD
 EOF
+
+echo -e "\nAdding the keytab"
+kadmin.local -q "ktadd -k /etc/krb5/kadm.keytab kadmin/admin@$REALM noPermissions@$REALM" <<EOF
+$ADMIN_PASSWORD
+$ADMIN_PASSWORD
+EOF
+
 
 echo -e "\nEnable services at startup"
 invoke-rc.d krb5-admin-server restart
 invoke-rc.d krb5-kdc restart
 service krb5-admin-server status
 
-netstat -alnt | egrep ':88|:464|:749'
+which kadmind
+
+netstat -aln
 
 tail -f var/log/kadmin.log &
 TAIL_PID=$!

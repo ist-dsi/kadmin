@@ -8,13 +8,6 @@ chroot /var/lib/lxc/kerberos/rootfs /tmp/configureContainer.sh
 echo -e "\n\nStarting the Kerberos container"
 lxc-start --name kerberos --daemon
 
-echo -e "\nSleeping for 30s to allow the container to start"
-sleep 30
-
-tail /var/lib/lxc/kerberos/rootfs/var/log/kadmin.log
-
-dpkg -l | grep krb5
-
 
 # We must configure kerberos on the local machine so we can use kadmin and kinit commands
 
@@ -49,10 +42,11 @@ kinit kadmin/admin@EXAMPLE.COM <<EOF
 MITiys4K5!
 EOF
 
+echo -e "\n"
 klist && echo -e "\nKerberos fully operational"
 
 
 
-kadmin -p kadmin/admin@EXAMPLE.COM -q "getprincipal kadmin/admin@EXAMPLE.COM" <<EOF
+kadmin -r EXAMPLE.COM -d example.com -p kadmin/admin@EXAMPLE.COM -q "getprincipal kadmin/admin@EXAMPLE.COM" <<EOF
 MITiys4K5!
 EOF

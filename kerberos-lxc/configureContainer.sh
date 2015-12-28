@@ -41,12 +41,12 @@ echo -e "\nFinal /etc/krb5.conf:"
 cat /etc/krb5.conf
 
 cat > /etc/krb5kdc/kdc.conf<<EOF
-#[kdcdefaults]
-#	kdc_ports = 88
+[kdcdefaults]
+	kdc_ports = 88
 
 [realms]
 	$REALM = {
-		#kadmind_port = 749
+		kadmind_port = 749
 		admin_keytab = /etc/krb5/kadm.keytab
 		max_life = 12h 0m 0s
 		max_renewable_life = 7d 0h 0m 0s

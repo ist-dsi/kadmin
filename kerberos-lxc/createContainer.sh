@@ -28,8 +28,8 @@ cat > /etc/krb5.conf <<EOF
 
 [realms]
 	$REALM = {
-		kdc = $CONTAINER_IP
-		admin_server = $CONTAINER_IP
+		kdc = $CONTAINER_IP:88
+		admin_server = $CONTAINER_IP:749
 		default_domain = $DOMAIN
 	}
 [domain_realm]

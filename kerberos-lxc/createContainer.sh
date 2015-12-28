@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 
-lxc-create --template download --name kerberos -- --dist debian --release jessie --arch amd64
+lxc-create --template download --name kerberos -- --dist debian --release wheezy --arch amd64
 
 cp kerberos-lxc/configureContainer.sh /var/lib/lxc/kerberos/rootfs/tmp/
 chroot /var/lib/lxc/kerberos/rootfs /tmp/configureContainer.sh

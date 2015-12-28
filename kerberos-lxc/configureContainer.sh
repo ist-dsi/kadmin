@@ -9,7 +9,7 @@ echo -e "\n\nInside chroot"
 echo -e "\nInstalling Kerberos packages"
 apt-get update
 apt-get install -y apt-utils
-apt-get install -y krb5-kdc krb5-admin-server krb5-user
+apt-get install -y krb5-admin-server krb5-kdc
 apt-get clean
 
 echo -e "\nConfiguring Kerberos"
@@ -25,8 +25,8 @@ cat > /etc/krb5.conf <<EOF
 
 [realms]
 	$REALM = {
-		kdc = localhost:88
-		admin_server = localhost:749
+		kdc = localhost
+		admin_server = localhost
 		default_domain = $DOMAIN
 	}
 [domain_realm]
@@ -38,12 +38,8 @@ echo -e "\nFinal /etc/krb5.conf:"
 cat /etc/krb5.conf
 
 cat > /etc/krb5kdc/kdc.conf<<EOF
-[kdcdefaults]
-	kdc_ports = 88,750
-
 [realms]
 	$REALM = {
-		kadmind_port = 749
 		max_life = 12h 0m 0s
 		max_renewable_life = 7d 0h 0m 0s
 		master_key_type = aes256-cts
@@ -88,8 +84,9 @@ $ADMIN_PASSWORD
 EOF
 
 echo -e "\nEnable services at startup"
-service krb5-kdc restart
-service krb5-kadmin-server restart
+invoke-rc.d krb5-admin-server restart
+invoke-rc.d krb5-kdc restart
+
 #systemctl enable krb5-kdc
 #update-rc.d krb5-kdc enable
 

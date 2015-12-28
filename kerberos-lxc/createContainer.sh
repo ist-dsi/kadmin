@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 
-lxc-create --template download --name kerberos -- --dist debian --release wheezy --arch amd64
+lxc-create --template download --name kerberos -- --dist debian --release jessie --arch amd64
 
 cp kerberos-lxc/configureContainer.sh /var/lib/lxc/kerberos/rootfs/tmp/
 chroot /var/lib/lxc/kerberos/rootfs /tmp/configureContainer.sh
@@ -12,7 +12,9 @@ echo -e "\nSleeping for 30s to allow the container to start"
 sleep 30
 
 tail /var/lib/lxc/kerberos/rootfs/var/log/kadmin.log
-#tail /var/lib/lxc/kerberos/rootfs/var/log/krb5kdc.log
+
+dpkg -l | grep krb5
+
 
 # We must configure kerberos on the local machine so we can use kadmin and kinit commands
 
@@ -38,7 +40,7 @@ cat > /etc/krb5.conf <<EOF
 EOF
 
 echo -e "\nTrying kinit kadmin/admin@EXAMPLE.TEST (should fail)"
-kinit kadmin/admin@EXAMPLE.COM <<EOF
+kinit kadmin/admin@EXAMPLE.TEST <<EOF
 MITiys4K5!
 EOF
 

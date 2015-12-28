@@ -84,14 +84,11 @@ $ADMIN_PASSWORD
 EOF
 
 echo -e "\nEnable services at startup"
-invoke-rc.d krb5-admin-server restart
-invoke-rc.d krb5-kdc restart
+#invoke-rc.d krb5-admin-server restart
+#invoke-rc.d krb5-kdc restart
 
-#systemctl enable krb5-kdc
-#update-rc.d krb5-kdc enable
-
-#systemctl enable krb5-kadmin-server
-#update-rc.d krb5-kadmin-server enable
+systemctl restart krb5-admin-server krb5-kdc
+systemctl status krb5-admin-server
 
 echo -e "\nContainer fully configured\n\n"
 exit

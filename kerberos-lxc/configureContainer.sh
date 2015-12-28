@@ -90,7 +90,10 @@ service krb5-admin-server status
 
 netstat -alnt | egrep ':88|:464|:749'
 
-tail -f var/log/kadmin.log &; sleep 60; kill -2 %1
+tail -f var/log/kadmin.log &
+TAIL_PID=$!
+sleep 60
+kill -2 $TAIL_PID
 
 #systemctl restart krb5-admin-server krb5-kdc
 #systemctl status krb5-admin-server

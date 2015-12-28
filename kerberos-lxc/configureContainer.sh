@@ -47,7 +47,7 @@ cat > /etc/krb5kdc/kdc.conf<<EOF
 [realms]
 	$REALM = {
 		kadmind_port = 749
-		admin_keytab = /etc/krb5/kadm.keytab
+		admin_keytab = /tmp/kadm.keytab
 		max_life = 12h 0m 0s
 		max_renewable_life = 7d 0h 0m 0s
 		master_key_type = aes256-cts
@@ -92,7 +92,7 @@ $ADMIN_PASSWORD
 EOF
 
 echo -e "\nAdding the keytab"
-kadmin.local -q "ktadd -k /etc/krb5/kadm.keytab kadmin/admin@$REALM noPermissions@$REALM" <<EOF
+kadmin.local -q "ktadd -k /tmp/kadm.keytab kadmin/admin@$REALM noPermissions@$REALM" <<EOF
 $ADMIN_PASSWORD
 $ADMIN_PASSWORD
 EOF

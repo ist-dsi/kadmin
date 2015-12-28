@@ -12,6 +12,11 @@ apt-get install -y apt-utils
 apt-get install -y krb5-kdc krb5-admin-server krb5-user
 apt-get clean
 
+echo -e "\nInstalled /etc/krb5.conf:"
+cat /etc/krb5.conf
+echo -e "\nInstalled /etc/krb5kdc/kdc.conf:"
+cat /etc/krb5kdc/kdc.conf
+
 echo -e "\nConfiguring Kerberos"
 
 REALM="EXAMPLE.COM"
@@ -87,12 +92,14 @@ $ADMIN_PASSWORD
 $ADMIN_PASSWORD
 EOF
 
-echo -e "\nSystemctl enable"
+echo -e "\nEnable services at startup"
+insseerv krb5-kdc
+insseerv krb5-kadmin-server
 #systemctl enable krb5-kdc
-update-rc.d krb5-kdc enable
+#update-rc.d krb5-kdc enable
 
 #systemctl enable krb5-kadmin-server
-update-rc.d krb5-kadmin-server enable
+#update-rc.d krb5-kadmin-server enable
 
 echo -e "\nContainer fully configured\n\n"
 exit

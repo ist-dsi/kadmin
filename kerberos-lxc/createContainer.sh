@@ -11,7 +11,7 @@ lxc-start --name kerberos --daemon
 echo -e "\nSleeping for 30s to allow the container to start"
 sleep 30
 
-#tail /var/lib/lxc/kerberos/rootfs/var/log/kadmin.log
+tail /var/lib/lxc/kerberos/rootfs/var/log/kadmin.log
 #tail /var/lib/lxc/kerberos/rootfs/var/log/krb5kdc.log
 
 # We must configure kerberos on the local machine so we can use kadmin and kinit commands

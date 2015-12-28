@@ -9,7 +9,7 @@ echo -e "\n\nInside chroot"
 echo -e "\nInstalling Kerberos packages"
 apt-get update
 apt-get install -y apt-utils
-apt-get install -y krb5-admin-server krb5-kdc libkrb5
+apt-get install -y krb5-admin-server krb5-kdc
 apt-get clean
 
 service krb5-admin-server stop

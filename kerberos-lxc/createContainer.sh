@@ -20,6 +20,8 @@ echo -e "\nContainer IP: $CONTAINER_IP"
 cat > /etc/krb5.conf <<EOF
 [libdefaults]
 	default_realm = $REALM
+	#dns_lookup_realm = false
+	#dns_lookup_kdc = false
 
 [realms]
 	$REALM = {
@@ -47,6 +49,6 @@ klist && echo -e "\nKerberos fully operational"
 
 
 
-kadmin -r EXAMPLE.COM -d example.com -p kadmin/admin@EXAMPLE.COM -q "getprincipal kadmin/admin@EXAMPLE.COM" <<EOF
+kadmin -p kadmin/admin@EXAMPLE.COM -q "getprincipal kadmin/admin@EXAMPLE.COM" <<EOF
 MITiys4K5!
 EOF

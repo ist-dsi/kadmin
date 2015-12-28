@@ -8,6 +8,8 @@ chroot /var/lib/lxc/kerberos/rootfs /tmp/configureContainer.sh
 echo -e "\n\nStarting the Kerberos container"
 lxc-start --name kerberos --daemon
 
+echo -e "\nWaiting 60s to allow the container to boot"
+sleep 60
 
 # We must configure kerberos on the local machine so we can use kadmin and kinit commands
 
@@ -20,8 +22,8 @@ echo -e "\nContainer IP: $CONTAINER_IP"
 cat > /etc/krb5.conf <<EOF
 [libdefaults]
 	default_realm = $REALM
-	#dns_lookup_realm = false
-	#dns_lookup_kdc = false
+	dns_lookup_realm = false
+	dns_lookup_kdc = false
 
 [realms]
 	$REALM = {

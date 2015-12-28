@@ -29,7 +29,7 @@ cat > /etc/krb5.conf <<EOF
 [realms]
 	$REALM = {
 		kdc = localhost:88
-		admin_server = $REALM
+		admin_server = localhost:749
 		default_domain = $DOMAIN
 	}
 [domain_realm]

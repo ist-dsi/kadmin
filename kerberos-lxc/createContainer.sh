@@ -2,23 +2,21 @@
 
 lxc-create --template download --name kerberos -- --dist debian --release wheezy --arch amd64
 
-cp kerberos-lxc/configureContainer.sh /var/lib/lxc/kerberos/rootfs/tmp/
-chroot /var/lib/lxc/kerberos/rootfs /tmp/configureContainer.sh
-
-echo -e "\n\nStarting the Kerberos container"
+echo -e "\n\nStarting the Kerberos container and waiting 60s to allow it to boot"
 lxc-start --name kerberos --daemon
-
-echo -e "\nWaiting 60s to allow the container to boot"
 sleep 60
-
-# We must configure kerberos on the local machine so we can use kadmin and kinit commands
 
 REALM="EXAMPLE.COM"
 DOMAIN="example.com"
 CONTAINER_IP=$(lxc-info -n kerberos -iH)
 
-echo -e "\nContainer IP: $CONTAINER_IP"
+cp kerberos-lxc/configureContainer.sh /var/lib/lxc/kerberos/rootfs/tmp/
+#chroot /var/lib/lxc/kerberos/rootfs /tmp/configureContainer.sh
+lxc-attach -n kerberos /tmp/configureContainer.sh $REALM $DOMAIN $CONTAINER_IP
 
+
+# We must configure kerberos on the local machine so we can use kadmin and kinit commands
+echo -e "\nConfiguring krb5-user on the local machine"
 cat > /etc/krb5.conf <<EOF
 [libdefaults]
 	default_realm = $REALM

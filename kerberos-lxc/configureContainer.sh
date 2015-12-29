@@ -1,6 +1,13 @@
 #!/usr/bin/env bash
 
-echo -e "\n\nInside chroot"
+echo -e "\n\nInside lxc-attach"
+
+REALM=$1
+DOMAIN=$2
+CONTAINER_IP=$3
+echo -e "\nREALM: $REALM"
+echo -e "\nDOMAIN: $DOMAIN"
+echo -e "\nContainer IP: $CONTAINER_IP"
 
 # The configuration used to install Kerberos is the one specified here:
 # http://web.mit.edu/kerberos/krb5-1.13/doc/admin/install.html
@@ -12,13 +19,16 @@ apt-get install -y apt-utils
 apt-get install -y krb5-admin-server krb5-kdc
 apt-get clean
 
+echo -e "\nInitial /etc/krb5kdc/kdc.conf:"
+cat /etc/krb5kdc/kdc.conf
+
 service krb5-admin-server stop
 service krb5-kdc stop
 
 echo -e "\nConfiguring Kerberos"
 
-REALM="EXAMPLE.COM"
-DOMAIN="example.com"
+#REALM="EXAMPLE.COM"
+#DOMAIN="example.com"
 
 cat > /etc/krb5.conf <<EOF
 [libdefaults]
@@ -28,8 +38,8 @@ cat > /etc/krb5.conf <<EOF
 
 [realms]
 	$REALM = {
-		kdc = localhost:88
-		admin_server = localhost:749
+		kdc = $CONTAINER_IP:88
+		admin_server = $CONTAINER_IP:749
 		default_domain = $DOMAIN
 	}
 [domain_realm]

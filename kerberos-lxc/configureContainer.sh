@@ -91,15 +91,12 @@ kadmin.local -q "addprinc -pw $ADMIN_PASSWORD noPermissions@$REALM"
 echo -e "\nEnable services at startup"
 invoke-rc.d krb5-admin-server restart
 invoke-rc.d krb5-kdc restart
-service krb5-admin-server status
 
-tail -f var/log/kadmin.log &
+echo -e "\nTail /var/log/kadmin.log"
+tail -f /var/log/kadmin.log &
 TAIL_PID=$!
-sleep 60
+sleep 30
 kill -2 $TAIL_PID
-
-#systemctl restart krb5-admin-server krb5-kdc
-#systemctl status krb5-admin-server
 
 echo -e "\nContainer fully configured\n\n"
 exit

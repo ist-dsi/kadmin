@@ -9,12 +9,10 @@ sleep 30
 REALM="EXAMPLE.COM"
 DOMAIN="example.com"
 CONTAINER_IP=$(lxc-info -n kerberos -iH)
-ADMIN_PASSWORD="MITiys4K5!"
+ADMIN_PASSWORD="MITiys4K5"
 
 cp kerberos-lxc/configureContainer.sh /var/lib/lxc/kerberos/rootfs/tmp/
-#chroot /var/lib/lxc/kerberos/rootfs /tmp/configureContainer.sh
-lxc-attach -n kerberos /tmp/configureContainer.sh $REALM $DOMAIN $CONTAINER_IP $ADMIN_PASSWORD
-
+lxc-attach -n kerberos /tmp/configureContainer.sh -- $REALM $DOMAIN $CONTAINER_IP $ADMIN_PASSWORD
 
 # We must configure kerberos on the local machine so we can use kadmin and kinit commands
 echo -e "\nConfiguring krb5-user on the local machine"
@@ -40,16 +38,12 @@ kinit kadmin/admin@EXAMPLE.TEST <<EOF
 $ADMIN_PASSWORD
 EOF
 
-echo -e "\nTrying kinit kadmin/admin@EXAMPLE.COM (should work)"
-kinit kadmin/admin@EXAMPLE.COM <<EOF
+echo -e "\nTrying kinit kadmin/admin@$REALM (should work)"
+kinit kadmin/admin@$REALM <<EOF
 $ADMIN_PASSWORD
 EOF
 
 echo -e "\n"
 klist && echo -e "\nKerberos fully operational"
 
-
-
-kadmin -p kadmin/admin@EXAMPLE.COM -q "getprincipal kadmin/admin@EXAMPLE.COM" <<EOF
-MITiys4K5!
-EOF
+kadmin -p kadmin/admin@$REALM -q "getprincipal kadmin/admin@$REALM" -p $ADMIN_PASSWORD

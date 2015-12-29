@@ -21,11 +21,6 @@ apt-get install -y apt-utils
 apt-get install -y krb5-admin-server krb5-kdc
 apt-get clean
 
-echo -e "\nInitial /etc/krb5kdc/kdc.conf:"
-cat /etc/krb5kdc/kdc.conf
-echo -e "\nInitial /etc/krb5.conf:"
-cat /etc/krb5.conf
-
 service krb5-admin-server stop
 service krb5-kdc stop
 
@@ -81,24 +76,17 @@ EOF
 echo -e "\nFinal /etc/krb5kdc/kadm5.acl:"
 cat /etc/krb5kdc/kadm5.acl
 
+echo -e "\nCreating realm"
 # Super mega hack to bypass the lack of entropy inside the LXC/Travis environment
 rm -f /dev/random
 mknod /dev/random c 1 9
-
-echo -e "\nCreating realm"
 kdb5_util create -r $REALM -s -P $(tr -cd '[:alnum:]' < /dev/urandom | fold -w30 | head -n1)
 
 echo -e "\nAdding kadmin/admin principal"
-kadmin.local -q "addprinc kadmin/admin@$REALM" <<EOF
-$ADMIN_PASSWORD
-$ADMIN_PASSWORD
-EOF
+kadmin.local -q "addprinc -pw $ADMIN_PASSWORD kadmin/admin@$REALM"
 
 echo -e "\nAdding noPermissions principal"
-kadmin.local -q "addprinc noPermissions@$REALM" <<EOF
-$ADMIN_PASSWORD
-$ADMIN_PASSWORD
-EOF
+kadmin.local -q "addprinc -pw $ADMIN_PASSWORD noPermissions@$REALM"
 
 echo -e "\nEnable services at startup"
 invoke-rc.d krb5-admin-server restart

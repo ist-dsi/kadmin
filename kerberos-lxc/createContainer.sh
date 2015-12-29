@@ -15,6 +15,8 @@ cp kerberos-lxc/configureContainer.sh /var/lib/lxc/kerberos/rootfs/tmp/
 lxc-attach -n kerberos /tmp/configureContainer.sh -- $REALM $DOMAIN $CONTAINER_IP $ADMIN_PASSWORD
 
 # We must configure kerberos on the local machine so we can use kadmin and kinit commands
+
+
 echo -e "\nConfiguring krb5-user on the local machine"
 cat > /etc/krb5.conf <<EOF
 [libdefaults]
@@ -46,4 +48,4 @@ EOF
 echo -e "\n"
 klist && echo -e "\nKerberos fully operational"
 
-kadmin -p admin/admin@$REALM -q "getprincipal kadmin/admin@$REALM" -w $ADMIN_PASSWORD
+kadmin -p admin/admin@$REALM -q "get_principal admin/admin@$REALM" -w $ADMIN_PASSWORD

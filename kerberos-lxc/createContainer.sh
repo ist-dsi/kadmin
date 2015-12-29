@@ -50,7 +50,11 @@ kinit admin/admin@$REALM <<EOF
 $ADMIN_PASSWORD
 EOF
 
-echo -e "\n"
+echo -e "\nKlist"
 klist && echo -e "\nKerberos fully operational"
 
-kadmin -p admin/admin@$REALM -q "get_principal admin/admin@$REALM" -w $ADMIN_PASSWORD
+echo -e "\nKadmin"
+kadmin -p admin/admin@$REALM <<EOF
+$ADMIN_PASSWORD
+get_principal admin/admin@$REALM
+EOF

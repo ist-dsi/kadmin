@@ -42,7 +42,6 @@ cat > /etc/krb5.conf <<EOF
 	.$DOMAIN = $REALM
 	$DOMAIN = $REALM
 EOF
-
 echo -e "\nFinal /etc/krb5.conf:"
 cat /etc/krb5.conf
 
@@ -64,15 +63,13 @@ cat > /etc/krb5kdc/kdc.conf<<EOF
 	kdc = FILE:/var/log/krb5kdc.log
 	admin_server = FILE:/var/log/kadmin.log
 EOF
-
 echo -e "\nFinal /etc/krb5kdc/kdc.conf:"
 cat /etc/krb5kdc/kdc.conf
 
 cat > /etc/krb5kdc/kadm5.acl <<EOF
-kadmin/admin@$REALM  *
+admin/admin@$REALM  *
 noPermissions@$REALM X
 EOF
-
 echo -e "\nFinal /etc/krb5kdc/kadm5.acl:"
 cat /etc/krb5kdc/kadm5.acl
 

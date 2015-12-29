@@ -1,7 +1,7 @@
 sudo: required
 
-dist: trusty
-# dist: Wily
+#dist: trusty
+dist: Wily
 
 language: scala
 scala: 2.11.7

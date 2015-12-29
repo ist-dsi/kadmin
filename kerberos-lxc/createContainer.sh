@@ -2,17 +2,18 @@
 
 lxc-create --template download --name kerberos -- --dist debian --release wheezy --arch amd64
 
-echo -e "\n\nStarting the Kerberos container and waiting 60s to allow it to boot"
+echo -e "\n\nStarting the Kerberos container and waiting 30s to allow it to boot"
 lxc-start --name kerberos --daemon
-sleep 60
+sleep 30
 
 REALM="EXAMPLE.COM"
 DOMAIN="example.com"
 CONTAINER_IP=$(lxc-info -n kerberos -iH)
+ADMIN_PASSWORD="MITiys4K5!"
 
 cp kerberos-lxc/configureContainer.sh /var/lib/lxc/kerberos/rootfs/tmp/
 #chroot /var/lib/lxc/kerberos/rootfs /tmp/configureContainer.sh
-lxc-attach -n kerberos /tmp/configureContainer.sh $REALM $DOMAIN $CONTAINER_IP
+lxc-attach -n kerberos /tmp/configureContainer.sh $REALM $DOMAIN $CONTAINER_IP $ADMIN_PASSWORD
 
 
 # We must configure kerberos on the local machine so we can use kadmin and kinit commands
@@ -25,7 +26,7 @@ cat > /etc/krb5.conf <<EOF
 
 [realms]
 	$REALM = {
-		kdc = $CONTAINER_IP:88
+		kdc = $CONTAINER_IP:750
 		admin_server = $CONTAINER_IP:749
 		default_domain = $DOMAIN
 	}
@@ -36,12 +37,12 @@ EOF
 
 echo -e "\nTrying kinit kadmin/admin@EXAMPLE.TEST (should fail)"
 kinit kadmin/admin@EXAMPLE.TEST <<EOF
-MITiys4K5!
+$ADMIN_PASSWORD
 EOF
 
 echo -e "\nTrying kinit kadmin/admin@EXAMPLE.COM (should work)"
 kinit kadmin/admin@EXAMPLE.COM <<EOF
-MITiys4K5!
+$ADMIN_PASSWORD
 EOF
 
 echo -e "\n"

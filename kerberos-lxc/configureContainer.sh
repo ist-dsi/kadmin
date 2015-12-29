@@ -5,9 +5,11 @@ echo -e "\n\nInside lxc-attach"
 REALM=$1
 DOMAIN=$2
 CONTAINER_IP=$3
-echo -e "\nREALM: $REALM"
-echo -e "\nDOMAIN: $DOMAIN"
-echo -e "\nContainer IP: $CONTAINER_IP"
+ADMIN_PASSWORD=$4
+echo "REALM: $REALM"
+echo "DOMAIN: $DOMAIN"
+echo "Container IP: $CONTAINER_IP"
+echo "Admin Password: $ADMIN_PASSWORD"
 
 # The configuration used to install Kerberos is the one specified here:
 # http://web.mit.edu/kerberos/krb5-1.13/doc/admin/install.html
@@ -21,14 +23,13 @@ apt-get clean
 
 echo -e "\nInitial /etc/krb5kdc/kdc.conf:"
 cat /etc/krb5kdc/kdc.conf
+echo -e "\nInitial /etc/krb5.conf:"
+cat /etc/krb5.conf
 
 service krb5-admin-server stop
 service krb5-kdc stop
 
 echo -e "\nConfiguring Kerberos"
-
-#REALM="EXAMPLE.COM"
-#DOMAIN="example.com"
 
 cat > /etc/krb5.conf <<EOF
 [libdefaults]
@@ -38,7 +39,7 @@ cat > /etc/krb5.conf <<EOF
 
 [realms]
 	$REALM = {
-		kdc = $CONTAINER_IP:88
+		kdc = $CONTAINER_IP:750
 		admin_server = $CONTAINER_IP:749
 		default_domain = $DOMAIN
 	}
@@ -52,7 +53,7 @@ cat /etc/krb5.conf
 
 cat > /etc/krb5kdc/kdc.conf<<EOF
 [kdcdefaults]
-	kdc_ports = 88
+	kdc_ports = 750,88
 
 [realms]
 	$REALM = {
@@ -88,7 +89,6 @@ echo -e "\nCreating realm"
 kdb5_util create -r $REALM -s -P $(tr -cd '[:alnum:]' < /dev/urandom | fold -w30 | head -n1)
 
 echo -e "\nAdding kadmin/admin principal"
-ADMIN_PASSWORD="MITiys4K5!"
 kadmin.local -q "addprinc kadmin/admin@$REALM" <<EOF
 $ADMIN_PASSWORD
 $ADMIN_PASSWORD

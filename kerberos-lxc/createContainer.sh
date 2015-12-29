@@ -33,17 +33,17 @@ cat > /etc/krb5.conf <<EOF
 	$DOMAIN = $REALM
 EOF
 
-echo -e "\nTrying kinit kadmin/admin@EXAMPLE.TEST (should fail)"
-kinit kadmin/admin@EXAMPLE.TEST <<EOF
+echo -e "\nTrying kinit admin/admin@EXAMPLE.TEST (should fail)"
+kinit admin/admin@EXAMPLE.TEST <<EOF
 $ADMIN_PASSWORD
 EOF
 
-echo -e "\nTrying kinit kadmin/admin@$REALM (should work)"
-kinit kadmin/admin@$REALM <<EOF
+echo -e "\nTrying kinit admin/admin@$REALM (should work)"
+kinit admin/admin@$REALM <<EOF
 $ADMIN_PASSWORD
 EOF
 
 echo -e "\n"
 klist && echo -e "\nKerberos fully operational"
 
-kadmin -p kadmin/admin@$REALM -q "getprincipal kadmin/admin@$REALM" -p $ADMIN_PASSWORD
+kadmin -p admin/admin@$REALM -q "getprincipal kadmin/admin@$REALM" -w $ADMIN_PASSWORD

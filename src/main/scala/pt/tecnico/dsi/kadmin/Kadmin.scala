@@ -1,17 +1,16 @@
 package pt.tecnico.dsi.kadmin
 
 import java.io.File
-import java.nio.file.{Files, Paths}
+import java.nio.file.Files
 import java.util.Locale
 
-import com.typesafe.config.{Config, ConfigFactory}
+import com.typesafe.config.Config
 import com.typesafe.scalalogging.LazyLogging
 import org.joda.time.{DateTimeZone, DateTime}
 import org.joda.time.format.DateTimeFormat
 import work.martins.simon.expect.core.EndOfFile
 import work.martins.simon.expect.fluent.{ExpectBlock, Expect, When}
 
-import scala.io.Source
 import scala.util.{Failure, Success, Try}
 import scala.util.matching.Regex.Match
 
@@ -25,30 +24,9 @@ import scala.util.matching.Regex.Match
   *  Kadmin will be started with the `doOperation` method, that is, it will perform
   *  authentication as specified in the configuration.
   */
-class Kadmin(config: Config = ConfigFactory.load()) extends LazyLogging {
-  //TODO: create a Settings/Configs class and move these configurations there
-  val kerberosConfigs = ConfigFactory.load(config).getConfig("kadmin")
-  val realm = kerberosConfigs.getString("realm")
-  val performAuthentication = kerberosConfigs.getBoolean("perform-authentication")
-
-  val authenticatingPrincipal = kerberosConfigs.getString("authenticating-principal")
-  if (performAuthentication && authenticatingPrincipal.isEmpty)
-    throw new IllegalArgumentException("When performing authentication authenticating-principal cannot be empty.")
-  val authenticatingPrincipalPassword = kerberosConfigs.getString("authenticating-principal-password")
-  if (performAuthentication && authenticatingPrincipalPassword.isEmpty)
-    throw new IllegalArgumentException("When performing authentication authenticating-principal-password cannot be empty.")
-
-  val commandWithAuthentication = kerberosConfigs.getString("command-with-authentication")
-  require(commandWithAuthentication.nonEmpty, "command-with-authentication cannot be empty.")
-
-  val commandWithoutAuthentication = kerberosConfigs.getString("command-without-authentication")
-  require(commandWithoutAuthentication.nonEmpty, "command-without-authentication cannot be empty.")
-
-  val keytabsLocation = kerberosConfigs.getString("keytabs-location")
-
-  val kadminPrompt = "kadmin(.local)?: ".r
-
-
+class Kadmin(settings: Settings = new Settings()) extends LazyLogging {
+  def this(config: Config) = this(new Settings(config))
+  import settings._
 
   def getFullPrincipalName(principal: String): String = {
     if (principal.trim.endsWith(s"@$realm")){
@@ -434,7 +412,7 @@ class Kadmin(config: Config = ConfigFactory.load()) extends LazyLogging {
     * @param principal the principal to expire.
     * @return an Expect that expires `principal`.
     */
-  def expirePrincipal(principal: String, expirationDateTime: ExpirationDateTime = Now): Expect[Either[ErrorCase, Boolean]] = {
+  def expirePrincipal(principal: String, expirationDateTime: ExpirationDateTime = Now()): Expect[Either[ErrorCase, Boolean]] = {
     val dateTimeString = expirationDateTime.toKadminRepresentation
     modifyPrincipal(s"-expire $dateTimeString", principal)
   }
@@ -464,7 +442,7 @@ class Kadmin(config: Config = ConfigFactory.load()) extends LazyLogging {
     * @param force whether or not to clear the principal policy. By default this is set to false.
     * @return an Expect that sets the password expiration date of `principal` to `date`.
     */
-  def expirePrincipalPassword(principal: String, datetime: ExpirationDateTime = Now,
+  def expirePrincipalPassword(principal: String, datetime: ExpirationDateTime = Now(),
                               force: Boolean = false): Expect[Either[ErrorCase, Boolean]] = {
     val dateTimeString = datetime.toKadminRepresentation
     modifyPrincipal(s"${if (force) "-clearpolicy"} -pwexpire $dateTimeString", principal)

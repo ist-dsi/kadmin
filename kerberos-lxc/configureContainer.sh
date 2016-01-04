@@ -21,8 +21,7 @@ apt-get install -y apt-utils
 apt-get install -y krb5-admin-server krb5-kdc
 apt-get clean
 
-service krb5-admin-server stop
-service krb5-kdc stop
+systemctl stop krb5-admin-server krb5-kdc
 
 echo -e "\nConfiguring Kerberos"
 
@@ -55,7 +54,7 @@ cat > /etc/krb5kdc/kdc.conf<<EOF
 		max_life = 12h 0m 0s
 		max_renewable_life = 7d 0h 0m 0s
 		master_key_type = aes256-cts
-		supported_enctypes = aes256-cts:normal aes128-cts:normal
+		supported_enctypes = aes256-cts:normal
 	}
 
 [logging]
@@ -86,8 +85,7 @@ echo -e "\nAdding noPermissions principal"
 kadmin.local -q "addprinc -pw $ADMIN_PASSWORD noPermissions@$REALM"
 
 echo -e "\nEnable services at startup"
-invoke-rc.d krb5-admin-server restart
-invoke-rc.d krb5-kdc restart
+systemctl restart krb5-admin-server krb5-kdc
 
 echo -e "\nTail /var/log/kadmin.log"
 tail -f /var/log/kadmin.log &

@@ -9,10 +9,7 @@ trait ExpirationDateTime {
   val toKadminRepresentation: String
 }
 
-object Now {
-  def apply = new Now
-}
-class Now extends ExpirationDateTime {
+case class Now() extends ExpirationDateTime {
   private val dateTime = DateTime.now()
   //By using this instead of "now" we make the operations that use Now idempotent.
   val toKadminRepresentation: String  = format.print(dateTime)

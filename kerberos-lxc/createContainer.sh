@@ -4,7 +4,7 @@ apt-get update
 apt-get install -y -o Dpkg::Options::="--force-confold" lxc liblxc1 lxc-templates
 
 echo -e "\n\nCreating the Kerberos container"
-lxc-create --template download --name kerberos -- --dist debian --release jessie --arch amd64
+lxc-create --template download --name kerberos -- --dist debian --release wheezy --arch amd64
 
 echo -e "\n\nStarting the container and waiting 30s to allow it to boot"
 lxc-start --name kerberos --daemon

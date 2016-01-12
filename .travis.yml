@@ -13,11 +13,11 @@ cache:
   - "$HOME/.sbt/boot/"
 
 # This does not work because these packages are disallowed
- -#addons:
- -#  apt:
- -#    packages:
- -#    - lxc
- -#    - lxctl
+#addons:
+#  apt:
+#    packages:
+#    - lxc
+#    - lxctl
  
 before_install:
 - sudo ./kerberos-lxc/createContainer.sh

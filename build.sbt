@@ -25,7 +25,7 @@ libraryDependencies ++= Seq(
   "org.joda" % "joda-convert" % "1.7",
   "com.squants"  %% "squants"  % "0.5.3",
 
-  "work.martins.simon" %% "scala-expect" % "1.3.1"
+  "work.martins.simon" %% "scala-expect" % "1.7.2"
 )
 
 scalacOptions ++= Seq(

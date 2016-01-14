@@ -8,7 +8,7 @@ import com.typesafe.config.Config
 import com.typesafe.scalalogging.LazyLogging
 import org.joda.time.{DateTimeZone, DateTime}
 import org.joda.time.format.DateTimeFormat
-import work.martins.simon.expect.core.EndOfFile
+import work.martins.simon.expect.EndOfFile
 import work.martins.simon.expect.fluent.{ExpectBlock, Expect, When}
 
 import scala.util.{Failure, Success, Try}
@@ -66,7 +66,7 @@ class Kadmin(settings: Settings = new Settings()) extends LazyLogging {
       .addWhen(passwordExpired)
       .addWhen(unknownError)
       .when(EndOfFile)
-        .returning {
+        .returningExpect {
           val datetimeRegex = """\d\d-\d\d-\d\d\d\d \d\d:\d\d:\d\d"""
           val e2 = new Expect("klist", defaultValue)
           e2.expect(
@@ -219,7 +219,7 @@ class Kadmin(settings: Settings = new Settings()) extends LazyLogging {
         .when(s"""Principal "$fullPrincipal" added.""")
           .returning(Right(true))
         .when("Principal or policy already exists")
-          .returning(modifyPrincipal(options, principal))
+          .returningExpect(modifyPrincipal(options, principal))
           //Is modifying the existing principal the best approach?
           //Would deleting the existing principal and create a new one be a better one?
           //
@@ -688,33 +688,29 @@ class Kadmin(settings: Settings = new Settings()) extends LazyLogging {
 
   //TODO: policy commands
 
-  private def insufficientPermissions[R](privilege: String) = { expectBlock: ExpectBlock[Either[ErrorCase, R]] =>
-    expectBlock
-      .when(s"Operation requires ``$privilege'' privilege")
-        .returning(Left(InsufficientPermissions(privilege)))
+  private def insufficientPermissions[R](privilege: String)(expectBlock: ExpectBlock[Either[ErrorCase, R]]) = {
+    expectBlock.when(s"Operation requires ``$privilege'' privilege")
+      .returning(Left(InsufficientPermissions(privilege)))
   }
-  private def principalDoesNotExist[R]: ExpectBlock[Either[ErrorCase, R]] => When[Either[ErrorCase, R]] = { expectBlock =>
-    expectBlock
-      .when("Principal does not exist")
-        .returning(Left(NoSuchPrincipal))
+  private def principalDoesNotExist[R](expectBlock: ExpectBlock[Either[ErrorCase, R]]) = {
+    expectBlock.when("Principal does not exist")
+      .returning(Left(NoSuchPrincipal))
   }
-  private def passwordIncorrect[R] = { expectBlock: ExpectBlock[Either[ErrorCase, R]] =>
-    expectBlock
-      .when("Password incorrect")
-        .returning(Left(PasswordIncorrect))
-  }
-  private def passwordExpired[R] = { expectBlock: ExpectBlock[Either[ErrorCase, R]] =>
-    expectBlock
-      .when("Password expired")
+  private def passwordIncorrect[R](expectBlock: ExpectBlock[Either[ErrorCase, R]]) = {
+    expectBlock.when("Password incorrect")
       .returning(Left(PasswordIncorrect))
   }
-  private def unknownError[R] = { expectBlock: ExpectBlock[Either[ErrorCase, R]] =>
-    expectBlock
-      //By using a regex (even if it is greedy) we might not see the entire error output
-      .when("(.+)".r)
-        .returning{ m: Match =>
-          Left(UnknownError(Some(m.group(1))))
-        }
+  private def passwordExpired[R](expectBlock: ExpectBlock[Either[ErrorCase, R]]) = {
+    expectBlock.when("Password expired")
+      .returning(Left(PasswordIncorrect))
+  }
+  private def unknownError[R](expectBlock: ExpectBlock[Either[ErrorCase, R]]) = {
+    //By using a regex (even if it is greedy) we might not see the entire error output
+    //Would using "(.+)$".r work?
+    expectBlock.when("(.+)".r)
+      .returning{ m: Match =>
+        Left(UnknownError(Some(m.group(1))))
+      }
   }
 
   private def preemptiveExit[R]: When[Either[ErrorCase, R]] => Unit = { when =>

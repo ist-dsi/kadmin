@@ -227,7 +227,7 @@ class Kadmin(val settings: Settings = new Settings()) extends LazyLogging {
           //But we would partially lose the restraint that prohibits the reuse of the password.
           //
           //By modifying we could run into troubles if -randkey or -pw is used.
-        .addWhen(insufficientPermissions("add"))
+        .addWhen(insufficientPermission("add"))
         .addWhen(unknownError)
     }
   }
@@ -263,8 +263,8 @@ class Kadmin(val settings: Settings = new Settings()) extends LazyLogging {
       e.expect
         .when("Entry for principal (.*?) added to keytab".r)
         .returning(Right(true))
-        .addWhen(insufficientPermissions("inquire"))
-        .addWhen(insufficientPermissions("changepw"))
+        .addWhen(insufficientPermission("inquire"))
+        .addWhen(insufficientPermission("changepw"))
         .addWhen(unknownError)
     }
   }
@@ -283,7 +283,6 @@ class Kadmin(val settings: Settings = new Settings()) extends LazyLogging {
   def obtainKeytab(principal: String): Option[Array[Byte]] = {
     val f = getKeytabFile(principal)
     if (f.canRead) {
-      //Should we return an error (eg. inside an Either) if the file exists but we do not have permissions to read it?
       Some(Files.readAllBytes(f.toPath))
     } else {
       if (f.exists() == false) {
@@ -291,6 +290,7 @@ class Kadmin(val settings: Settings = new Settings()) extends LazyLogging {
       } else if (f.canRead == false) {
         val currentUser = System.getProperty("user.name")
         logger.info(s"""User "$currentUser" has insufficient permissions to read the keytab file "${f.getAbsolutePath}".""")
+        //Should we return an error (eg. inside an Either) if the file exists but we do not have permissions to read it?
       }
       None
     }
@@ -321,7 +321,7 @@ class Kadmin(val settings: Settings = new Settings()) extends LazyLogging {
           //Scala-expect will only return the last returning action, so the Right(true) will be returned
           //and not the Left(NoSuchPrincipal)
           .returning(Right(true))
-        .addWhen(insufficientPermissions("delete"))
+        .addWhen(insufficientPermission("delete"))
         .addWhen(unknownError)
     }
   }
@@ -371,7 +371,7 @@ class Kadmin(val settings: Settings = new Settings()) extends LazyLogging {
             //Its all good. We can continue.
           .addWhen(principalDoesNotExist)
             .addActions(preemptiveExit)
-          .addWhen(insufficientPermissions("modify"))
+          .addWhen(insufficientPermission("modify"))
             .addActions(preemptiveExit)
           .addWhen(unknownError)
             .addActions(preemptiveExit)
@@ -385,7 +385,7 @@ class Kadmin(val settings: Settings = new Settings()) extends LazyLogging {
         //We just need to check for these cases when the policy was not cleared. Because in the case the policy
         //was cleared these cases will already have been caught.
         w.addWhen(principalDoesNotExist)
-          .addWhen(insufficientPermissions("modify"))
+          .addWhen(insufficientPermission("modify"))
           .addWhen(unknownError)
       }
     }
@@ -498,7 +498,7 @@ class Kadmin(val settings: Settings = new Settings()) extends LazyLogging {
       e.expect
         .addWhen(principalDoesNotExist)
           .addActions(preemptiveExit)
-        .addWhen(insufficientPermissions("inquire"))
+        .addWhen(insufficientPermission("inquire"))
           .addActions(preemptiveExit)
         .addWhens(f)
     }
@@ -646,7 +646,7 @@ class Kadmin(val settings: Settings = new Settings()) extends LazyLogging {
         .when("Cannot reuse password")
         .returning(Left(PasswordIsBeingReused))
         .addWhen(principalDoesNotExist)
-        .addWhen(insufficientPermissions("changepw"))
+        .addWhen(insufficientPermission("changepw"))
         .addWhen(unknownError)
     }
   }
@@ -685,10 +685,13 @@ class Kadmin(val settings: Settings = new Settings()) extends LazyLogging {
     e
   }
 
-
   //TODO: policy commands
+  //def addPolicy(options: String, policy: String): Expect[Either[ErrorCase, Boolean]] =
+  //def modifyPolicy(options: String, policy: String): Expect[Either[ErrorCase, Boolean]] =
+  //def deletePolicy(policy: String): Expect[Either[ErrorCase, Boolean]] =
+  //def withPolicy[R](policy: String)(f: ExpectBlock[Either[ErrorCase, R]] => Unit): Expect[Either[ErrorCase, R]] =
 
-  private def insufficientPermissions[R](privilege: String)(expectBlock: ExpectBlock[Either[ErrorCase, R]]) = {
+  private def insufficientPermission[R](privilege: String)(expectBlock: ExpectBlock[Either[ErrorCase, R]]) = {
     expectBlock.when(s"Operation requires ``$privilege'' privilege")
       .returning(Left(InsufficientPermissions(privilege)))
   }

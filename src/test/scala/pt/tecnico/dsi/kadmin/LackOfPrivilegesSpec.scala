@@ -2,47 +2,64 @@ package pt.tecnico.dsi.kadmin
 
 import com.typesafe.config.ConfigFactory
 import org.scalatest.concurrent.ScalaFutures
-import org.scalatest.exceptions.TestFailedException
 import org.scalatest.time.{Seconds, Span}
-import org.scalatest.{FlatSpec, Matchers}
+import org.scalatest.{WordSpec, Matchers}
 
-import scala.concurrent.ExecutionContext.Implicits.global
-
-class LackOfPrivilegesSpec extends FlatSpec with Matchers with ScalaFutures {
-  val defaultPatience = PatienceConfig(
+class LackOfPrivilegesSpec extends WordSpec with Matchers with ScalaFutures with TestUtils {
+  implicit val defaultPatience = PatienceConfig(
     timeout = Span(1, Seconds),
     interval = Span(2, Seconds)
   )
 
   val authenticatedConfig = ConfigFactory.parseString(s"""
     kadmin {
-      realm = "EXAMPLE.COM"
-
       perform-authentication = true
 
-      authenticating-principal = ""
-      authenticating-principal-password = ""
+      authenticating-principal = "noPermissions"
+      authenticating-principal-password = "MITiys4K5"
 
-      command-with-authentication = "kadmin -p "$${kadmin.authenticating-principal}
-      command-without-authentication = "kadmin.local"
+      //command-with-authentication = "kadmin -p "$${kadmin.authenticating-principal}
     }""")
 
-  val kerberos = new Kadmin(authenticatedConfig)
+  val kerberos = new Kadmin(authenticatedConfig/*.resolve()*/)
   import kerberos._
 
-  //In kadm5.acl have an entry
-  //noPermissions@IST.UTL.PT X *
-  //This means the principal noPermissions@IST.UTL.PT has no permissions for every principal
+  "An Expect" when {
+    "the authenticating principal does not have sufficient permissions" should {
+      val principal = "kadmin/admin"
+      val options = "-nokey"
 
-  //Use the noPermissions principal for the following tests.
+      "fail while adding a principal" in {
+        testInsufficientPermission("add") {
+          addPrincipal(options, principal)
+        }
+      }
 
-  //addPrincipal lack of privilege add
+      "fail while deleting a principal" in {
+        testInsufficientPermission("delete") {
+          deletePrincipal(principal)
+        }
+      }
 
-  //deletePrincipal lack of privilege delete
+      "fail while modifying a principal" in {
+        testInsufficientPermission("modify") {
+          modifyPrincipal(options, principal)
+        }
+      }
 
-  //modifyPrincipal lack of privilege modify
+      "fail while changing a principal password" in {
+        testInsufficientPermission("changepw") {
+          changePassword(principal, "a super shiny new pa$$w0rd")
+        }
+      }
 
-  //changePassword lack of privilege changepw
-
-  //getPrincipal lack of privilege inquire
+      "fail while getting a principal" in {
+        testInsufficientPermission("inquire") {
+          withPrincipal[Boolean](principal) { e =>
+            //Purposefully left empty
+          }
+        }
+      }
+    }
+  }
 }

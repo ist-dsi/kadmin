@@ -2,48 +2,13 @@ package pt.tecnico.dsi.kadmin
 
 import com.typesafe.config.ConfigFactory
 import org.scalatest.concurrent.ScalaFutures
-import org.scalatest.exceptions.TestFailedException
 import org.scalatest.time.{Seconds, Span}
 import org.scalatest.{FlatSpec, Matchers}
-import work.martins.simon.expect.fluent.Expect
 import squants.time.TimeConversions._
 import scala.concurrent.ExecutionContext.Implicits.global
 
-class AuthenticatedSpec extends FlatSpec with Matchers with ScalaFutures {
-  /**
-    * Tests that the operation in `test` is idempotent by repeating `test` three times.
-    * If `test` fails on the second or third time a `TestFailedException` exception will
-    * be thrown stating `test` is not idempotent.
-    *
-    * @example {{{
-    *  val initialSet = Set(1, 2, 3)
-    *  idempotent {
-    *   (initialSet + 4) shouldBe Set(1, 2, 3, 4)
-    *  }
-    * }}}
-    */
-  def idempotent(test: => Unit): Unit = {
-    //If this fails we do not want to catch its exception, because failing in the first attempt means
-    //whatever is being tested in `test` is not implemented correctly. Therefore we do not want to mask
-    //the failure with a "Operation is not idempotent".
-    test
-
-    //This code will only be executed if the previous test succeed.
-    //And now we want to catch the exception because if `test` fails here it means it is not idempotent.
-    try {
-      test
-      test
-    } catch {
-      case e: TestFailedException =>
-        throw new TestFailedException("Operation is not idempotent", e, e.failedCodeStackDepth + 1)
-    }
-  }
-
-  def testNoSuchPrincipal[R](e: Expect[Either[ErrorCase, R]]) = idempotent {
-    e.run().futureValue shouldBe Left(NoSuchPrincipal)
-  }
-
-  val defaultPatience = PatienceConfig(
+class AuthenticatedSpec extends FlatSpec with Matchers with ScalaFutures with TestUtils {
+  implicit val defaultPatience: PatienceConfig = PatienceConfig(
     timeout = Span(1, Seconds),
     interval = Span(2, Seconds)
   )

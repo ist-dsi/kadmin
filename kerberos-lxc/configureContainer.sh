@@ -67,7 +67,7 @@ echo -e "\nFinal /etc/krb5kdc/kdc.conf:"
 cat /etc/krb5kdc/kdc.conf
 
 cat > /etc/krb5kdc/kadm5.acl <<EOF
-admin/admin@$REALM  *
+kadmin/admin@$REALM  *
 noPermissions@$REALM X
 EOF
 echo -e "\nFinal /etc/krb5kdc/kadm5.acl:"
@@ -79,8 +79,8 @@ rm -f /dev/random
 mknod /dev/random c 1 9
 kdb5_util create -r $REALM -s -P $(tr -cd '[:alnum:]' < /dev/urandom | fold -w30 | head -n1)
 
-echo -e "\nAdding admin/admin principal"
-kadmin.local -q "addprinc -pw $ADMIN_PASSWORD admin/admin@$REALM"
+echo -e "\nAdding kadmin/admin principal"
+kadmin.local -q "addprinc -pw $ADMIN_PASSWORD kadmin/admin@$REALM"
 
 echo -e "\nAdding noPermissions principal"
 kadmin.local -q "addprinc -pw $ADMIN_PASSWORD noPermissions@$REALM"

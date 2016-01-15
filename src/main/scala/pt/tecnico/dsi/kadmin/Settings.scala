@@ -1,6 +1,6 @@
 package pt.tecnico.dsi.kadmin
 
-import com.typesafe.config.{ConfigFactory, Config}
+import com.typesafe.config.{ConfigResolveOptions, ConfigFactory, Config}
 
 /**
   * This class holds all the settings that parameterize kadmin.

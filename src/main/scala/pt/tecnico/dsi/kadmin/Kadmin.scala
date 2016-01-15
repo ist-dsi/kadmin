@@ -24,7 +24,7 @@ import scala.util.matching.Regex.Match
   *  Kadmin will be started with the `doOperation` method, that is, it will perform
   *  authentication as specified in the configuration.
   */
-class Kadmin(settings: Settings = new Settings()) extends LazyLogging {
+class Kadmin(val settings: Settings = new Settings()) extends LazyLogging {
   def this(config: Config) = this(new Settings(config))
   import settings._
 

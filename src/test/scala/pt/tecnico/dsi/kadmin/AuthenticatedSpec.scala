@@ -56,23 +56,31 @@ class AuthenticatedSpec extends FlatSpec with Matchers with ScalaFutures {
 
   val authenticatedConfig = ConfigFactory.parseString(s"""
     kadmin {
-      realm = "EXAMPLE.COM"
-
       perform-authentication = true
 
-      authenticating-principal = ""
-      authenticating-principal-password = ""
+      authenticating-principal = "batatas"
+      authenticating-principal-password = "MITiys4K5"
 
-      command-with-authentication = "kadmin -p "$${kadmin.authenticating-principal}
-      command-without-authentication = "kadmin.local"
+      //command-with-authentication = "kadmin -p "$${kadmin.authenticating-principal}
     }""")
 
-  val kerberos = new Kadmin(authenticatedConfig)
+  val kerberos = new Kadmin(authenticatedConfig.resolve())
   import kerberos._
 
-  //kadm5.acl has an entry
-  //noPermissions@EXAMPLE.COM X
-  //This means the principal noPermissions@EXAMPLE.COM has no permissions for every principal
+  println(kerberos.settings)
+
+  //These tests make the following assumptions:
+  //  · The realm EXAMPLE.COM exists.
+  //  · In EXAMPLE.COM KDC the kadm5.acl file has at least the following entries
+  //     kadmin/admin@EXAMPLE.COM  *
+  //     noPermissions@EXAMPLE.COM X
+  //  · The password for these two principals is "MITiys4K5".
+  //
+  //These assumptions are valid in the Travis CI.
+  //Look at the .travis.yml file and the kerberos-lxc directory to understand why.
+  //To run these tests locally:
+  //  · Install LXC on your machine.
+  //  . sudo ./kerberos-lxc/createContainer.sh
 
   "addPrincipal" should "idempotently succeed" in {
     val principal = "test"

@@ -36,12 +36,11 @@ trait TestUtils { self: ScalaFutures with Matchers =>
     }
   }
 
-  def testNoSuchPrincipal[R](e: Expect[Either[ErrorCase, R]])(implicit defaultPatience: PatienceConfig) = idempotent {
+  def testNoSuchPrincipal[R](e: Expect[Either[ErrorCase, R]]) = idempotent {
     e.run().futureValue shouldBe Left(NoSuchPrincipal)
   }
 
-  def testInsufficientPermission[R](permission: String)(e: Expect[Either[ErrorCase, R]])
-                                   (implicit defaultPatience: PatienceConfig) = idempotent {
+  def testInsufficientPermission[R](permission: String)(e: Expect[Either[ErrorCase, R]]) = idempotent {
     e.run().futureValue shouldBe Left(InsufficientPermissions(permission))
   }
 }

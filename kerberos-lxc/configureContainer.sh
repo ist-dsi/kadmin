@@ -80,6 +80,9 @@ mknod /dev/random c 1 9
 kdb5_util create -r $REALM -s -P $(tr -cd '[:alnum:]' < /dev/urandom | fold -w30 | head -n1)
 
 echo -e "\nAdding kadmin/admin principal"
+# Something created the kadmin/admin but because we don't know what we don't know its password.
+# So we first delete it and then create it again with a password known to us.
+kadmin.local -q "delete_principal -force kadmin/admin@$REALM"
 kadmin.local -q "addprinc -pw $ADMIN_PASSWORD kadmin/admin@$REALM"
 
 echo -e "\nAdding noPermissions principal"

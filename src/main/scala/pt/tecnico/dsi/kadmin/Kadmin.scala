@@ -635,7 +635,7 @@ class Kadmin(val settings: Settings = new Settings()) extends LazyLogging {
     val fullPrincipal = getFullPrincipalName(principal)
     doOperation { e =>
       e.expect(kadminPrompt)
-        .sendln(s"change_password -pw $newPassword $fullPrincipal")
+        .sendln(s"""change_password -pw "$newPassword" $fullPrincipal""")
       e.expect
         .when(s"""Password for "$fullPrincipal" changed.""")
         .returning(Right(true))

@@ -39,12 +39,6 @@ class AuthenticatedSpec extends FlatSpec with Matchers with ScalaFutures {
     }
   }
 
-  class Teste extends Settings() {
-    override val realm: String = "YOUR.DOMAIN.TLD"
-    override val keytabsLocation: String = "/var/local/keytabs"
-    override val commandWithAuthentication: String = s"""ssh user@server:port "kadmin -p $authenticatingPrincipal""""
-  }
-
   def testNoSuchPrincipal[R](e: Expect[Either[ErrorCase, R]]) = idempotent {
     e.run().futureValue shouldBe Left(NoSuchPrincipal)
   }
@@ -58,19 +52,21 @@ class AuthenticatedSpec extends FlatSpec with Matchers with ScalaFutures {
     kadmin {
       perform-authentication = true
 
-      authenticating-principal = "batatas"
+      authenticating-principal = "kadmin/admin"
       authenticating-principal-password = "MITiys4K5"
 
       //command-with-authentication = "kadmin -p "$${kadmin.authenticating-principal}
     }""")
 
-  val kerberos = new Kadmin(authenticatedConfig.resolve())
+  val kerberos = new Kadmin(authenticatedConfig/*.resolve()*/)
   import kerberos._
 
-  println(kerberos.settings)
+  //println(kerberos.settings)
 
   //These tests make the following assumptions:
   //  · The realm EXAMPLE.COM exists.
+  //  . Kerberos client is installed in the machine where the tests are being ran. And the configuration has as the
+  //     default realm EXAMPLE.COM.
   //  · In EXAMPLE.COM KDC the kadm5.acl file has at least the following entries
   //     kadmin/admin@EXAMPLE.COM  *
   //     noPermissions@EXAMPLE.COM X
@@ -131,18 +127,18 @@ class AuthenticatedSpec extends FlatSpec with Matchers with ScalaFutures {
       changePassword(principal, "p$1").run().futureValue shouldBe Left(PasswordTooShort)
     }
   }
-  it should "return PasswordWithoutEnoughCharacterClasses when the password does not have enougth character classes" in {
+  it should "return PasswordWithoutEnoughCharacterClasses when the password does not have enough character classes" in {
     val principal = "test"
     addPrincipal("-nokey", principal).run().futureValue shouldBe Right(true)
     idempotent {
-      changePassword(principal, "superbigpasswordwithonlytext").run().futureValue shouldBe Left(PasswordTooShort)
+      changePassword(principal, "super big password with only text").run().futureValue shouldBe Left(PasswordTooShort)
     }
   }
   it should "idempotently succeed" in {
     val principal = "test"
     addPrincipal("-nokey", principal).run().futureValue shouldBe Right(true)
     //This will fail if the principal policy does not allow password reuses
-    val password = "bigpasswordshave@least20characters"
+    val password = "big passwords have @least 20 characters"
     idempotent {
       changePassword(principal, password).run().futureValue shouldBe Right(true)
       checkPassword(principal, password).run().futureValue shouldBe Right(true)

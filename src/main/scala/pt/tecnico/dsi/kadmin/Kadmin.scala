@@ -54,12 +54,14 @@ class Kadmin(val settings: Settings = new Settings()) extends LazyLogging {
     require(authenticatingPrincipal.isEmpty, "authenticatingPrincipal cannot be empty.")
     require(authenticatingPrincipalPassword.isEmpty, "authenticatingPrincipalPassword cannot be empty.")
 
+    val fullPrincipal = getFullPrincipalName(authenticatingPrincipal)
+
     val defaultValue: Either[ErrorCase, DateTime] = Left(UnknownError())
-    val e = new Expect(s"kinit $authenticatingPrincipal", defaultValue)
+    val e = new Expect(s"kinit $fullPrincipal", defaultValue)
     e.expect
-      .when(s"Password for $authenticatingPrincipal: ")
+      .when(s"Password for $fullPrincipal: ")
         .sendln(authenticatingPrincipalPassword)
-      .when(s"""Client '$authenticatingPrincipal' not found in Kerberos database""")
+      .when(s"""Client '$fullPrincipal' not found in Kerberos database""")
         .returning(Left(NoSuchPrincipal))
     e.expect
       .addWhen(passwordIncorrect)
@@ -108,7 +110,8 @@ class Kadmin(val settings: Settings = new Settings()) extends LazyLogging {
   def withAuthentication[R](f: Expect[Either[ErrorCase, R]] => Unit): Expect[Either[ErrorCase, R]] = {
     val defaultValue: Either[ErrorCase, R] = Left(UnknownError())
     val e = new Expect(commandWithAuthentication, defaultValue)
-    e.expect(s"Password for $authenticatingPrincipal: ")
+    val fullPrincipal = getFullPrincipalName(authenticatingPrincipal)
+    e.expect(s"Password for $fullPrincipal: ")
       .sendln(authenticatingPrincipalPassword)
     e.expect
       //Due to the fantastic consistency in kerberos commands we cannot use:

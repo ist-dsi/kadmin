@@ -18,11 +18,13 @@ class LackOfPrivilegesSpec extends WordSpec with Matchers with ScalaFutures with
       authenticating-principal = "noPermissions"
       authenticating-principal-password = "MITiys4K5"
 
-      //command-with-authentication = "kadmin -p "$${kadmin.authenticating-principal}
+      command-with-authentication = "kadmin -p "$${kadmin.authenticating-principal}
     }""")
 
-  val kerberos = new Kadmin(authenticatedConfig/*.resolve()*/)
+  val kerberos = new Kadmin(authenticatedConfig.resolve())
   import kerberos._
+
+  println(kerberos.settings)
 
   "An Expect" when {
     "the authenticating principal does not have sufficient permissions" should {

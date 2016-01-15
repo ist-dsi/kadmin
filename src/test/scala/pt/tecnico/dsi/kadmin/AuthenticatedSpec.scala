@@ -20,10 +20,10 @@ class AuthenticatedSpec extends FlatSpec with Matchers with ScalaFutures with Te
       authenticating-principal = "kadmin/admin"
       authenticating-principal-password = "MITiys4K5"
 
-      //command-with-authentication = "kadmin -p "$${kadmin.authenticating-principal}
+      command-with-authentication = "kadmin -p "$${kadmin.authenticating-principal}
     }""")
 
-  val kerberos = new Kadmin(authenticatedConfig/*.resolve()*/)
+  val kerberos = new Kadmin(authenticatedConfig.resolve())
   import kerberos._
 
   //println(kerberos.settings)

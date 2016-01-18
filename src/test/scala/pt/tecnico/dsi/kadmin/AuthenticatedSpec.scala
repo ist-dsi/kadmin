@@ -1,11 +1,13 @@
 package pt.tecnico.dsi.kadmin
 
+import java.util.concurrent.Executors
+
 import com.typesafe.config.ConfigFactory
 import org.scalatest.concurrent.ScalaFutures
 import org.scalatest.time.{Seconds, Span}
 import org.scalatest.{FlatSpec, Matchers}
 import squants.time.TimeConversions._
-import scala.concurrent.ExecutionContext.Implicits.global
+import scala.concurrent.ExecutionContext
 
 class AuthenticatedSpec extends FlatSpec with Matchers with ScalaFutures with TestUtils {
   implicit val defaultPatience: PatienceConfig = PatienceConfig(
@@ -22,7 +24,7 @@ class AuthenticatedSpec extends FlatSpec with Matchers with ScalaFutures with Te
       authenticating-principal = "kadmin/admin"
       authenticating-principal-password = "MITiys4K5"
 
-      command-with-authentication = "kadmin -p "$${kadmin.authenticating-principal}@$${kadmin.realm}
+      command-with-authentication = "kadmin -p "$${kadmin.authenticating-principal}"@"$${kadmin.realm}
     }""")
 
   val kerberos = new Kadmin(authenticatedConfig.resolve())

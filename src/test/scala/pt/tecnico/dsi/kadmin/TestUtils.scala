@@ -1,12 +1,16 @@
 package pt.tecnico.dsi.kadmin
 
+import java.util.concurrent.Executors
+
 import org.scalatest.Matchers
 import org.scalatest.concurrent.ScalaFutures
 import org.scalatest.exceptions.TestFailedException
 import work.martins.simon.expect.fluent.Expect
-import scala.concurrent.ExecutionContext.Implicits.global
+
+import scala.concurrent.ExecutionContext
 
 trait TestUtils { self: ScalaFutures with Matchers =>
+  implicit val ec = ExecutionContext.fromExecutor(Executors.newFixedThreadPool(1))
   /**
     * Tests that the operation in `test` is idempotent by repeating `test` three times.
     * If `test` fails on the second or third time a `TestFailedException` exception will

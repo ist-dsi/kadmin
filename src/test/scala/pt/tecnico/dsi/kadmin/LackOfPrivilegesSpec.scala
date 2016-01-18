@@ -15,10 +15,12 @@ class LackOfPrivilegesSpec extends WordSpec with Matchers with ScalaFutures with
     kadmin {
       perform-authentication = true
 
+      realm = "EXAMPLE.COM"
+
       authenticating-principal = "noPermissions"
       authenticating-principal-password = "MITiys4K5"
 
-      command-with-authentication = "kadmin -p "$${kadmin.authenticating-principal}
+      command-with-authentication = "kadmin -p "$${kadmin.authenticating-principal}@$${kadmin.realm}
     }""")
 
   val kerberos = new Kadmin(authenticatedConfig.resolve())

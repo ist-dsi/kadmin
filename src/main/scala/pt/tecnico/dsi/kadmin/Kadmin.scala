@@ -695,7 +695,7 @@ class Kadmin(val settings: Settings = new Settings()) extends LazyLogging {
   //def withPolicy[R](policy: String)(f: ExpectBlock[Either[ErrorCase, R]] => Unit): Expect[Either[ErrorCase, R]] =
 
   private def insufficientPermission[R](privilege: String)(expectBlock: ExpectBlock[Either[ErrorCase, R]]) = {
-    expectBlock.when(s"Operation requires ``$privilege'' privilege")
+    expectBlock.when("Operation requires ``" + privilege + "'' privilege")
       .returning(Left(InsufficientPermissions(privilege)))
   }
   private def principalDoesNotExist[R](expectBlock: ExpectBlock[Either[ErrorCase, R]]) = {

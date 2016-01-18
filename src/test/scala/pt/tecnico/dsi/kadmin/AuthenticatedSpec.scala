@@ -17,10 +17,12 @@ class AuthenticatedSpec extends FlatSpec with Matchers with ScalaFutures with Te
     kadmin {
       perform-authentication = true
 
+      realm = "EXAMPLE.COM"
+
       authenticating-principal = "kadmin/admin"
       authenticating-principal-password = "MITiys4K5"
 
-      command-with-authentication = "kadmin -p "$${kadmin.authenticating-principal}
+      command-with-authentication = "kadmin -p "$${kadmin.authenticating-principal}@$${kadmin.realm}
     }""")
 
   val kerberos = new Kadmin(authenticatedConfig.resolve())
@@ -30,8 +32,8 @@ class AuthenticatedSpec extends FlatSpec with Matchers with ScalaFutures with Te
 
   //These tests make the following assumptions:
   //  · The realm EXAMPLE.COM exists.
-  //  . Kerberos client is installed in the machine where the tests are being ran. And the configuration has as the
-  //     default realm EXAMPLE.COM.
+  //  . Kerberos client is installed in the machine where the tests are being ran. And the configuration has the
+  //     realm EXAMPLE.COM.
   //  · In EXAMPLE.COM KDC the kadm5.acl file has at least the following entries
   //     kadmin/admin@EXAMPLE.COM  *
   //     noPermissions@EXAMPLE.COM X

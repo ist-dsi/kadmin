@@ -32,7 +32,7 @@ class LackOfPrivilegesSpec extends WordSpec with Matchers with ScalaFutures with
 
       "fail while adding a principal" in {
         testInsufficientPermission("add") {
-          addPrincipal("", "random")
+          addPrincipal("-randkey", "random")
         }
       }
 
@@ -44,7 +44,7 @@ class LackOfPrivilegesSpec extends WordSpec with Matchers with ScalaFutures with
 
       "fail while modifying a principal" in {
         testInsufficientPermission("modify") {
-          modifyPrincipal("-nokey", principal)
+          modifyPrincipal("-randkey", principal)
         }
       }
 

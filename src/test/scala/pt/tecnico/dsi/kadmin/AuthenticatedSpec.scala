@@ -39,7 +39,7 @@ class AuthenticatedSpec extends FlatSpec with Matchers with ScalaFutures with Te
   //
   //These assumptions are valid in the Travis CI.
   //Look at the .travis.yml file and the kerberos-lxc directory to understand why.
-  //To run these tests locally:
+  //To run these tests locally (assuming a Debian machine):
   //  · Install LXC on your machine.
   //  . sudo ./kerberos-lxc/createContainer.sh
 
@@ -49,13 +49,13 @@ class AuthenticatedSpec extends FlatSpec with Matchers with ScalaFutures with Te
     //This also tests adding a principal when a principal already exists
     //TODO: test with all the options, maybe property based testing is helpful for this
     idempotent {
-      addPrincipal("-nokey", principal).run().futureValue shouldBe Right(true)
+      addPrincipal("-randkey", principal).run().futureValue shouldBe Right(true)
     }
   }
 
   "deletePrincipal" should "idempotently succeed" in {
     val principal = "test"
-    addPrincipal("-nokey", principal).run().futureValue shouldBe Right(true)
+    addPrincipal("-randkey", principal).run().futureValue shouldBe Right(true)
     //This also tests deleting a principal when there is no longer a principal
     idempotent {
       deletePrincipal(principal).run().futureValue shouldBe Right(true)
@@ -66,7 +66,7 @@ class AuthenticatedSpec extends FlatSpec with Matchers with ScalaFutures with Te
     val principal = "test"
     deletePrincipal(principal).run().futureValue shouldBe Right(true)
     testNoSuchPrincipal {
-      modifyPrincipal("-nokey", principal)
+      modifyPrincipal("-randkey", principal)
     }
   }
   it should "idempotently succeed" in {
@@ -74,7 +74,7 @@ class AuthenticatedSpec extends FlatSpec with Matchers with ScalaFutures with Te
     addPrincipal("-nokey", principal).run().futureValue shouldBe Right(true)
     //TODO: test with all the options, maybe property based testing is helpful for this
     idempotent {
-      modifyPrincipal("-nokey", principal).run().futureValue shouldBe Right(true)
+      modifyPrincipal("-randkey", principal).run().futureValue shouldBe Right(true)
     }
   }
 
@@ -87,21 +87,21 @@ class AuthenticatedSpec extends FlatSpec with Matchers with ScalaFutures with Te
   }
   it should "return PasswordTooShort when the password is too short" in {
     val principal = "test"
-    addPrincipal("-nokey", principal).run().futureValue shouldBe Right(true)
+    addPrincipal("-randkey", principal).run().futureValue shouldBe Right(true)
     idempotent {
       changePassword(principal, "p$1").run().futureValue shouldBe Left(PasswordTooShort)
     }
   }
   it should "return PasswordWithoutEnoughCharacterClasses when the password does not have enough character classes" in {
     val principal = "test"
-    addPrincipal("-nokey", principal).run().futureValue shouldBe Right(true)
+    addPrincipal("-randkey", principal).run().futureValue shouldBe Right(true)
     idempotent {
       changePassword(principal, "super big password with only text").run().futureValue shouldBe Left(PasswordTooShort)
     }
   }
   it should "idempotently succeed" in {
     val principal = "test"
-    addPrincipal("-nokey", principal).run().futureValue shouldBe Right(true)
+    addPrincipal("-randkey", principal).run().futureValue shouldBe Right(true)
     //This will fail if the principal policy does not allow password reuses
     val password = "big passwords have @least 20 characters"
     idempotent {

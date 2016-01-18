@@ -29,11 +29,10 @@ class LackOfPrivilegesSpec extends WordSpec with Matchers with ScalaFutures with
   "An Expect" when {
     "the authenticating principal does not have sufficient permissions" should {
       val principal = "kadmin/admin"
-      val options = "-nokey"
 
       "fail while adding a principal" in {
         testInsufficientPermission("add") {
-          addPrincipal(options, principal)
+          addPrincipal("", "random")
         }
       }
 
@@ -45,7 +44,7 @@ class LackOfPrivilegesSpec extends WordSpec with Matchers with ScalaFutures with
 
       "fail while modifying a principal" in {
         testInsufficientPermission("modify") {
-          modifyPrincipal(options, principal)
+          modifyPrincipal("-nokey", principal)
         }
       }
 

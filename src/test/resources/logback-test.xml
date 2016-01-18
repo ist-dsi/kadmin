@@ -11,7 +11,7 @@
             <!-- With Colors -->
             <!-- <pattern>[%date] %logger%n %highlight([%-5level][%logger{0}] %message) %n%xException</pattern> -->
             <!-- Without Colors -->
-            <pattern>[%-5level][%date][%logger]%n %message%n%xException</pattern>
+            <pattern>[%-5level][%date][%logger{0}]%n %message%n%xException</pattern>
         </encoder>
     </appender>
 

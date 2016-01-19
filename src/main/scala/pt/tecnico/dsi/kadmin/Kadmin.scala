@@ -321,8 +321,6 @@ class Kadmin(val settings: Settings = new Settings()) extends LazyLogging {
           .returning(Right(true))
         .addWhen(principalDoesNotExist)
           //This is what makes this operation idempotent
-          //Scala-expect will only return the last returning action, so the Right(true) will be returned
-          //and not the Left(NoSuchPrincipal)
           .returning(Right(true))
         .addWhen(insufficientPermission("delete"))
         .addWhen(unknownError)
@@ -695,7 +693,7 @@ class Kadmin(val settings: Settings = new Settings()) extends LazyLogging {
   //def withPolicy[R](policy: String)(f: ExpectBlock[Either[ErrorCase, R]] => Unit): Expect[Either[ErrorCase, R]] =
 
   private def insufficientPermission[R](privilege: String)(expectBlock: ExpectBlock[Either[ErrorCase, R]]) = {
-    expectBlock.when("Operation requires ``" + privilege + "'' privilege")
+    expectBlock.when(s"Operation requires ``$privilege'' privilege")
       .returning(Left(InsufficientPermissions(privilege)))
   }
   private def principalDoesNotExist[R](expectBlock: ExpectBlock[Either[ErrorCase, R]]) = {
@@ -713,7 +711,7 @@ class Kadmin(val settings: Settings = new Settings()) extends LazyLogging {
   private def unknownError[R](expectBlock: ExpectBlock[Either[ErrorCase, R]]) = {
     //By using a regex (even if it is greedy) we might not see the entire error output
     //Would using "(.+)$".r work?
-    expectBlock.when("(.+)".r)
+    expectBlock.when("(.+)$".r)
       .returning{ m: Match =>
         Left(UnknownError(Some(m.group(1))))
       }

@@ -1,13 +1,11 @@
 package pt.tecnico.dsi.kadmin
 
-import java.util.concurrent.Executors
-
 import com.typesafe.config.ConfigFactory
 import org.scalatest.concurrent.ScalaFutures
 import org.scalatest.time.{Seconds, Span}
 import org.scalatest.{FlatSpec, Matchers}
 import squants.time.TimeConversions._
-import scala.concurrent.ExecutionContext
+import scala.concurrent.ExecutionContext.Implicits.global
 
 class AuthenticatedSpec extends FlatSpec with Matchers with ScalaFutures with TestUtils {
   implicit val defaultPatience: PatienceConfig = PatienceConfig(

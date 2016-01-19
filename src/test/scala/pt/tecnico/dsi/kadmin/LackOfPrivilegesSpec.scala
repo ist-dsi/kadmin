@@ -1,13 +1,10 @@
 package pt.tecnico.dsi.kadmin
 
-import java.util.concurrent.Executors
-
 import com.typesafe.config.ConfigFactory
 import org.scalatest.concurrent.ScalaFutures
 import org.scalatest.time.{Seconds, Span}
 import org.scalatest.{WordSpec, Matchers}
-
-import scala.concurrent.ExecutionContext
+import scala.concurrent.ExecutionContext.Implicits.global
 
 class LackOfPrivilegesSpec extends WordSpec with Matchers with ScalaFutures with TestUtils {
   implicit val defaultPatience = PatienceConfig(
@@ -30,7 +27,7 @@ class LackOfPrivilegesSpec extends WordSpec with Matchers with ScalaFutures with
   val kerberos = new Kadmin(authenticatedConfig.resolve())
   import kerberos._
 
-  println(kerberos.settings)
+  //println(kerberos.settings)
 
   "An Expect" when {
     "the authenticating principal does not have sufficient permissions" should {

@@ -19,7 +19,6 @@ import scala.util.matching.Regex.Match
   *  This operation is idempotent, that is, if this method is invoked twice for the same principal
   *  it will be successful in both invocations. This means that this operation can be repeated or retried as
   *  often as necessary without causing unintended effects.
-  *
   * @define startedWithDoOperation
   *  Kadmin will be started with the `doOperation` method, that is, it will perform
   *  authentication as specified in the configuration.
@@ -102,7 +101,6 @@ class Kadmin(val settings: Settings = new Settings()) extends LazyLogging {
     *       .sendln(s"getprinc fullPrincipal")
     *   }
     * }}}
-    *
     * @param f the kerberos administration operation to perform.
     * @tparam R the type for the Right of the Either returned by the Expect.
     * @return an Expect that performs the authentication, the operation `f` and then quits kadmin.
@@ -149,7 +147,6 @@ class Kadmin(val settings: Settings = new Settings()) extends LazyLogging {
     *       .sendln(s"getprinc fullPrincipal")
     *   }
     * }}}
-    *
     * @param f the kerberos administration operation to perform.
     * @tparam R the type for the Right of the Either returned by the Expect.
     * @return an Expect that performs the operation `f` and then quits kadmin.
@@ -181,7 +178,6 @@ class Kadmin(val settings: Settings = new Settings()) extends LazyLogging {
     *       .sendln(s"getprinc fullPrincipal")
     *   }
     * }}}
-    *
     * @param f the kerberos administration operation to perform.
     * @tparam R the type for the Right of the Either returned by the Expect.
     * @return an Expect that performs the operation `f` and then quits kadmin.
@@ -222,6 +218,7 @@ class Kadmin(val settings: Settings = new Settings()) extends LazyLogging {
         .when(s"""Principal "$fullPrincipal" added.""")
           .returning(Right(true))
         .when("Principal or policy already exists")
+          //If options contains -randkey, -pw, -e we must remove them or throw an error.
           .returningExpect(modifyPrincipal(options, principal))
           //Is modifying the existing principal the best approach?
           //Would deleting the existing principal and create a new one be a better one?
@@ -230,7 +227,7 @@ class Kadmin(val settings: Settings = new Settings()) extends LazyLogging {
           //But we would partially lose the restraint that prohibits the reuse of the password.
           //
           //By modifying we could run into troubles if -randkey or -pw is used.
-        .addWhen(insufficientPermission("add"))
+        .addWhen(insufficientPermission)
         .addWhen(unknownError)
     }
   }
@@ -254,6 +251,7 @@ class Kadmin(val settings: Settings = new Settings()) extends LazyLogging {
     *
     * This operation is NOT idempotent, since multiple invocations lead to the keytab file being append
     * with the same tickets but with diferent keys.
+    *
     * @param principal
     * @return
     */
@@ -266,8 +264,7 @@ class Kadmin(val settings: Settings = new Settings()) extends LazyLogging {
       e.expect
         .when("Entry for principal (.*?) added to keytab".r)
         .returning(Right(true))
-        .addWhen(insufficientPermission("inquire"))
-        .addWhen(insufficientPermission("changepw"))
+        .addWhen(insufficientPermission)
         .addWhen(unknownError)
     }
   }
@@ -322,7 +319,7 @@ class Kadmin(val settings: Settings = new Settings()) extends LazyLogging {
         .addWhen(principalDoesNotExist)
           //This is what makes this operation idempotent
           .returning(Right(true))
-        .addWhen(insufficientPermission("delete"))
+        .addWhen(insufficientPermission)
         .addWhen(unknownError)
     }
   }
@@ -372,7 +369,7 @@ class Kadmin(val settings: Settings = new Settings()) extends LazyLogging {
             //Its all good. We can continue.
           .addWhen(principalDoesNotExist)
             .addActions(preemptiveExit)
-          .addWhen(insufficientPermission("modify"))
+          .addWhen(insufficientPermission)
             .addActions(preemptiveExit)
           .addWhen(unknownError)
             .addActions(preemptiveExit)
@@ -386,7 +383,7 @@ class Kadmin(val settings: Settings = new Settings()) extends LazyLogging {
         //We just need to check for these cases when the policy was not cleared. Because in the case the policy
         //was cleared these cases will already have been caught.
         w.addWhen(principalDoesNotExist)
-          .addWhen(insufficientPermission("modify"))
+          .addWhen(insufficientPermission)
           .addWhen(unknownError)
       }
     }
@@ -485,7 +482,6 @@ class Kadmin(val settings: Settings = new Settings()) extends LazyLogging {
     *         //m.group(1) will contain the maximum ticket life.
     *       }
     * }}}
-    *
     * @param principal the principal to get the attributes.
     * @param f the operation to perform upon the principal attributes.
     * @tparam R the type for the Right of the Either returned by the Expect.
@@ -499,7 +495,7 @@ class Kadmin(val settings: Settings = new Settings()) extends LazyLogging {
       e.expect
         .addWhen(principalDoesNotExist)
           .addActions(preemptiveExit)
-        .addWhen(insufficientPermission("inquire"))
+        .addWhen(insufficientPermission)
           .addActions(preemptiveExit)
         .addWhens(f)
     }
@@ -647,7 +643,7 @@ class Kadmin(val settings: Settings = new Settings()) extends LazyLogging {
         .when("Cannot reuse password")
           .returning(Left(PasswordIsBeingReused))
         .addWhen(principalDoesNotExist)
-        .addWhen(insufficientPermission("changepw"))
+        .addWhen(insufficientPermission)
         .addWhen(unknownError)
     }
   }
@@ -692,9 +688,11 @@ class Kadmin(val settings: Settings = new Settings()) extends LazyLogging {
   //def deletePolicy(policy: String): Expect[Either[ErrorCase, Boolean]] =
   //def withPolicy[R](policy: String)(f: ExpectBlock[Either[ErrorCase, R]] => Unit): Expect[Either[ErrorCase, R]] =
 
-  private def insufficientPermission[R](privilege: String)(expectBlock: ExpectBlock[Either[ErrorCase, R]]) = {
-    expectBlock.when(s"Operation requires ``$privilege'' privilege")
-      .returning(Left(InsufficientPermissions(privilege)))
+  private def insufficientPermission[R](expectBlock: ExpectBlock[Either[ErrorCase, R]]) = {
+    expectBlock.when("""Operation requires ``(\w+)'' privilege""".r)
+      .returning { m: Match =>
+        Left(InsufficientPermissions(m.group(1)))
+      }
   }
   private def principalDoesNotExist[R](expectBlock: ExpectBlock[Either[ErrorCase, R]]) = {
     expectBlock.when("Principal does not exist")
@@ -710,7 +708,7 @@ class Kadmin(val settings: Settings = new Settings()) extends LazyLogging {
   }
   private def unknownError[R](expectBlock: ExpectBlock[Either[ErrorCase, R]]) = {
     expectBlock.when(s"(?m)(^.+$$)+\n$kadminPrompt".r)
-      .returning{ m: Match =>
+      .returning { m: Match =>
         Left(UnknownError(Some(m.group(1))))
       }
   }

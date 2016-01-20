@@ -5,7 +5,7 @@ import org.joda.time.format.DateTimeFormat
 import squants.time.Time
 
 trait ExpirationDateTime {
-  protected val format = DateTimeFormat.forPattern("\"yyyy-MM-dd HH:mm:ss zzz\"")
+  protected val format = DateTimeFormat.forPattern("yyyy-MM-dd HH:mm:ss zzz")
   val toKadminRepresentation: String
 }
 

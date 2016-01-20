@@ -412,7 +412,7 @@ class Kadmin(val settings: Settings = new Settings()) extends LazyLogging {
     */
   def expirePrincipal(principal: String, expirationDateTime: ExpirationDateTime = Now()): Expect[Either[ErrorCase, Boolean]] = {
     val dateTimeString = expirationDateTime.toKadminRepresentation
-    modifyPrincipal(s"-expire $dateTimeString", principal)
+    modifyPrincipal(s"""-expire $dateTimeString"""", principal)
   }
 
   /**
@@ -443,7 +443,7 @@ class Kadmin(val settings: Settings = new Settings()) extends LazyLogging {
   def expirePrincipalPassword(principal: String, datetime: ExpirationDateTime = Now(),
                               force: Boolean = false): Expect[Either[ErrorCase, Boolean]] = {
     val dateTimeString = datetime.toKadminRepresentation
-    modifyPrincipal(s"${if (force) "-clearpolicy"} -pwexpire $dateTimeString", principal)
+    modifyPrincipal(s"""${if (force) "-clearpolicy"} -pwexpire "$dateTimeString"""", principal)
     // Sometimes there isn't the need to clear the policy. This is true when `date` lies ahead of how soon the
     // password can expire according to the policy. We could avoid the clear policy in two different ways:
     // First alternative:
@@ -591,7 +591,7 @@ class Kadmin(val settings: Settings = new Settings()) extends LazyLogging {
       //MMM = three letter month of the year, eg: English: Feb, Portuguese: Fev
       //zzz = the timezone
       val parts = trimmedDateString.split("""\s+""")
-      require(parts.size < 6, "Not enough fields in `dateTimeString` for format \"EEE MMM dd HH:mm:ss zzz yyyy\".")
+      require(parts.size < 6, s"""Not enough fields in "$dateTimeString" for format "EEE MMM dd HH:mm:ss zzz yyyy".""")
 
       //Discards any field after the year
       val Array(dayOfWeek, month, day, time, timezone, year, _*) = parts

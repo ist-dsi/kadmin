@@ -689,7 +689,7 @@ class Kadmin(val settings: Settings = new Settings()) extends LazyLogging {
   //def withPolicy[R](policy: String)(f: ExpectBlock[Either[ErrorCase, R]] => Unit): Expect[Either[ErrorCase, R]] =
 
   private def insufficientPermission[R](expectBlock: ExpectBlock[Either[ErrorCase, R]]) = {
-    expectBlock.when("""Operation requires ``(\w+)'' privilege""".r)
+    expectBlock.when("""Operation requires ``([^']+)'' privilege""".r)
       .returning { m: Match =>
         Left(InsufficientPermissions(m.group(1)))
       }

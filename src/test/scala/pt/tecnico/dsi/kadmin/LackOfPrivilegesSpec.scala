@@ -46,19 +46,19 @@ class LackOfPrivilegesSpec extends WordSpec with Matchers with ScalaFutures with
       }
 
       "fail while modifying a principal" in {
-        testInsufficientPermission("modify") {
+        testInsufficientPermission("get") {
           modifyPrincipal("", principal)
         }
       }
 
       "fail while changing a principal password" in {
-        testInsufficientPermission("changepw") {
+        testInsufficientPermission("change-password") {
           changePassword(principal, "a super shiny new pa$$w0rd")
         }
       }
 
       "fail while getting a principal" in {
-        testInsufficientPermission("inquire") {
+        testInsufficientPermission("get") {
           withPrincipal[Boolean](principal) { e =>
             //Purposefully left empty
           }

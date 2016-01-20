@@ -125,6 +125,7 @@ class AuthenticatedSpec extends FlatSpec with Matchers with ScalaFutures with Te
   "expirePrincipal and getExpirationDate" should "idempotently succeed" in {
     //expirePrincipal uses internally the modifyPrincipal so we do not test for NoSuchPrincipal nor lack of privilege
     val principal = "test"
+    addPrincipal("-randkey", principal).run().futureValue shouldBe Right(true)
     val expireDateTime: AbsoluteDateTime = 2.hours.toAbsolute
     idempotent {
       expirePrincipal(principal, expireDateTime).run().futureValue shouldBe Right(true)
@@ -135,6 +136,7 @@ class AuthenticatedSpec extends FlatSpec with Matchers with ScalaFutures with Te
   "expirePrincipalPassword and getPasswordExpirationDate" should "idempotently succeed" in {
     //expirePrincipal uses internally the modifyPrincipal so we do not test for NoSuchPrincipal nor lack of privilege
     val principal = "test"
+    addPrincipal("-randkey", principal).run().futureValue shouldBe Right(true)
     val expireDateTime: AbsoluteDateTime = 2.hours.toAbsolute
     idempotent {
       expirePrincipalPassword(principal, expireDateTime).run().futureValue shouldBe Right(true)

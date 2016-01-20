@@ -323,7 +323,7 @@ class Kadmin(val settings: Settings = new Settings()) extends LazyLogging {
           //This is what makes this operation idempotent
           .returning(Right(true))
         .addWhen(insufficientPermission("delete"))
-        //.addWhen(unknownError)
+        .addWhen(unknownError)
     }
   }
 
@@ -709,7 +709,7 @@ class Kadmin(val settings: Settings = new Settings()) extends LazyLogging {
       .returning(Left(PasswordIncorrect))
   }
   private def unknownError[R](expectBlock: ExpectBlock[Either[ErrorCase, R]]) = {
-    expectBlock.when("(.+)$".r)
+    expectBlock.when(s"(?m)(^.+$$)+\n$kadminPrompt".r)
       .returning{ m: Match =>
         Left(UnknownError(Some(m.group(1))))
       }

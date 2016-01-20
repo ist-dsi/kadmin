@@ -215,7 +215,7 @@ class Kadmin(val settings: Settings = new Settings()) extends LazyLogging {
       e.expect(kadminPrompt)
         .sendln(s"add_principal $options $fullPrincipal")
       e.expect
-        .when(s"""Principal "$fullPrincipal" added.""")
+        .when(s"""Principal "$fullPrincipal" (created|added).""".r)
           .returning(Right(true))
         .when("Principal or policy already exists")
           //If options contains -randkey, -pw, -e we must remove them or throw an error.

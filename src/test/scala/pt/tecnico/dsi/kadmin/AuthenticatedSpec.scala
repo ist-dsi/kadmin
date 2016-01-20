@@ -9,7 +9,7 @@ import scala.concurrent.ExecutionContext.Implicits.global
 
 class AuthenticatedSpec extends FlatSpec with Matchers with ScalaFutures with TestUtils {
   implicit val defaultPatience: PatienceConfig = PatienceConfig(
-    timeout = Span(1, Seconds),
+    timeout = Span(10, Seconds),
     interval = Span(2, Seconds)
   )
 

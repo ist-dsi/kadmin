@@ -412,7 +412,7 @@ class Kadmin(val settings: Settings = new Settings()) extends LazyLogging {
     */
   def expirePrincipal(principal: String, expirationDateTime: ExpirationDateTime = Now()): Expect[Either[ErrorCase, Boolean]] = {
     val dateTimeString = expirationDateTime.toKadminRepresentation
-    modifyPrincipal(s"""-expire $dateTimeString"""", principal)
+    modifyPrincipal(s"""-expire "$dateTimeString"""", principal)
   }
 
   /**

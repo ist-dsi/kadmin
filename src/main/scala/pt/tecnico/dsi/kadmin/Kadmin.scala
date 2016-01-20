@@ -66,7 +66,7 @@ class Kadmin(val settings: Settings = new Settings()) extends LazyLogging {
     e.expect
       .addWhen(passwordIncorrect)
       .addWhen(passwordExpired)
-      .addWhen(unknownError)
+      //.addWhen(unknownError)
       .when(EndOfFile)
         .returningExpect {
           val datetimeRegex = """\d\d-\d\d-\d\d\d\d \d\d:\d\d:\d\d"""
@@ -126,8 +126,8 @@ class Kadmin(val settings: Settings = new Settings()) extends LazyLogging {
         //All good. The password was correct. We can continue.
         //We need to send a newline in order for `f` to see the KadminPrompt
         .sendln("")
-      .addWhen(unknownError)
-        .addActions(preemptiveExit)
+      /*.addWhen(unknownError)
+        .addActions(preemptiveExit)*/
     e.addExpectBlock(f)
     e.expect(kadminPrompt)
       .sendln("quit")
@@ -162,8 +162,8 @@ class Kadmin(val settings: Settings = new Settings()) extends LazyLogging {
         //All good. We can continue.
         //We need to send a newline in order for `f` to see KadminPrompt
         .sendln("")
-      .addWhen(unknownError)
-        .addActions(preemptiveExit)
+      /*.addWhen(unknownError)
+        .addActions(preemptiveExit)*/
     e.addExpectBlock(f)
     e.expect(kadminPrompt)
       .sendln("quit")
@@ -231,7 +231,7 @@ class Kadmin(val settings: Settings = new Settings()) extends LazyLogging {
           //
           //By modifying we could run into troubles if -randkey or -pw is used.
         .addWhen(insufficientPermission("add"))
-        .addWhen(unknownError)
+        //.addWhen(unknownError)
     }
   }
 
@@ -268,7 +268,7 @@ class Kadmin(val settings: Settings = new Settings()) extends LazyLogging {
         .returning(Right(true))
         .addWhen(insufficientPermission("inquire"))
         .addWhen(insufficientPermission("changepw"))
-        .addWhen(unknownError)
+        //.addWhen(unknownError)
     }
   }
 
@@ -323,7 +323,7 @@ class Kadmin(val settings: Settings = new Settings()) extends LazyLogging {
           //This is what makes this operation idempotent
           .returning(Right(true))
         .addWhen(insufficientPermission("delete"))
-        .addWhen(unknownError)
+        //.addWhen(unknownError)
     }
   }
 
@@ -374,8 +374,8 @@ class Kadmin(val settings: Settings = new Settings()) extends LazyLogging {
             .addActions(preemptiveExit)
           .addWhen(insufficientPermission("modify"))
             .addActions(preemptiveExit)
-          .addWhen(unknownError)
-            .addActions(preemptiveExit)
+          /*.addWhen(unknownError)
+            .addActions(preemptiveExit)*/
       }
       e.expect(kadminPrompt)
         .sendln( s"""modify_principal $cleanedOptions $fullPrincipal""")
@@ -387,7 +387,7 @@ class Kadmin(val settings: Settings = new Settings()) extends LazyLogging {
         //was cleared these cases will already have been caught.
         w.addWhen(principalDoesNotExist)
           .addWhen(insufficientPermission("modify"))
-          .addWhen(unknownError)
+          //.addWhen(unknownError)
       }
     }
   }
@@ -639,16 +639,16 @@ class Kadmin(val settings: Settings = new Settings()) extends LazyLogging {
         .sendln(s"""change_password -pw "$newPassword" $fullPrincipal""")
       e.expect
         .when(s"""Password for "$fullPrincipal" changed.""")
-        .returning(Right(true))
+          .returning(Right(true))
         .when("Password is too short")
-        .returning(Left(PasswordTooShort))
+          .returning(Left(PasswordTooShort))
         .when("Password does not contain enough character classes")
-        .returning(Left(PasswordWithoutEnoughCharacterClasses))
+          .returning(Left(PasswordWithoutEnoughCharacterClasses))
         .when("Cannot reuse password")
-        .returning(Left(PasswordIsBeingReused))
+          .returning(Left(PasswordIsBeingReused))
         .addWhen(principalDoesNotExist)
         .addWhen(insufficientPermission("changepw"))
-        .addWhen(unknownError)
+        //.addWhen(unknownError)
     }
   }
 
@@ -709,8 +709,6 @@ class Kadmin(val settings: Settings = new Settings()) extends LazyLogging {
       .returning(Left(PasswordIncorrect))
   }
   private def unknownError[R](expectBlock: ExpectBlock[Either[ErrorCase, R]]) = {
-    //By using a regex (even if it is greedy) we might not see the entire error output
-    //Would using "(.+)$".r work?
     expectBlock.when("(.+)$".r)
       .returning{ m: Match =>
         Left(UnknownError(Some(m.group(1))))

@@ -1,13 +1,14 @@
 package pt.tecnico.dsi.kadmin
 
 import com.typesafe.config.ConfigFactory
+import com.typesafe.scalalogging.LazyLogging
 import org.scalatest.concurrent.ScalaFutures
 import org.scalatest.time.{Seconds, Span}
 import org.scalatest.{FlatSpec, Matchers}
 import squants.time.TimeConversions._
 import scala.concurrent.ExecutionContext.Implicits.global
 
-class AuthenticatedSpec extends FlatSpec with Matchers with ScalaFutures with TestUtils {
+class AuthenticatedSpec extends FlatSpec with Matchers with ScalaFutures with TestUtils with LazyLogging {
   implicit val defaultPatience: PatienceConfig = PatienceConfig(
     timeout = Span(10, Seconds),
     interval = Span(2, Seconds)
@@ -51,7 +52,10 @@ class AuthenticatedSpec extends FlatSpec with Matchers with ScalaFutures with Te
     //This also tests adding a principal when a principal already exists
     //TODO: test with all the options, maybe property based testing is helpful for this
     idempotent {
-      addPrincipal("-randkey", principal).run().futureValue shouldBe Right(true)
+      whenReady(addPrincipal("-randkey", principal).run()) { r =>
+        logger.info(s"Got $r")
+        r shouldBe Right(true)
+      }
     }
   }
 
@@ -60,7 +64,10 @@ class AuthenticatedSpec extends FlatSpec with Matchers with ScalaFutures with Te
     addPrincipal("-randkey", principal).run().futureValue shouldBe Right(true)
     //This also tests deleting a principal when there is no longer a principal
     idempotent {
-      deletePrincipal(principal).run().futureValue shouldBe Right(true)
+      whenReady(deletePrincipal(principal).run()) { r =>
+        logger.info(s"Got $r")
+        r shouldBe Right(true)
+      }
     }
   }
 

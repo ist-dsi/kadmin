@@ -32,7 +32,7 @@ trait TestUtils { self: ScalaFutures with Matchers =>
       test
     } catch {
       case e: TestFailedException =>
-        throw new TestFailedException("Operation is not idempotent", e, e.failedCodeStackDepth + 1)
+        throw new TestFailedException("Operation is not idempotent." + e.message, e, e.failedCodeStackDepth + 1)
     }
   }
 

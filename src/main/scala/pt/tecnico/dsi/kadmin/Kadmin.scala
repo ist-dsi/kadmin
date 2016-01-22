@@ -218,7 +218,8 @@ class Kadmin(val settings: Settings = new Settings()) extends LazyLogging {
         .when(s"""Principal "$fullPrincipal" (created|added).""".r)
           .returning(Right(true))
         .when("Principal or policy already exists")
-          //If options contains -randkey, -pw, -e we must remove them or throw an error.
+          //TODO: If options contains any of -randkey, -pw, -e we must invoke changePassword  to change them
+          //because kadmin is awesome </sarcasm>
           .returningExpect(modifyPrincipal(options, principal))
           //Is modifying the existing principal the best approach?
           //Would deleting the existing principal and create a new one be a better one?
@@ -328,11 +329,7 @@ class Kadmin(val settings: Settings = new Settings()) extends LazyLogging {
   /**
     * Modifies `principal` using `options`.
     *
-    * If `options` contains any of:
-    *  - `-randkey`
-    *  - `-pw ''password''`
-    *
-    * This operation won't be idempotent. Otherwise $idempotentOperation
+    * $idempotentOperation
     *
     * $startedWithDoOperation
     *
@@ -591,7 +588,7 @@ class Kadmin(val settings: Settings = new Settings()) extends LazyLogging {
       //MMM = three letter month of the year, eg: English: Feb, Portuguese: Fev
       //zzz = the timezone
       val parts = trimmedDateString.split("""\s+""")
-      require(parts.size < 6, s"""Not enough fields in "$dateTimeString" for format "EEE MMM dd HH:mm:ss zzz yyyy".""")
+      require(parts.size >= 6, s"""Not enough fields in "$trimmedDateString" for format "EEE MMM dd HH:mm:ss zzz yyyy".""")
 
       //Discards any field after the year
       val Array(dayOfWeek, month, day, time, timezone, year, _*) = parts
@@ -629,6 +626,7 @@ class Kadmin(val settings: Settings = new Settings()) extends LazyLogging {
     * @return an Expect that changes `principal` password.
     */
   def changePassword(principal: String, newPassword: String): Expect[Either[ErrorCase, Boolean]] = {
+    //TODO: handle -randkey, -pw and -e. Right now we are just handling -pw
     val fullPrincipal = getFullPrincipalName(principal)
     doOperation { e =>
       e.expect(kadminPrompt)

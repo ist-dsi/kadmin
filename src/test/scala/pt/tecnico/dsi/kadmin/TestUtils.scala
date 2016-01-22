@@ -36,6 +36,29 @@ trait TestUtils { self: ScalaFutures with Matchers =>
     }
   }
 
+  def idempotent2[T](expectedResult: T, repetitions: Int = 3)(test: => T): Unit = {
+    require(repetitions >= 2, "To test for idempotency at least 2 repetitions must be made")
+    //If this fails we do not want to catch its exception, because failing in the first attempt means
+    //whatever is being tested in `test` is not implemented correctly. Therefore we do not want to mask
+    //the failure with a "Operation is not idempotent".
+    val firstResult = test
+    firstResult shouldBe expectedResult
+
+    //This code will only be executed if the previous test succeed.
+    //And now we want to catch the exception because if `test` fails here it means it is not idempotent.
+    val results = (1 until repetitions).map(_ => test)
+    try {
+      results.foreach(_ shouldBe expectedResult)
+    } catch {
+      case e: TestFailedException =>
+        throw new TestFailedException(s"""Operation is not idempotent. Results:
+                                         |$firstResult
+                                         |${results.mkString("\n")}
+                                         |${e.message}""".stripMargin,
+          e, e.failedCodeStackDepth + 1)
+    }
+  }
+
   def testNoSuchPrincipal[R](e: Expect[Either[ErrorCase, R]])(implicit patience: PatienceConfig) = idempotent {
     e.run().futureValue(patience) shouldBe Left(NoSuchPrincipal)
   }

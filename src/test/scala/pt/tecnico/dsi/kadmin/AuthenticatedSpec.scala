@@ -51,7 +51,7 @@ class AuthenticatedSpec extends FlatSpec with Matchers with ScalaFutures with Te
     deletePrincipal(principal).run().futureValue shouldBe Right(true)
     //This also tests adding a principal when a principal already exists
     //TODO: test with all the options, maybe property based testing is helpful for this
-    idempotent {
+    idempotent2 {
       whenReady(addPrincipal("-randkey", principal).run()) { r =>
         logger.info(s"Got $r")
         r shouldBe Right(true)
@@ -63,7 +63,7 @@ class AuthenticatedSpec extends FlatSpec with Matchers with ScalaFutures with Te
     val principal = "test"
     addPrincipal("-randkey", principal).run().futureValue shouldBe Right(true)
     //This also tests deleting a principal when there is no longer a principal
-    idempotent {
+    idempotent2 {
       whenReady(deletePrincipal(principal).run()) { r =>
         logger.info(s"Got $r")
         r shouldBe Right(true)

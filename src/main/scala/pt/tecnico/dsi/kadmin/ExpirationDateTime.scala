@@ -39,7 +39,7 @@ class RelativeDateTime(duration: Time) extends ExpirationDateTime {
   override def toString = s"RelativeDateTime($toKadminRepresentation)"
 }
 
-class AbsoluteDateTime(dateTime: DateTime) extends ExpirationDateTime {
+class AbsoluteDateTime(protected val dateTime: DateTime) extends ExpirationDateTime {
   val toKadminRepresentation: String  = format.print(dateTime)
 
   def canEqual(other: Any): Boolean = other.isInstanceOf[AbsoluteDateTime]

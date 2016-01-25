@@ -15,14 +15,14 @@ libraryDependencies ++= Seq(
   "com.typesafe.scala-logging" %% "scala-logging" % "3.1.0" % "test",
   "ch.qos.logback" % "logback-classic" % "1.1.3" % "test",
   //Testing
-  "org.scalatest" %% "scalatest" % "2.2.4" % "test",
+  "org.scalatest" %% "scalatest" % "2.2.6" % "test",
   //Configuration
   "com.typesafe" % "config" % "1.3.0",
   //Time and dates
-  "joda-time" % "joda-time" % "2.8.1",
+  "joda-time" % "joda-time" % "2.9.1",
   //See http://stackoverflow.com/questions/13856266/class-broken-error-with-joda-time-using-scala
   //as to why this library must be included
-  "org.joda" % "joda-convert" % "1.7",
+  "org.joda" % "joda-convert" % "1.8.1",
   "com.squants"  %% "squants"  % "0.5.3",
 
   "work.martins.simon" %% "scala-expect" % "1.8.0"

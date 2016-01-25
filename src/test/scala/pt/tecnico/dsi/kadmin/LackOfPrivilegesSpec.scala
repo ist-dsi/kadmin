@@ -1,17 +1,9 @@
 package pt.tecnico.dsi.kadmin
 
 import com.typesafe.config.ConfigFactory
-import org.scalatest.concurrent.ScalaFutures
-import org.scalatest.time.{Seconds, Span}
-import org.scalatest.{WordSpec, Matchers}
-import scala.concurrent.ExecutionContext.Implicits.global
+import org.scalatest.WordSpec
 
-class LackOfPrivilegesSpec extends WordSpec with Matchers with ScalaFutures with TestUtils {
-  implicit val defaultPatience = PatienceConfig(
-    timeout = Span(1, Seconds),
-    interval = Span(2, Seconds)
-  )
-
+class LackOfPrivilegesSpec extends WordSpec with TestUtils {
   val authenticatedConfig = ConfigFactory.parseString(s"""
     kadmin {
       perform-authentication = true

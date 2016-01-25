@@ -706,7 +706,7 @@ class Kadmin(val settings: Settings = new Settings()) extends LazyLogging {
       .returning(Left(PasswordIncorrect))
   }
   private def unknownError[R](expectBlock: ExpectBlock[Either[ErrorCase, R]]) = {
-    expectBlock.when(s"(?m)(^.+$$)+\n$kadminPrompt".r)
+    expectBlock.when(s"(?m)(^.+$$)+(?=\n$kadminPrompt)".r)
       .returning { m: Match =>
         Left(UnknownError(Some(m.group(1))))
       }

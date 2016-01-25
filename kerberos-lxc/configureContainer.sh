@@ -17,12 +17,12 @@ echo "Admin Password: $ADMIN_PASSWORD"
 
 echo -e "\nInstalling Kerberos packages"
 apt-get update
-apt-get install -y apt-utils
-apt-get install -y krb5-admin-server krb5-kdc
+apt-get install -y apt-utils krb5-admin-server krb5-kdc
 apt-get clean
 
-service krb5-admin-server stop
-service krb5-kdc stop
+systemctl stop krb5-admin-server krb5-kdc
+#service krb5-admin-server stop
+#service krb5-kdc stop
 
 echo -e "\nConfiguring Kerberos"
 
@@ -89,8 +89,9 @@ echo -e "\nAdding noPermissions principal"
 kadmin.local -q "addprinc -pw $ADMIN_PASSWORD noPermissions@$REALM"
 
 echo -e "\nEnable services at startup"
-invoke-rc.d krb5-admin-server restart
-invoke-rc.d krb5-kdc restart
+systemctl restart krb5-admin-server krb5-kdc
+#invoke-rc.d krb5-admin-server restart
+#invoke-rc.d krb5-kdc restart
 
 echo -e "\nTail /var/log/kadmin.log"
 tail -f /var/log/kadmin.log &

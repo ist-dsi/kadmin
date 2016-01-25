@@ -21,8 +21,6 @@ apt-get install -y apt-utils krb5-admin-server krb5-kdc
 apt-get clean
 
 systemctl stop krb5-admin-server krb5-kdc
-#service krb5-admin-server stop
-#service krb5-kdc stop
 
 echo -e "\nConfiguring Kerberos"
 
@@ -77,7 +75,11 @@ echo -e "\nCreating realm"
 # Super mega hack to bypass the lack of entropy inside the LXC/Travis environment
 rm -f /dev/random
 mknod /dev/random c 1 9
-kdb5_util create -r $REALM -s -P $(tr -cd '[:alnum:]' < /dev/urandom | fold -w30 | head -n1)
+MASTER_PASSWORD=$(tr -cd '[:alnum:]' < /dev/urandom | fold -w30 | head -n1)
+krb5_newrealm <<EOF
+$MASTER_PASSWORD
+$MASTER_PASSWORD
+EOF
 
 echo -e "\nAdding kadmin/admin principal"
 # Something created the kadmin/admin but because we don't know what we don't know its password.
@@ -90,14 +92,9 @@ kadmin.local -q "addprinc -pw $ADMIN_PASSWORD noPermissions@$REALM"
 
 echo -e "\nEnable services at startup"
 systemctl restart krb5-admin-server krb5-kdc
-#invoke-rc.d krb5-admin-server restart
-#invoke-rc.d krb5-kdc restart
 
-echo -e "\nTail /var/log/kadmin.log"
-tail -f /var/log/kadmin.log &
-TAIL_PID=$!
-sleep 30
-kill -2 $TAIL_PID
+echo -e "\nStatus"
+systemctl status krb5-admin-server krb5-kdc
 
 echo -e "\nContainer fully configured\n\n"
 exit

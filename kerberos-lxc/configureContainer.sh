@@ -93,6 +93,8 @@ kadmin.local -q "addprinc -pw $ADMIN_PASSWORD noPermissions@$REALM"
 echo -e "\nEnable services at startup"
 systemctl restart krb5-admin-server krb5-kdc
 
+journalctl -xn
+
 echo -e "\nStatus"
 systemctl status krb5-admin-server krb5-kdc
 

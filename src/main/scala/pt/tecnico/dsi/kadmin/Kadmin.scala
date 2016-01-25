@@ -129,6 +129,7 @@ class Kadmin(val settings: Settings = new Settings()) extends LazyLogging {
     e.addExpectBlock(f)
     e.expect(kadminPrompt)
       .sendln("quit")
+      .exit()
     e
   }
 

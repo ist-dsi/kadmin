@@ -38,6 +38,7 @@ class AuthenticatedSpec extends FlatSpec with TestUtils with LazyLogging {
   //  · Install LXC on your machine.
   //  . sudo ./kerberos-lxc/createContainer.sh
 
+/*
   "addPrincipal" should "idempotently succeed" in {
     val principal = "test"
     runExpect(deletePrincipal(principal)) shouldBe Right(true)
@@ -47,6 +48,7 @@ class AuthenticatedSpec extends FlatSpec with TestUtils with LazyLogging {
       addPrincipal("-randkey", principal)
     }(Right(true))
   }
+*/
 
   "deletePrincipal" should "idempotently succeed" in {
     val principal = "test"
@@ -57,6 +59,7 @@ class AuthenticatedSpec extends FlatSpec with TestUtils with LazyLogging {
     }(Right(true))
   }
 
+/*
   "modifyPrincipal" should "return NoSuchPrincipal when the principal does not exists" in {
     val principal = "test"
     runExpect(deletePrincipal(principal)) shouldBe Right(true)
@@ -142,4 +145,5 @@ class AuthenticatedSpec extends FlatSpec with TestUtils with LazyLogging {
       getPasswordExpirationDate(principal)
     }(Right(expireDateTime))
   }
+*/
 }

@@ -14,31 +14,19 @@ trait TestUtils extends ScalaFutures with Matchers {
   )
   def runExpect[T](e: Expect[T]): T = e.run().futureValue(computePatience(e))
 
-  /**
-    * Tests that the operation in `test` is idempotent by repeating `test` three times.
-    * If `test` fails on the second or third time a `TestFailedException` exception will
-    * be thrown stating `test` is not idempotent.
-    *
-    * @example {{{
-    *  val initialSet = Set(1, 2, 3)
-    *  idempotent {
-    *   (initialSet + 4) shouldBe Set(1, 2, 3, 4)
-    *  }
-    * }}}
-    */
   def idempotent[T](test: => Expect[T])(expectedResult: T, repetitions: Int = 3): Unit = {
     require(repetitions >= 2, "To test for idempotency at least 2 repetitions must be made")
     //If this fails we do not want to catch its exception, because failing in the first attempt means
     //whatever is being tested in `test` is not implemented correctly. Therefore we do not want to mask
     //the failure with a "Operation is not idempotent".
     val firstResult = runExpect(test)
-    firstResult shouldBe expectedResult
+    firstResult shouldEqual expectedResult
 
     //This code will only be executed if the previous test succeed.
     //And now we want to catch the exception because if `test` fails here it means it is not idempotent.
     val results = (1 until repetitions).map(_ => runExpect(test))
     try {
-      results.foreach(_ shouldBe expectedResult)
+      results.foreach(_ shouldEqual expectedResult)
     } catch {
       case e: TestFailedException =>
         throw new TestFailedException(s"""Operation is not idempotent. Results:

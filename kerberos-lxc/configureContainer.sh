@@ -49,11 +49,16 @@ cat > /etc/krb5kdc/kdc.conf<<EOF
 
 [realms]
 	$REALM = {
-		kadmind_port = 749
-		max_life = 12h 0m 0s
+		database_name = /var/lib/krb5kdc/principal
+		admin_keytab = FILE:/etc/krb5kdc/kadm5.keytab
+		acl_file = /etc/krb5kdc/kadm5.acl
+		key_stash_file = /etc/krb5kdc/stash
+		kdc_ports = 750,88
+		max_life = 10h 0m 0s
 		max_renewable_life = 7d 0h 0m 0s
-		master_key_type = aes256-cts
-		supported_enctypes = aes256-cts:normal
+		master_key_type = des3-hmac-sha1
+		supported_enctypes = aes256-cts:normal arcfour-hmac:normal des3-hmac-sha1:normal des-cbc-crc:normal des:normal des:v4 des:norealm des:onlyrealm des:afs3
+		default_principal_flags = +preauth
 	}
 
 [logging]
@@ -91,12 +96,11 @@ echo -e "\nAdding noPermissions principal"
 kadmin.local -q "addprinc -pw $ADMIN_PASSWORD noPermissions@$REALM"
 
 echo -e "\nEnable services at startup"
-systemctl restart krb5-admin-server krb5-kdc
+systemctl restart krb5-kdc
+systemctl status krb5-kdc
 
-journalctl -xn
-
-echo -e "\nStatus"
-systemctl status krb5-admin-server krb5-kdc
+systemctl restart krb5-admin-server
+systemctl status krb5-admin-server
 
 echo -e "\nContainer fully configured\n\n"
 exit

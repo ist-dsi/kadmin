@@ -81,10 +81,20 @@ echo -e "\nCreating realm"
 rm -f /dev/random
 mknod /dev/random c 1 9
 MASTER_PASSWORD=$(tr -cd '[:alnum:]' < /dev/urandom | fold -w30 | head -n1)
+# Because of debian this command also starts the krb5-kdc and krb5-admin-server services
 krb5_newrealm <<EOF
 $MASTER_PASSWORD
 $MASTER_PASSWORD
 EOF
+
+echo -e "\nTail /var/log/krb5kdc.log"
+tail -f /var/log/krb5kdc.log
+TAIL_PID=$!
+sleep 30
+kill -2 $TAIL_PID
+
+echo -e "\nService status"
+systemctl status krb5-kdc krb5-admin-server
 
 echo -e "\nAdding kadmin/admin principal"
 # Something created the kadmin/admin but because we don't know what we don't know its password.
@@ -94,13 +104,6 @@ kadmin.local -q "addprinc -pw $ADMIN_PASSWORD kadmin/admin@$REALM"
 
 echo -e "\nAdding noPermissions principal"
 kadmin.local -q "addprinc -pw $ADMIN_PASSWORD noPermissions@$REALM"
-
-echo -e "\nEnable services at startup"
-systemctl restart krb5-kdc
-systemctl status krb5-kdc
-
-systemctl restart krb5-admin-server
-systemctl status krb5-admin-server
 
 echo -e "\nContainer fully configured\n\n"
 exit

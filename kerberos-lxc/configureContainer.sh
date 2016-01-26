@@ -62,9 +62,9 @@ cat > /etc/krb5kdc/kdc.conf<<EOF
 	}
 
 [logging]
-	default = FILE:/var/log/krb5libs.log
-	kdc = FILE:/var/log/krb5kdc.log
-	admin_server = FILE:/var/log/kadmin.log
+	default = FILE:/tmp/krb5libs.log
+	kdc = FILE:/tmp/kdc.log
+	admin_server = FILE:/tmp/kadmin.log
 EOF
 echo -e "\nFinal /etc/krb5kdc/kdc.conf:"
 cat /etc/krb5kdc/kdc.conf
@@ -87,8 +87,8 @@ $MASTER_PASSWORD
 $MASTER_PASSWORD
 EOF
 
-echo -e "\nTail /var/log/krb5kdc.log"
-tail -f /var/log/krb5kdc.log
+echo -e "\nTail /tmp/kdc.log"
+tail -f /tmp/kdc.log
 TAIL_PID=$!
 sleep 30
 kill -2 $TAIL_PID

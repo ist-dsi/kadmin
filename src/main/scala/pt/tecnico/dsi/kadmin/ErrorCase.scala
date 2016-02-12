@@ -2,6 +2,7 @@ package pt.tecnico.dsi.kadmin
 
 sealed trait ErrorCase
 case object NoSuchPrincipal extends ErrorCase
+case object NoSuchPolicy extends ErrorCase
 case object PasswordIncorrect extends ErrorCase
 case object PasswordTooShort extends ErrorCase
 case object PasswordWithoutEnoughCharacterClasses extends ErrorCase

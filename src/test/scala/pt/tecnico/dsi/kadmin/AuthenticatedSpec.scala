@@ -35,8 +35,7 @@ class AuthenticatedSpec extends FlatSpec with TestUtils with LazyLogging {
   //These assumptions are valid in the Travis CI.
   //Look at the .travis.yml file and the kerberos-lxc directory to understand why.
   //To run these tests locally (assuming a Debian machine):
-  //  · Install LXC on your machine.
-  //  . sudo ./kerberos-lxc/createContainer.sh
+  //  · sudo ./kerberos-lxc/createContainer.sh
 
   "addPrincipal" should "idempotently succeed" in {
     val principal = "add"

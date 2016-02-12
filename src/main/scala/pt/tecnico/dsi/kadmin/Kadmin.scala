@@ -87,13 +87,16 @@ class Kadmin(val settings: Settings = new Settings()) extends LazyLogging {
     e
   }
 
+  //region <Generic commands>
   /**
     * Creates an Expect that performs an authenticated kadmin operation `f` and then quits kadmin.
     *
-    * Kadmin is started using the `command-with-authentication` configuration value.
+    * Kadmin is started using `command-with-authentication` configuration value.
     * The authentication is performed by sending `authenticatingPrincipalPassword` and waiting for either
     * an error message saying the password was incorrect or the kadmin prompt. If the password was incorrect Expect
     * will return a Left(IncorrectPassword).
+    *
+    * If no authentication is required use `withoutAuthentication` instead.
     *
     * @example {{{
     *   withAuthentication { e =>
@@ -136,9 +139,8 @@ class Kadmin(val settings: Settings = new Settings()) extends LazyLogging {
   /**
     * Creates an Expect that performs a kadmin operation `f` and then quits kadmin.
     *
-    * Kadmin is started using the `command-without-authentication` configuration value. It is assumed that this command
-    * starts kadmin in a way that requires no authentication (such as using kadmin.local on the
-    * master KDC).
+    * Kadmin is started using `command-without-authentication` configuration value. It is assumed that this command
+    * starts kadmin in a way that requires no authentication (such as using kadmin.local on the master KDC).
     *
     * If authentication is required use `withAuthentication` instead.
     *
@@ -190,17 +192,16 @@ class Kadmin(val settings: Settings = new Settings()) extends LazyLogging {
       withoutAuthentication(f)
     }
   }
+  //endregion
 
-
+  //region <Add/Modify commands>
   /**
     * Creates `principal` using `options`.
     *
-    * If `options` contains any of:
+    * $idempotentOperation Except if `options` contains any of:
     *  - `-randkey`
-    *  - `-pw ''password''` - this options only makes the add non-idempotent in some cases.
-    *                         See the `changePassword` method for more informations.
-    *
-    * This operation won't be idempotent. Otherwise $idempotentOperation
+    *  - `-pw ''password''`
+    *  - `-e ''enc:salt''`
     *
     * $startedWithDoOperation
     *
@@ -219,118 +220,26 @@ class Kadmin(val settings: Settings = new Settings()) extends LazyLogging {
         .when(s"""Principal "$fullPrincipal" (created|added).""".r)
           .returning(Right(true))
         .when("Principal or policy already exists")
-          //TODO: If options contains any of -randkey, -pw, -e we must invoke changePassword  to change them
-          //because kadmin is awesome </sarcasm>
           .returningExpect(modifyPrincipal(options, principal))
           //Is modifying the existing principal the best approach?
           //Would deleting the existing principal and create a new one be a better one?
-          //
-          //By deleting we will be losing the password history. Which would make the add idempotent when using the -pw option.
-          //But we would partially lose the restraint that prohibits the reuse of the password.
-          //
-          //By modifying we could run into troubles if -randkey or -pw is used.
+          //  · By deleting we will be losing the password history. Which would make the add idempotent when using the
+          //    change password options (-pw, -e and -randkey). But we would partially lose the restraint that prohibits
+          //    the reuse of the password.
+          //  · By modifying we run into troubles when using the change password options (-pw, -e or -randkey).
+          //TODO: would invoking changePassword for these options solve the problem?
         .addWhen(insufficientPermission)
         .addWhen(unknownError)
     }
   }
-
-
-  protected def getKeytabFile(principal: String): File = {
-    val principalWithoutRealm = if (principal.contains("@")) {
-      principal.substring(0, principal.indexOf("@"))
-    } else {
-      principal
-    }
-    val cleanedPrincipal = if (principalWithoutRealm.contains("/")) {
-      principalWithoutRealm.replaceAll("/", ".")
-    } else {
-      principalWithoutRealm
-    }
-    new File(keytabsLocation, s"$cleanedPrincipal.keytab")
-  }
-
-  /**
-    *
-    * This operation is NOT idempotent, since multiple invocations lead to the keytab file being append
-    * with the same tickets but with diferent keys.
-    *
-    * @param principal
-    * @return
-    */
-  def createKeytab(principal: String): Expect[Either[ErrorCase, Boolean]] = {
-    val fullPrincipal = getFullPrincipalName(principal)
-    val keytabPath = getKeytabFile(principal).getAbsolutePath
-    doOperation{ e =>
-      e.expect(kadminPrompt)
-        .sendln(s"ktadd -keytab $keytabPath $fullPrincipal")
-      e.expect
-        .when("Entry for principal (.*?) added to keytab".r)
-        .returning(Right(true))
-        .addWhen(insufficientPermission)
-        .addWhen(unknownError)
-    }
-  }
-
-  /**
-    * Obtains a keytab for the given principal.
-    * If the principal does not have a keytab or the keytab exists but it isn't readable by the current user a None
-    * will be returned.
-    *
-    * A keytab for a principal can be created with: {{{
-    *   addPrincipal("-randkey", principal)
-    * }}}
-    *
-    * @param principal the principal to obtain the keytab.
-    */
-  def obtainKeytab(principal: String): Option[Array[Byte]] = {
-    val f = getKeytabFile(principal)
-    if (f.canRead) {
-      Some(Files.readAllBytes(f.toPath))
-    } else {
-      if (f.exists() == false) {
-        logger.info(s"""Keytab file "${f.getAbsolutePath}" doesn't exist.""")
-      } else if (f.canRead == false) {
-        val currentUser = System.getProperty("user.name")
-        logger.info(s"""User "$currentUser" has insufficient permissions to read the keytab file "${f.getAbsolutePath}".""")
-        //Should we return an error (eg. inside an Either) if the file exists but we do not have permissions to read it?
-      }
-      None
-    }
-  }
-
-
-  /**
-    * Deletes `principal`.
-    *
-    * $idempotentOperation
-    *
-    * $startedWithDoOperation
-    *
-    * @param principal the principal to delete.
-    * @return an Expect that deletes `principal`.
-    */
-  def deletePrincipal(principal: String): Expect[Either[ErrorCase, Boolean]] = {
-    val fullPrincipal = getFullPrincipalName(principal)
-    doOperation { e =>
-      e.expect(kadminPrompt)
-        //With the -force option this command no longer prompts for deletion.
-        .sendln(s"delete_principal -force $fullPrincipal")
-      e.expect
-        .when(s"""Principal "$fullPrincipal" deleted.""")
-          .returning(Right(true))
-        .addWhen(principalDoesNotExist)
-          //This is what makes this operation idempotent
-          .returning(Right(true))
-        .addWhen(insufficientPermission)
-        .addWhen(unknownError)
-    }
-  }
-
 
   /**
     * Modifies `principal` using `options`.
     *
-    * $idempotentOperation
+    * $idempotentOperation Except if `options` contains any of:
+    *  - `-randkey`
+    *  - `-pw ''password''`
+    *  - `-e ''enc:salt''`
     *
     * $startedWithDoOperation
     *
@@ -357,7 +266,7 @@ class Kadmin(val settings: Settings = new Settings()) extends LazyLogging {
         e.expect(kadminPrompt)
           .sendln(s"modify_principal -clearpolicy $fullPrincipal")
         e.expect
-          .when( s"""Principal "$fullPrincipal" modified.""")
+          .when(s"""Principal "$fullPrincipal" modified.""")
             //Its all good. We can continue.
           .when("User modification failed: No such attribute")
             //This happens when the principal already has no policy. (This error happens in kadmin.local)
@@ -373,7 +282,7 @@ class Kadmin(val settings: Settings = new Settings()) extends LazyLogging {
             .addActions(preemptiveExit)
       }
       e.expect(kadminPrompt)
-        .sendln( s"""modify_principal $cleanedOptions $fullPrincipal""")
+        .sendln(s"""modify_principal $cleanedOptions $fullPrincipal""")
       val w = e.expect
         .when(s"""Principal "$fullPrincipal" modified.""")
           .returning(Right(true))
@@ -421,14 +330,15 @@ class Kadmin(val settings: Settings = new Settings()) extends LazyLogging {
     *
     * To guarantee that the date will actually change it is necessary to clear the principal policy. This can be
     * achieved by invoking this method with `force` set to true. If you do so, then it is your responsibility to
-    * change, at a later time, the policy back to the intended one.
+    * change, at a later time, the policy back to the intended one. However bear in mind that doing so might cause the
+    * expiration date to revert back to the one defined by the policy.
     *
     * WARNING when this method is invoked with `force` set to false and the password expiration date does not change
     * (due to the policy) `getPasswordExpirationDate` will return the original date (the one set by the policy).
-    * However if the policy is cleared and then `getPasswordExpirationDate` is invoked again, the obtained datetime
+    * However if the policy is cleared and `getPasswordExpirationDate` is invoked again, the obtained datetime
     * will be the one set by this method. This caveat comes from the kadmin utility and not from this library.
     *
-    * Due to its caveats this method should only be used for debugging applications where the fact that the principal
+    * Due to its caveats this method SHOULD ONLY BE USED FOR DEBUGGING applications where the fact that the principal
     * password is about to expire or has expired changes the behavior of the application.
     *
     * $startedWithDoOperation
@@ -461,9 +371,146 @@ class Kadmin(val settings: Settings = new Settings()) extends LazyLogging {
     // should only be used for debugging purposes.
   }
 
+  /**
+    * Changes the `principal` password to `newPassword` and/or sets its key to a random value
+    * and/or sets its salt to `salt`.
+    *
+    * In some cases this operation might not be idempotent. For example: if the policy assigned to `principal`
+    * does not allow the same password to be reused, the first time the password is changed it will be successful,
+    * however on the second time it will fail with an ErrorCase `PasswordIsBeingReused`.
+    *
+    * $startedWithDoOperation
+    *
+    * @param principal the principal to change the password.
+    * @param newPassword the new password
+    * @return an Expect that changes `principal` password.
+    */
+  def changePassword(principal: String, newPassword: Option[String] = None,
+                     randKey: Boolean = false, salt: Option[String] = None): Expect[Either[ErrorCase, Boolean]] = {
+    require(newPassword.nonEmpty || randKey || salt.nonEmpty,
+      "At least one of newPassword, randKey or salt must be defined " +
+      "(be a Some, for newPassword and salt. Or set to true, for the randKey).")
+
+    val newPasswordOption = newPassword.map(p => s"""-pw "$p"""").getOrElse("")
+    val randKeyOption = if (randKey) "-randkey" else ""
+    val saltOption = salt.map(s => s"""-e "$s"""").getOrElse("")
+    val options = Seq(newPasswordOption, randKeyOption, saltOption).mkString(" ")
+
+    val fullPrincipal = getFullPrincipalName(principal)
+    doOperation { e =>
+      e.expect(kadminPrompt)
+        .sendln(s"""change_password $options $fullPrincipal""")
+      e.expect
+        .when(s"""Password for "$fullPrincipal" changed.""")
+          .returning(Right(true))
+        .when("Password is too short")
+          .returning(Left(PasswordTooShort))
+        .when("Password does not contain enough character classes")
+          .returning(Left(PasswordWithoutEnoughCharacterClasses))
+        .when("Cannot reuse password")
+          .returning(Left(PasswordIsBeingReused))
+        .addWhen(principalDoesNotExist)
+        .addWhen(insufficientPermission)
+        .addWhen(unknownError)
+    }
+  }
+  //endregion
+
+  //region <Keytab commands>
+  /**
+    * @return The File for the `principal` keytab.
+    */
+  protected def getKeytabFile(principal: String): File = {
+    val principalWithoutRealm = if (principal.contains("@")) {
+      principal.substring(0, principal.indexOf("@"))
+    } else {
+      principal
+    }
+    val cleanedPrincipal = if (principalWithoutRealm.contains("/")) {
+      principalWithoutRealm.replaceAll("/", ".")
+    } else {
+      principalWithoutRealm
+    }
+    new File(keytabsLocation, s"$cleanedPrincipal.keytab")
+  }
 
   /**
-    * Performs the operation `f` over the output returned by "getprinc principal".
+    * Creates a keytab for the given `principal`. The keytab can then be obtained with the `obtainKeytab` method.
+    *
+    * This operation is NOT idempotent, since multiple invocations lead to the keytab file being appended
+    * with the same tickets but with different keys.
+    *
+    * @param principal
+    * @return an Expect that creates the keytab for `principal`.
+    */
+  def createKeytab(principal: String): Expect[Either[ErrorCase, Boolean]] = {
+    val fullPrincipal = getFullPrincipalName(principal)
+    val keytabPath = getKeytabFile(principal).getAbsolutePath
+    doOperation{ e =>
+      e.expect(kadminPrompt)
+        .sendln(s"ktadd -keytab $keytabPath $fullPrincipal")
+      e.expect
+        .when("Entry for principal (.*?) added to keytab".r)
+          .returning(Right(true))
+        .addWhen(insufficientPermission)
+        .addWhen(unknownError)
+    }
+  }
+
+  /**
+    * Obtains a keytab for the given `principal`.
+    * If the principal does not have a keytab or the keytab exists but it isn't readable by the current user a None
+    * will be returned.
+    *
+    * @param principal the principal to obtain the keytab.
+    */
+  def obtainKeytab(principal: String): Option[Array[Byte]] = {
+    val f = getKeytabFile(principal)
+    if (f.canRead) {
+      Some(Files.readAllBytes(f.toPath))
+    } else {
+      if (f.exists() == false) {
+        logger.info(s"""Keytab file "${f.getAbsolutePath}" doesn't exist.""")
+      } else if (f.canRead == false) {
+        val currentUser = System.getProperty("user.name")
+        logger.info(s"""User "$currentUser" has insufficient permissions to read the keytab file "${f.getAbsolutePath}".""")
+        //Should we return an error (eg. inside an Either) if the file exists but we do not have permissions to read it?
+      }
+      None
+    }
+  }
+  //endregion
+
+  /**
+    * Deletes `principal`.
+    *
+    * $idempotentOperation
+    *
+    * $startedWithDoOperation
+    *
+    * @param principal the principal to delete.
+    * @return an Expect that deletes `principal`.
+    */
+  def deletePrincipal(principal: String): Expect[Either[ErrorCase, Boolean]] = {
+    val fullPrincipal = getFullPrincipalName(principal)
+    doOperation { e =>
+      e.expect(kadminPrompt)
+        //With the -force option this command no longer prompts for deletion.
+        .sendln(s"delete_principal -force $fullPrincipal")
+      e.expect
+        .when(s"""Principal "$fullPrincipal" deleted.""")
+          .returning(Right(true))
+        .addWhen(principalDoesNotExist)
+          //This is what makes this operation idempotent
+          .returning(Right(true))
+        .addWhen(insufficientPermission)
+        .addWhen(unknownError)
+    }
+  }
+
+  //region <Get/Read commands>
+  /**
+    * Performs the operation `f` over the output returned by "get_principal principal".
     * This is useful to read the principal attributes.
     *
     * $startedWithDoOperation
@@ -489,7 +536,7 @@ class Kadmin(val settings: Settings = new Settings()) extends LazyLogging {
     val fullPrincipal = getFullPrincipalName(principal)
     doOperation { e =>
       e.expect(kadminPrompt)
-        .sendln(s"getprinc $fullPrincipal")
+        .sendln(s"get_principal $fullPrincipal")
       e.expect
         .addWhen(principalDoesNotExist)
           .addActions(preemptiveExit)
@@ -612,41 +659,6 @@ class Kadmin(val settings: Settings = new Settings()) extends LazyLogging {
       new AbsoluteDateTime(fmt.parseDateTime(s"$dayOfWeek $month $day $time $year"))
   }
 
-
-  /**
-    * Changes the `principal` password to `newPassword`.
-    *
-    * In some cases this operation might not be idempotent. For example: if the policy assigned to `principal`
-    * does not allow the same password to be reused, the first time this operation is executed it will be successful,
-    * however on the second time it will fail with an ErrorCase `PasswordIsBeingReused`.
-    *
-    * $startedWithDoOperation
-    *
-    * @param principal the principal to change the password.
-    * @param newPassword the new password
-    * @return an Expect that changes `principal` password.
-    */
-  def changePassword(principal: String, newPassword: String): Expect[Either[ErrorCase, Boolean]] = {
-    //TODO: handle -randkey, -pw and -e. Right now we are just handling -pw
-    val fullPrincipal = getFullPrincipalName(principal)
-    doOperation { e =>
-      e.expect(kadminPrompt)
-        .sendln(s"""change_password -pw "$newPassword" $fullPrincipal""")
-      e.expect
-        .when(s"""Password for "$fullPrincipal" changed.""")
-          .returning(Right(true))
-        .when("Password is too short")
-          .returning(Left(PasswordTooShort))
-        .when("Password does not contain enough character classes")
-          .returning(Left(PasswordWithoutEnoughCharacterClasses))
-        .when("Cannot reuse password")
-          .returning(Left(PasswordIsBeingReused))
-        .addWhen(principalDoesNotExist)
-        .addWhen(insufficientPermission)
-        .addWhen(unknownError)
-    }
-  }
-
   /**
     * Checks if the password of `principal` is `password`.
     *
@@ -680,12 +692,116 @@ class Kadmin(val settings: Settings = new Settings()) extends LazyLogging {
       .addWhen(passwordExpired)
     e
   }
+  //endregion
 
-  //TODO: policy commands
-  //def addPolicy(options: String, policy: String): Expect[Either[ErrorCase, Boolean]] =
-  //def modifyPolicy(options: String, policy: String): Expect[Either[ErrorCase, Boolean]] =
-  //def deletePolicy(policy: String): Expect[Either[ErrorCase, Boolean]] =
-  //def withPolicy[R](policy: String)(f: ExpectBlock[Either[ErrorCase, R]] => Unit): Expect[Either[ErrorCase, R]] =
+  //region <Policy commands>
+  /**
+    * Creates `policy` using `options`.
+    *
+    * $idempotentOperation
+    *
+    * $startedWithDoOperation
+    *
+    * @param policy the policy to create.
+    * @param options the parameters to pass to the kadmin `add_policy` operation.
+    * See [[http://web.mit.edu/kerberos/krb5-devel/doc/admin/admin_commands/kadmin_local.html#add-policy Add
+    * Policy (MIT Kerberos)]] for a full list. The parameters are not checked for validity.
+    * @return an Expect that creates `policy`.
+    */
+  def addPolicy(options: String, policy: String): Expect[Either[ErrorCase, Boolean]] = {
+    doOperation { e =>
+      e.expect(kadminPrompt)
+        .sendln(s"add_policy $options $policy")
+      e.expect
+        .when(s"""Policy "$policy" (created|added).""".r)
+          .returning(Right(true))
+        .when("Principal or policy already exists")
+          .returningExpect(modifyPolicy(options, policy))
+        .addWhen(insufficientPermission)
+        .addWhen(unknownError)
+    }
+  }
+  /**
+    * Modifies `policy` using `options`.
+    *
+    * $idempotentOperation
+    *
+    * $startedWithDoOperation
+    *
+    * @param policy the principal to policy.
+    * @param options the parameters to pass to the kadmin `modify_policy` operation.
+    * See [[http://web.mit.edu/kerberos/krb5-devel/doc/admin/admin_commands/kadmin_local.html#modify-policy Modify
+    * policy (MIT Kerberos)]] for a full list. The parameters are not checked for validity.
+    * @return an Expect that modifies `policy`.
+    */
+  def modifyPolicy(options: String, policy: String): Expect[Either[ErrorCase, Boolean]] = {
+    doOperation { e =>
+      e.expect(kadminPrompt)
+        .sendln(s"modify_policy $options $policy")
+      e.expect
+        .when(s"""Policy "$policy" modified.""")
+          .returning(Right(true))
+        .addWhen(policyDoesNotExist)
+        .addWhen(insufficientPermission)
+        .addWhen(unknownError)
+    }
+  }
+  /**
+    * Deletes `policy`.
+    *
+    * $idempotentOperation
+    *
+    * $startedWithDoOperation
+    *
+    * @param policy the policy to delete.
+    * @return an Expect that deletes `policy`.
+    */
+  def deletePolicy(policy: String): Expect[Either[ErrorCase, Boolean]] = {
+    doOperation { e =>
+      e.expect(kadminPrompt)
+        //With the -force option this command no longer prompts for deletion.
+        .sendln(s"delete_policy -force $policy")
+      e.expect
+        .when(s"""Policy "$policy" deleted.""")
+          .returning(Right(true))
+        .addWhen(policyDoesNotExist)
+          //This is what makes this operation idempotent
+          .returning(Right(true))
+        .addWhen(insufficientPermission)
+        .addWhen(unknownError)
+    }
+  }
+  /**
+    * Performs the operation `f` over the output returned by "get_policy policy".
+    * This is useful to read the policy attributes.
+    *
+    * $startedWithDoOperation
+    *
+    * @example {{{
+    *   withPolicy(policy){ expectBlock =>
+    *     expectBlock.when("Minimum password length: (\d+)\n".r)
+    *       .returning{ m: Match =>
+    *         //m.group(1) will contain the minimum password length.
+    *       }
+    * }}}
+    * @param policy the policy to get the attributes.
+    * @param f the operation to perform upon the policy attributes.
+    * @tparam R the type for the Right of the Either returned by the Expect.
+    * @return an Expect that lists the `policy` attributes, performs the operation `f` and then quits kadmin.
+    */
+  def withPolicy[R](policy: String)(f: ExpectBlock[Either[ErrorCase, R]] => Unit): Expect[Either[ErrorCase, R]] = {
+    doOperation { e =>
+      e.expect(kadminPrompt)
+        .sendln(s"get_policy $policy")
+      e.expect
+        .addWhen(policyDoesNotExist)
+          .addActions(preemptiveExit)
+        .addWhen(insufficientPermission)
+          .addActions(preemptiveExit)
+        .addWhens(f)
+    }
+  }
+  //endregion
 
   private def insufficientPermission[R](expectBlock: ExpectBlock[Either[ErrorCase, R]]) = {
     expectBlock.when("""Operation requires ``([^']+)'' privilege""".r)
@@ -696,6 +812,10 @@ class Kadmin(val settings: Settings = new Settings()) extends LazyLogging {
   private def principalDoesNotExist[R](expectBlock: ExpectBlock[Either[ErrorCase, R]]) = {
     expectBlock.when("Principal does not exist")
       .returning(Left(NoSuchPrincipal))
+  }
+  private def policyDoesNotExist[R](expectBlock: ExpectBlock[Either[ErrorCase, R]]) = {
+    expectBlock.when("No such entry in the database")
+      .returning(Left(NoSuchPolicy))
   }
   private def passwordIncorrect[R](expectBlock: ExpectBlock[Either[ErrorCase, R]]) = {
     expectBlock.when("Password incorrect")
@@ -712,7 +832,7 @@ class Kadmin(val settings: Settings = new Settings()) extends LazyLogging {
       }
   }
 
-  private def preemptiveExit[R]: When[Either[ErrorCase, R]] => Unit = { when =>
+  private def preemptiveExit[R](when: When[Either[ErrorCase, R]]): Unit = {
     when
       //We send the quit to allow kadmin a graceful shutdown
       .sendln("quit")

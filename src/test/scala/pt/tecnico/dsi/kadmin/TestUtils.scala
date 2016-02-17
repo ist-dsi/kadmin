@@ -30,8 +30,10 @@ trait TestUtils extends ScalaFutures with Matchers {
     } catch {
       case e: TestFailedException =>
         throw new TestFailedException(s"""Operation is not idempotent. Results:
-                                         |$firstResult
-                                         |${results.mkString("\n")}
+                                         |  1st:
+                                         |    $firstResult
+                                         |  Rest:
+                                         |    ${results.mkString("\n    ")}
                                          |${e.message}""".stripMargin,
           e, e.failedCodeStackDepth + 1)
     }

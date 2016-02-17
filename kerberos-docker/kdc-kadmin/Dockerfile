@@ -1,0 +1,10 @@
+FROM debian:stable
+MAINTAINER Simão Martins "simao.martins@tecnico.ulisboa.pt
+
+RUN apt-get -y update && \
+  DEBIAN_FRONTEND=noninteractive apt-get install -y krb5-kdc krb5-admin-server && \
+  apt-get clean
+
+COPY ./init-script.sh /tmp/
+RUN chmod a+x /tmp/init-script.sh
+CMD /tmp/init-script.sh

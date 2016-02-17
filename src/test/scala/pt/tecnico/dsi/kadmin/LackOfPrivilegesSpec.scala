@@ -27,7 +27,7 @@ class LackOfPrivilegesSpec extends WordSpec with TestUtils {
 
       "fail while adding a principal" in {
         testInsufficientPermission("add") {
-          addPrincipal(options = "-randkey", principal = "random")
+          addPrincipal(options = "-nokey", principal = "random")
         }
       }
 

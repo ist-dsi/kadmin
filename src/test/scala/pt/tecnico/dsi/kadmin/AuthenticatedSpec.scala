@@ -43,13 +43,13 @@ class AuthenticatedSpec extends FlatSpec with TestUtils with LazyLogging {
     //This also tests adding a principal when a principal already exists
     //TODO: test with all the options, maybe property based testing is helpful for this
     idempotent {
-      addPrincipal("-randkey", principal)
+      addPrincipal("-nokey", principal)
     }(Right(true))
   }
 
   "deletePrincipal" should "idempotently succeed" in {
     val principal = "delete"
-    runExpect(addPrincipal("-randkey", principal)) shouldBe Right(true)
+    runExpect(addPrincipal("-nokey", principal)) shouldBe Right(true)
     //This also tests deleting a principal when there is no longer a principal
     idempotent {
       deletePrincipal(principal)
@@ -61,7 +61,7 @@ class AuthenticatedSpec extends FlatSpec with TestUtils with LazyLogging {
     val principal = "modifyNoSuchPrincipal"
     runExpect(deletePrincipal(principal)) shouldBe Right(true)
     testNoSuchPrincipal {
-      modifyPrincipal("-randkey", principal)
+      modifyPrincipal("-nokey", principal)
     }
   }
   it should "idempotently succeed" in {
@@ -69,7 +69,7 @@ class AuthenticatedSpec extends FlatSpec with TestUtils with LazyLogging {
     runExpect(addPrincipal("-nokey", principal)) shouldBe Right(true)
     //TODO: test with all the options, maybe property based testing is helpful for this
     idempotent {
-      modifyPrincipal("-randkey", principal)
+      modifyPrincipal("-nokey", principal)
     }(Right(true))
   }
 
@@ -82,21 +82,21 @@ class AuthenticatedSpec extends FlatSpec with TestUtils with LazyLogging {
   }
   it should "return PasswordTooShort when the password is too short" in {
     val principal = "changePasswordPasswordTooShort"
-    runExpect(addPrincipal("-randkey", principal)) shouldBe Right(true)
+    runExpect(addPrincipal("-nokey", principal)) shouldBe Right(true)
     idempotent {
       changePassword(principal, "p$1")
     }(Left(PasswordTooShort))
   }
   it should "return PasswordWithoutEnoughCharacterClasses when the password does not have enough character classes" in {
     val principal = "changePasswordNotEnoughClasses"
-    runExpect(addPrincipal("-randkey", principal)) shouldBe Right(true)
+    runExpect(addPrincipal("-nokey", principal)) shouldBe Right(true)
     idempotent {
       changePassword(principal, "super big password with only text")
     }(Left(PasswordTooShort))
   }
   it should "idempotently succeed" in {
     val principal = "changePassword"
-    runExpect(addPrincipal("-randkey", principal)) shouldBe Right(true)
+    runExpect(addPrincipal("-nokey", principal)) shouldBe Right(true)
     //This will fail if the principal policy does not allow password reuses
     val password = "big passwords have @least 20 characters"
     idempotent {
@@ -120,7 +120,7 @@ class AuthenticatedSpec extends FlatSpec with TestUtils with LazyLogging {
   "expirePrincipal and getExpirationDate" should "idempotently succeed" in {
     //expirePrincipal uses internally the modifyPrincipal so we do not test for NoSuchPrincipal nor lack of privilege
     val principal = "expire"
-    runExpect(addPrincipal("-randkey", principal)) shouldBe Right(true)
+    runExpect(addPrincipal("-nokey", principal)) shouldBe Right(true)
     val expireDateTime: AbsoluteDateTime = 2.hours.toAbsolute
     idempotent {
       expirePrincipal(principal, expireDateTime)
@@ -133,7 +133,7 @@ class AuthenticatedSpec extends FlatSpec with TestUtils with LazyLogging {
   "expirePrincipalPassword and getPasswordExpirationDate" should "idempotently succeed" in {
     //expirePrincipal uses internally the modifyPrincipal so we do not test for NoSuchPrincipal nor lack of privilege
     val principal = "expirePassword"
-    runExpect(addPrincipal("-randkey", principal)) shouldBe Right(true)
+    runExpect(addPrincipal("-nokey", principal)) shouldBe Right(true)
     val expireDateTime: AbsoluteDateTime = 2.hours.toAbsolute
     idempotent {
       expirePrincipalPassword (principal, expireDateTime)

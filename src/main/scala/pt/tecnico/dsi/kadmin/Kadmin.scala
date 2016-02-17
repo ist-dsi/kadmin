@@ -252,7 +252,10 @@ class Kadmin(val settings: Settings = new Settings()) extends LazyLogging {
   def modifyPrincipal(options: String, principal: String): Expect[Either[ErrorCase, Boolean]] = {
     val fullPrincipal = getFullPrincipalName(principal)
     val clearPolicy = options.contains("-clearpolicy")
-    val cleanedOptions = if (clearPolicy) options.replaceAll("-clearpolicy", "") else options
+    val cleanedOptions = options
+      .replaceAll("-clearpolicy", "")
+      //Contrary to what is stated in the documentation the option -nokey is not valid in modify.
+      .replaceAll("""-nokey\b""", "")
 
     doOperation { e =>
       if (clearPolicy) {
@@ -826,7 +829,8 @@ class Kadmin(val settings: Settings = new Settings()) extends LazyLogging {
       .returning(Left(PasswordIncorrect))
   }
   private def unknownError[R](expectBlock: ExpectBlock[Either[ErrorCase, R]]) = {
-    expectBlock.when(s"(?m)(^.+$$)+(?=\n$kadminPrompt)".r)
+    //Regex flags: s = dotall mode. In this mode . matches any character, including a line terminator.
+    expectBlock.when(s"(?s)(.+?)(?=\n$kadminPrompt)".r)
       .returning { m: Match =>
         Left(UnknownError(Some(m.group(1))))
       }

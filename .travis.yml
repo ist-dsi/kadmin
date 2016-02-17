@@ -21,7 +21,7 @@ services:
 #- sudo ./kerberos-lxc/createContainer.sh
 
 script:
-  - docker-compose up
+  - cd kerberos-docker; docker-compose up
 
 notifications:
   slack:

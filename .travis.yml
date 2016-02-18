@@ -17,7 +17,8 @@ services:
 
 # We cannot cache sbt dependencies because we need sudo to use lxc
  
-#before_install:
+before_install:
+ - sudo apt-get update
 #- sudo ./kerberos-lxc/createContainer.sh
 
 script:

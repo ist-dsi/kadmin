@@ -1,55 +1,61 @@
 package pt.tecnico.dsi.kadmin
 
+import com.typesafe.scalalogging.LazyLogging
 import org.joda.time.DateTime
 import org.joda.time.format.DateTimeFormat
 import squants.time.Time
 
-trait ExpirationDateTime {
-  protected val format = DateTimeFormat.forPattern("yyyy-MM-dd HH:mm:ss zzz")
-  val toKadminRepresentation: String
+trait ExpirationDateTime extends Equals {
+  protected def dateTime: DateTime
+
+  private val format = DateTimeFormat.forPattern("yyyy-MM-dd HH:mm:ss zzz")
+  val toKadminRepresentation: String = format.print(dateTime)
+
+  override def equals(other: Any): Boolean = other match {
+    case that: ExpirationDateTime => (that canEqual this) &&
+      //Expiration dates in kadmin have a resolution to the second, so we zero the millis
+      //to give the comparison a change to succeed.
+      dateTime.withMillisOfSecond(0).equals(that.dateTime.withMillisOfSecond(0))
+    case _ => false
+  }
+  override def hashCode(): Int = {
+    val state = Seq(dateTime)
+    state.map(_.hashCode()).foldLeft(0)((a, b) => 31 * a + b)
+  }
 }
 
 case class Now() extends ExpirationDateTime {
-  private val dateTime = DateTime.now()
-  //By using this instead of "now" we make the operations that use Now idempotent.
-  val toKadminRepresentation: String  = format.print(dateTime)
+  protected val dateTime = DateTime.now()
   val toAbsolute = new AbsoluteDateTime(dateTime)
+
+  //By NOT overriding the toKadminRepresentation method its value will be the dateTime.
+  //We could have override it and used "now" instead, but by not using it we make the operations that use Now idempotent.
+
   override def toString = s"Now($toKadminRepresentation)"
+
+  def canEqual(that: Any): Boolean = that.isInstanceOf[Now]
+  //We want to ignore the dateTime in the comparison
+  override def equals(other: Any): Boolean = canEqual(other)
 }
 
 object Never extends ExpirationDateTime {
-  val toKadminRepresentation: String = "never"
+  protected def dateTime = throw new IllegalArgumentException("Never has no dateTime")
+  override val toKadminRepresentation: String = "never"
   override def toString = s"Never()"
+
+  def canEqual(other: Any): Boolean = other.isInstanceOf[Never.type]
+  override def hashCode(): Int = toString.hashCode
 }
 
 class RelativeDateTime(duration: Time) extends ExpirationDateTime {
-  private val dateTime = new DateTime(DateTime.now().getMillis + duration.millis)
-  val toKadminRepresentation: String  = format.print(dateTime)
+  protected val dateTime = new DateTime(DateTime.now().getMillis + duration.millis)
   val toAbsolute = new AbsoluteDateTime(dateTime)
 
   def canEqual(other: Any): Boolean = other.isInstanceOf[RelativeDateTime]
-  override def equals(other: Any): Boolean = other match {
-    case that: RelativeDateTime => (that canEqual this) && dateTime == that.dateTime
-    case _ => false
-  }
-  override def hashCode(): Int = {
-    val state = Seq(dateTime)
-    state.map(_.hashCode()).foldLeft(0)((a, b) => 31 * a + b)
-  }
   override def toString = s"RelativeDateTime($toKadminRepresentation)"
 }
 
-class AbsoluteDateTime(protected val dateTime: DateTime) extends ExpirationDateTime {
-  val toKadminRepresentation: String  = format.print(dateTime)
-
+class AbsoluteDateTime(val dateTime: DateTime) extends ExpirationDateTime with LazyLogging {
   def canEqual(other: Any): Boolean = other.isInstanceOf[AbsoluteDateTime]
-  override def equals(other: Any): Boolean = other match {
-    case that: AbsoluteDateTime => (that canEqual this) && dateTime.equals(that.dateTime)
-    case _ => false
-  }
-  override def hashCode(): Int = {
-    val state = Seq(dateTime)
-    state.map(_.hashCode()).foldLeft(0)((a, b) => 31 * a + b)
-  }
   override def toString = s"AbsoluteDateTime($toKadminRepresentation)"
 }

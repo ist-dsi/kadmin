@@ -354,7 +354,7 @@ class Kadmin(val settings: Settings = new Settings()) extends LazyLogging {
   def expirePrincipalPassword(principal: String, datetime: ExpirationDateTime = Now(),
                               force: Boolean = false): Expect[Either[ErrorCase, Boolean]] = {
     val dateTimeString = datetime.toKadminRepresentation
-    modifyPrincipal(s"""${if (force) "-clearpolicy"} -pwexpire "$dateTimeString"""", principal)
+    modifyPrincipal(s"""${if (force) "-clearpolicy " else ""}-pwexpire "$dateTimeString"""", principal)
     // Sometimes there isn't the need to clear the policy. This is true when `date` lies ahead of how soon the
     // password can expire according to the policy. We could avoid the clear policy in two different ways:
     // First alternative:
@@ -659,7 +659,8 @@ class Kadmin(val settings: Settings = new Settings()) extends LazyLogging {
         //mostly likely is locale specific.
         .withLocale(Locale.getDefault)
 
-      new AbsoluteDateTime(fmt.parseDateTime(s"$dayOfWeek $month $day $time $year"))
+      val dateTime = fmt.parseDateTime(s"$dayOfWeek $month $day $time $year")
+      new AbsoluteDateTime(dateTime)
   }
 
   /**

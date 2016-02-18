@@ -2,6 +2,7 @@ package pt.tecnico.dsi.kadmin
 
 import com.typesafe.config.ConfigFactory
 import com.typesafe.scalalogging.LazyLogging
+import org.joda.time.DateTimeZone
 import org.scalatest.FlatSpec
 import squants.time.TimeConversions._
 
@@ -56,7 +57,7 @@ class AuthenticatedSpec extends FlatSpec with TestUtils with LazyLogging {
     }(Right(true))
   }
 
-/*
+
   "modifyPrincipal" should "return NoSuchPrincipal when the principal does not exists" in {
     val principal = "modifyNoSuchPrincipal"
     runExpect(deletePrincipal(principal)) shouldBe Right(true)
@@ -73,7 +74,7 @@ class AuthenticatedSpec extends FlatSpec with TestUtils with LazyLogging {
     }(Right(true))
   }
 
-  "changePassword" should "return NoSuchPrincipal when the principal does not exists" in {
+  /*"changePassword" should "return NoSuchPrincipal when the principal does not exists" in {
     val principal = "changePasswordNoSuchPrincipal"
     runExpect(deletePrincipal(principal)) shouldBe Right(true)
     testNoSuchPrincipal {
@@ -105,7 +106,7 @@ class AuthenticatedSpec extends FlatSpec with TestUtils with LazyLogging {
     idempotent {
       checkPassword(principal, password)
     }(Right(true))
-  }
+  }*/
 
   "getPrincipal" should "return NoSuchPrincipal when the principal does not exists" in {
     val principal = "get"
@@ -117,30 +118,32 @@ class AuthenticatedSpec extends FlatSpec with TestUtils with LazyLogging {
     }
   }
 
+  val expireDateTime = 2.hours.toAbsolute
+  val utcExpireDateTime = new AbsoluteDateTime(expireDateTime.dateTime.withZone(DateTimeZone.forID("UTC")))
   "expirePrincipal and getExpirationDate" should "idempotently succeed" in {
     //expirePrincipal uses internally the modifyPrincipal so we do not test for NoSuchPrincipal nor lack of privilege
     val principal = "expire"
     runExpect(addPrincipal("-nokey", principal)) shouldBe Right(true)
-    val expireDateTime: AbsoluteDateTime = 2.hours.toAbsolute
+
     idempotent {
       expirePrincipal(principal, expireDateTime)
     }(Right(true))
+
     idempotent {
       getExpirationDate(principal)
-    }(Right(expireDateTime))
+    }(Right(utcExpireDateTime))
   }
-
   "expirePrincipalPassword and getPasswordExpirationDate" should "idempotently succeed" in {
     //expirePrincipal uses internally the modifyPrincipal so we do not test for NoSuchPrincipal nor lack of privilege
-    val principal = "expirePassword"
+    val principal = "expire"
     runExpect(addPrincipal("-nokey", principal)) shouldBe Right(true)
-    val expireDateTime: AbsoluteDateTime = 2.hours.toAbsolute
+
     idempotent {
-      expirePrincipalPassword (principal, expireDateTime)
+      expirePrincipalPassword(principal, expireDateTime)
     }(Right(true))
+
     idempotent {
       getPasswordExpirationDate(principal)
-    }(Right(expireDateTime))
+    }(Right(utcExpireDateTime))
   }
-*/
 }

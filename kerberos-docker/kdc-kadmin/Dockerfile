@@ -1,7 +1,7 @@
 FROM debian:stable
 MAINTAINER Simão Martins "simao.martins@tecnico.ulisboa.pt
 
-RUN apt-get -y update && \
+RUN apt-get -qq -y update && \
   DEBIAN_FRONTEND=noninteractive apt-get install -y krb5-kdc krb5-admin-server && \
   apt-get clean
 

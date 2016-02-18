@@ -1,26 +1,12 @@
 package pt.tecnico.dsi.kadmin
 
-import com.typesafe.config.ConfigFactory
 import org.scalatest.WordSpec
 
 /**
   * $assumptions
   */
 class LackOfPrivilegesSpec extends WordSpec with TestUtils {
-  val authenticatedConfig = ConfigFactory.parseString(s"""
-    kadmin {
-      perform-authentication = true
-
-      realm = "EXAMPLE.COM"
-
-      authenticating-principal = "noPermissions"
-      authenticating-principal-password = "MITiys4K5"
-
-      command-with-authentication = "kadmin -p "$${kadmin.authenticating-principal}"@"$${kadmin.realm}
-    }""")
-
-  val kerberos = new Kadmin(authenticatedConfig.resolve())
-  import kerberos._
+  import unAuthenticatedKadmin._
 
   //println(kerberos.settings)
 

@@ -6,24 +6,13 @@ import org.joda.time.DateTimeZone
 import org.scalatest.FlatSpec
 import squants.time.TimeConversions._
 
+import scala.util.matching.Regex.Match
+
 /**
   * $assumptions
   */
 class AuthenticatedSpec extends FlatSpec with TestUtils with LazyLogging {
-  val authenticatedConfig = ConfigFactory.parseString(s"""
-    kadmin {
-      perform-authentication = true
-
-      realm = "EXAMPLE.COM"
-
-      authenticating-principal = "kadmin/admin"
-      authenticating-principal-password = "MITiys4K5"
-
-      command-with-authentication = "kadmin -p "$${kadmin.authenticating-principal}"@"$${kadmin.realm}
-    }""")
-
-  val kerberos = new Kadmin(authenticatedConfig.resolve())
-  import kerberos._
+  import authenticatedKadmin._
 
   //println(kerberos.settings)
 
@@ -58,8 +47,15 @@ class AuthenticatedSpec extends FlatSpec with TestUtils with LazyLogging {
     runExpect(addPrincipal("-nokey", principal)) shouldBe Right(true)
     //TODO: test with all the options, maybe property based testing is helpful for this
     idempotent {
-      modifyPrincipal("+allow_forwardable", principal)
+      modifyPrincipal("-allow_forwardable", principal)
     }(Right(true))
+
+    runExpect(withPrincipal[Boolean](principal){ expectBlock =>
+      expectBlock.when("""Attributes: ([^\n]+)\n""".r)
+        .returning { m: Match =>
+          Right(m.group(1).contains("DISALLOW_FORWARDABLE"))
+        }
+    }) shouldBe Right(true)
   }
 
   "getPrincipal" should "return NoSuchPrincipal when the principal does not exists" in {

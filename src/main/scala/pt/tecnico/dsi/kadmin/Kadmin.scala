@@ -525,7 +525,7 @@ class Kadmin(val settings: Settings = new Settings()) extends LazyLogging {
     *
     * @example {{{
     *   withPrincipal(principal){ expectBlock =>
-    *     expectBlock.when("Maximum ticket life: ([^\n]+)\n".r)
+    *     expectBlock.when("""Maximum ticket life: ([^\n]+)\n""".r)
     *       .returning{ m: Match =>
     *         //m.group(1) will contain the maximum ticket life.
     *       }
@@ -783,7 +783,7 @@ class Kadmin(val settings: Settings = new Settings()) extends LazyLogging {
     *
     * @example {{{
     *   withPolicy(policy){ expectBlock =>
-    *     expectBlock.when("Minimum password length: (\d+)\n".r)
+    *     expectBlock.when("""Minimum password length: (\d+)\n""".r)
     *       .returning{ m: Match =>
     *         //m.group(1) will contain the minimum password length.
     *       }

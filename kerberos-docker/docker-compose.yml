@@ -13,7 +13,7 @@ services:
   kerberos-client:
     build: ./kerberos-client
     env_file: kerberos.env
-    #links:
-    #  - kdc-kadmin
-    #volumes:
-    #  - ../:/tmp/kadmin/
+    links:
+      - kdc-kadmin
+    volumes:
+      - ../:/tmp/kadmin/

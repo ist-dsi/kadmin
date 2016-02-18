@@ -16,7 +16,7 @@ echo "Admin Password: $ADMIN_PASSWORD"
 # with very small modifications.
 
 echo -e "\nInstalling Kerberos packages"
-apt-get update
+apt-get -qq update
 apt-get install -y apt-utils krb5-admin-server krb5-kdc
 apt-get clean
 

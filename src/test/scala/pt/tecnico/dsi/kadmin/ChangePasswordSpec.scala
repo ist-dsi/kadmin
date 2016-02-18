@@ -9,35 +9,8 @@ import squants.time.TimeConversions._
 /**
   * $assumptions
   */
-class ChangePasswordAndPoliciesSpec extends FlatSpec with TestUtils with LazyLogging {
-  val authenticatedConfig = ConfigFactory.parseString(s"""
-    kadmin {
-      perform-authentication = true
-
-      realm = "EXAMPLE.COM"
-
-      authenticating-principal = "kadmin/admin"
-      authenticating-principal-password = "MITiys4K5"
-
-      command-with-authentication = "kadmin -p "$${kadmin.authenticating-principal}"@"$${kadmin.realm}
-    }""")
-
-  val kerberos = new Kadmin(authenticatedConfig.resolve())
-  import kerberos._
-
-  //These tests make the following assumptions:
-  //  · The realm EXAMPLE.COM exists.
-  //  . Kerberos client is installed in the machine where the tests are being ran. And the configuration has the
-  //     realm EXAMPLE.COM.
-  //  · In EXAMPLE.COM KDC the kadm5.acl file has at least the following entries
-  //     kadmin/admin@EXAMPLE.COM  *
-  //     noPermissions@EXAMPLE.COM X
-  //  · The password for these two principals is "MITiys4K5".
-  //
-  //These assumptions are valid in the Travis CI.
-  //Look at the .travis.yml file and the kerberos-lxc directory to understand why.
-  //To run these tests locally (assuming a Debian machine):
-  //  · sudo ./kerberos-lxc/createContainer.sh
+class ChangePasswordSpec extends FlatSpec with TestUtils with LazyLogging {
+  import authenticatedKadmin._
 
   /*"changePassword" should "return NoSuchPrincipal when the principal does not exists" in {
     val principal = "changePasswordNoSuchPrincipal"

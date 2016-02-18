@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 
-apt-get update
+apt-get -qq update
 apt-get install -y -o Dpkg::Options::="--force-confold" lxc liblxc1 lxc-templates
 
 echo -e "\n\nCreating the Kerberos container"

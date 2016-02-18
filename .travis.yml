@@ -19,6 +19,7 @@ services:
  
 before_install:
  - sudo apt-get update
+ - sudo dpkg -l | grep docker
 #- sudo ./kerberos-lxc/createContainer.sh
 
 script:

@@ -498,7 +498,7 @@ class Kadmin(val settings: Settings = new Settings()) extends LazyLogging {
     val fullPrincipal = getFullPrincipalName(principal)
     doOperation { e =>
       e.expect(kadminPrompt)
-        //With the -force option this command no longer prompts for deletion.
+        //With the -force option it no longer prompts for deletion.
         .sendln(s"delete_principal -force $fullPrincipal")
       e.expect
         .when(s"""Principal "$fullPrincipal" deleted.""")
@@ -763,7 +763,7 @@ class Kadmin(val settings: Settings = new Settings()) extends LazyLogging {
   def deletePolicy(policy: String): Expect[Either[ErrorCase, Boolean]] = {
     doOperation { e =>
       e.expect(kadminPrompt)
-        //With the -force option this command no longer prompts for deletion.
+        //With the -force option it no longer prompts for deletion.
         .sendln(s"delete_policy -force $policy")
       e.expect
         .when(s"""Policy "$policy" deleted.""")
@@ -830,7 +830,7 @@ class Kadmin(val settings: Settings = new Settings()) extends LazyLogging {
       .returning(Left(PasswordIncorrect))
   }
   private def unknownError[R](expectBlock: ExpectBlock[Either[ErrorCase, R]]) = {
-    //Regex flags: s = dotall mode. In this mode . matches any character, including a line terminator.
+    //(?s) inline regex flag for dotall mode. In this mode '.' matches any character, including a line terminator.
     expectBlock.when(s"(?s)(.+?)(?=\n$kadminPrompt)".r)
       .returning { m: Match =>
         Left(UnknownError(Some(m.group(1))))

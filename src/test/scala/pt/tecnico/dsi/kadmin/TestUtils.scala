@@ -35,36 +35,21 @@ trait TestUtils extends ScalaFutures with Matchers {
 
       command-with-authentication = "kadmin -p "$${kadmin.authenticating-principal}"@"$${kadmin.realm}
     }""")
+  val authenticatedKadmin = new Kadmin(createConfigFor("kadmin/admin").resolve())
+  val unAuthenticatedKadmin = new Kadmin(createConfigFor("noPermissions").resolve())
 
-  val authenticatedKadmin = new Kadmin(createConfigFor("kadmin/admin"))
-  val unAuthenticatedKadmin = new Kadmin(createConfigFor("noPermissions"))
-
-  def computePatience(e: Expect[_]): PatienceConfig = PatienceConfig(
-    timeout = Span(e.settings.timeout.toSeconds + 2, Seconds),
-    interval = Span(500, Millis)
-  )
-  def runExpect[T](e: Expect[T]): T = e.run().futureValue(computePatience(e))
-
-  def policyMinimumLength(kadmin: Kadmin, policy: String): Expect[Either[ErrorCase, Int]] = {
-    kadmin.withPolicy[Int](policy) { expectBlock =>
-      expectBlock.when("""Minimum password length: (\d+)\n""".r)
-        .returning { m: Match =>
-          Right(m.group(1).toInt)
-        }
-    }
-  }
-
-  def idempotent[T](test: => Expect[T])(expectedResult: T, repetitions: Int = 3): Unit = {
+  def idempotent[T](test: Expect[T])(expectedResult: T): Unit = idempotent[T]()(test)(expectedResult)
+  def idempotent[T](repetitions: Int = 3)(test: Expect[T])(expectedResult: T): Unit = {
     require(repetitions >= 2, "To test for idempotency at least 2 repetitions must be made")
     //If this fails we do not want to catch its exception, because failing in the first attempt means
     //whatever is being tested in `test` is not implemented correctly. Therefore we do not want to mask
     //the failure with a "Operation is not idempotent".
-    val firstResult = runExpect(test)
+    val firstResult = test.value
     firstResult shouldEqual expectedResult
 
     //This code will only be executed if the previous test succeed.
     //And now we want to catch the exception because if `test` fails here it means it is not idempotent.
-    val results = (1 until repetitions).map(_ => runExpect(test))
+    val results = (1 until repetitions).map(_ => test.value)
     try {
       results.foreach(_ shouldEqual expectedResult)
     } catch {
@@ -76,6 +61,22 @@ trait TestUtils extends ScalaFutures with Matchers {
                                          |    ${results.mkString("\n    ")}
                                          |${e.message}""".stripMargin,
           e, e.failedCodeStackDepth + 1)
+    }
+  }
+  implicit class RichExpect[T](expect: Expect[T]) {
+    def shouldIdempotentlyReturn(expectedResult: T): Unit = idempotent[T](expect)(expectedResult)
+    def value: T = expect.run().futureValue(new PatienceConfig(
+      timeout = Span(expect.settings.timeout.toSeconds + 2, Seconds),
+      interval = Span(500, Millis)
+    ))
+  }
+
+  def policyMinimumLength(kadmin: Kadmin, policy: String): Expect[Either[ErrorCase, Int]] = {
+    kadmin.withPolicy[Int](policy) { expectBlock =>
+      expectBlock.when("""Minimum password length: (\d+)\n""".r)
+        .returning { m: Match =>
+          Right(m.group(1).toInt)
+        }
     }
   }
 

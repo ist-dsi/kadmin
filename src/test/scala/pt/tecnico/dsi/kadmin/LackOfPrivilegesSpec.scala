@@ -8,8 +8,6 @@ import org.scalatest.WordSpec
 class LackOfPrivilegesSpec extends WordSpec with TestUtils {
   import unAuthenticatedKadmin._
 
-  //println(kerberos.settings)
-
   "An Expect" when {
     "the authenticating principal does not have sufficient permissions" should {
       val principal = "kadmin/admin"

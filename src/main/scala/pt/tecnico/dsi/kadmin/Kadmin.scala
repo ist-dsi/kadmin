@@ -9,7 +9,7 @@ import com.typesafe.scalalogging.LazyLogging
 import org.joda.time.{DateTimeZone, DateTime}
 import org.joda.time.format.DateTimeFormat
 import work.martins.simon.expect.EndOfFile
-import work.martins.simon.expect.fluent.{ExpectBlock, Expect, When}
+import work.martins.simon.expect.fluent.{RegexWhen, ExpectBlock, Expect, When}
 
 import scala.util.{Failure, Success, Try}
 import scala.util.matching.Regex.Match
@@ -714,15 +714,22 @@ class Kadmin(val settings: Settings = new Settings()) extends LazyLogging {
     */
   def addPolicy(options: String, policy: String): Expect[Either[ErrorCase, Boolean]] = {
     doOperation { e =>
+      val command: String = s"add_policy $options $policy"
       e.expect(kadminPrompt)
-        .sendln(s"add_policy $options $policy")
+        .sendln(command)
       e.expect
-        .when(s"""Policy "$policy" (created|added).""".r)
-          .returning(Right(true))
         .when("Principal or policy already exists")
           .returningExpect(modifyPolicy(options, policy))
         .addWhen(insufficientPermission)
         .addWhen(unknownError)
+          .returning { m: Match =>
+            val error = m.group(1)
+            if (error.trim == command) {
+              Right(true)
+            } else {
+              Left(UnknownError(Some(error)))
+            }
+          }
     }
   }
   /**
@@ -740,14 +747,21 @@ class Kadmin(val settings: Settings = new Settings()) extends LazyLogging {
     */
   def modifyPolicy(options: String, policy: String): Expect[Either[ErrorCase, Boolean]] = {
     doOperation { e =>
+      val command: String = s"modify_policy $options $policy"
       e.expect(kadminPrompt)
-        .sendln(s"modify_policy $options $policy")
+        .sendln(command)
       e.expect
-        .when(s"""Policy "$policy" modified.""")
-          .returning(Right(true))
         .addWhen(policyDoesNotExist)
         .addWhen(insufficientPermission)
         .addWhen(unknownError)
+          .returning { m: Match =>
+            val error = m.group(1)
+            if (error.trim == command) {
+              Right(true)
+            } else {
+              Left(UnknownError(Some(error)))
+            }
+          }
     }
   }
   /**
@@ -762,17 +776,24 @@ class Kadmin(val settings: Settings = new Settings()) extends LazyLogging {
     */
   def deletePolicy(policy: String): Expect[Either[ErrorCase, Boolean]] = {
     doOperation { e =>
+      val command = s"delete_policy -force $policy"
       e.expect(kadminPrompt)
         //With the -force option it no longer prompts for deletion.
-        .sendln(s"delete_policy -force $policy")
+        .sendln(command)
       e.expect
-        .when(s"""Policy "$policy" deleted.""")
-          .returning(Right(true))
         .addWhen(policyDoesNotExist)
           //This is what makes this operation idempotent
           .returning(Right(true))
         .addWhen(insufficientPermission)
         .addWhen(unknownError)
+          .returning { m: Match =>
+            val error = m.group(1)
+            if (error.trim == command) {
+              Right(true)
+            } else {
+              Left(UnknownError(Some(error)))
+            }
+          }
     }
   }
   /**
@@ -818,7 +839,7 @@ class Kadmin(val settings: Settings = new Settings()) extends LazyLogging {
       .returning(Left(NoSuchPrincipal))
   }
   private def policyDoesNotExist[R](expectBlock: ExpectBlock[Either[ErrorCase, R]]) = {
-    expectBlock.when("No such entry in the database")
+    expectBlock.when("Policy does not exist")
       .returning(Left(NoSuchPolicy))
   }
   private def passwordIncorrect[R](expectBlock: ExpectBlock[Either[ErrorCase, R]]) = {

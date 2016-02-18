@@ -6,6 +6,9 @@ import org.joda.time.DateTimeZone
 import org.scalatest.FlatSpec
 import squants.time.TimeConversions._
 
+/**
+  * $assumptions
+  */
 class AuthenticatedSpec extends FlatSpec with TestUtils with LazyLogging {
   val authenticatedConfig = ConfigFactory.parseString(s"""
     kadmin {
@@ -23,20 +26,6 @@ class AuthenticatedSpec extends FlatSpec with TestUtils with LazyLogging {
   import kerberos._
 
   //println(kerberos.settings)
-
-  //These tests make the following assumptions:
-  //  · The realm EXAMPLE.COM exists.
-  //  . Kerberos client is installed in the machine where the tests are being ran. And the configuration has the
-  //     realm EXAMPLE.COM.
-  //  · In EXAMPLE.COM KDC the kadm5.acl file has at least the following entries
-  //     kadmin/admin@EXAMPLE.COM  *
-  //     noPermissions@EXAMPLE.COM X
-  //  · The password for these two principals is "MITiys4K5".
-  //
-  //These assumptions are valid in the Travis CI.
-  //Look at the .travis.yml file and the kerberos-lxc directory to understand why.
-  //To run these tests locally (assuming a Debian machine):
-  //  · sudo ./kerberos-lxc/createContainer.sh
 
   "addPrincipal" should "idempotently succeed" in {
     val principal = "add"
@@ -57,7 +46,6 @@ class AuthenticatedSpec extends FlatSpec with TestUtils with LazyLogging {
     }(Right(true))
   }
 
-
   "modifyPrincipal" should "return NoSuchPrincipal when the principal does not exists" in {
     val principal = "modifyNoSuchPrincipal"
     runExpect(deletePrincipal(principal)) shouldBe Right(true)
@@ -70,43 +58,9 @@ class AuthenticatedSpec extends FlatSpec with TestUtils with LazyLogging {
     runExpect(addPrincipal("-nokey", principal)) shouldBe Right(true)
     //TODO: test with all the options, maybe property based testing is helpful for this
     idempotent {
-      modifyPrincipal("-nokey", principal)
+      modifyPrincipal("+allow_forwardable", principal)
     }(Right(true))
   }
-
-  /*"changePassword" should "return NoSuchPrincipal when the principal does not exists" in {
-    val principal = "changePasswordNoSuchPrincipal"
-    runExpect(deletePrincipal(principal)) shouldBe Right(true)
-    testNoSuchPrincipal {
-      changePassword(principal, "newPassword")
-    }
-  }
-  it should "return PasswordTooShort when the password is too short" in {
-    val principal = "changePasswordPasswordTooShort"
-    runExpect(addPrincipal("-nokey", principal)) shouldBe Right(true)
-    idempotent {
-      changePassword(principal, "p$1")
-    }(Left(PasswordTooShort))
-  }
-  it should "return PasswordWithoutEnoughCharacterClasses when the password does not have enough character classes" in {
-    val principal = "changePasswordNotEnoughClasses"
-    runExpect(addPrincipal("-nokey", principal)) shouldBe Right(true)
-    idempotent {
-      changePassword(principal, "super big password with only text")
-    }(Left(PasswordTooShort))
-  }
-  it should "idempotently succeed" in {
-    val principal = "changePassword"
-    runExpect(addPrincipal("-nokey", principal)) shouldBe Right(true)
-    //This will fail if the principal policy does not allow password reuses
-    val password = "big passwords have @least 20 characters"
-    idempotent {
-      changePassword(principal, password)
-    }(Right(true))
-    idempotent {
-      checkPassword(principal, password)
-    }(Right(true))
-  }*/
 
   "getPrincipal" should "return NoSuchPrincipal when the principal does not exists" in {
     val principal = "get"

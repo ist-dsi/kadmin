@@ -3,6 +3,9 @@ package pt.tecnico.dsi.kadmin
 import com.typesafe.config.ConfigFactory
 import org.scalatest.WordSpec
 
+/**
+  * $assumptions
+  */
 class LackOfPrivilegesSpec extends WordSpec with TestUtils {
   val authenticatedConfig = ConfigFactory.parseString(s"""
     kadmin {

@@ -19,12 +19,11 @@ services:
  
 before_install:
  - sudo apt-get update
- - sudo dpkg -l | grep docker
- - sudo docker-compose -v
 #- sudo ./kerberos-lxc/createContainer.sh
 
 script:
-  - cd kerberos-docker; docker-compose up
+  - cd kerberos-docker
+  - docker-compose up
 
 notifications:
   slack:

@@ -7,6 +7,20 @@ import org.scalatest.time.{Millis, Seconds, Span}
 import work.martins.simon.expect.fluent.Expect
 import scala.concurrent.ExecutionContext.Implicits.global
 
+/**
+  * @define assumptions These tests make the following assumptions:
+  *  - The realm EXAMPLE.COM exists.
+  *  - Kerberos client is installed in the machine where the tests are being ran.
+  *     And the configuration has the realm EXAMPLE.COM.
+  *  - In EXAMPLE.COM KDC the kadm5.acl file has at least the following entries
+  *     - kadmin/admin@EXAMPLE.COM  *
+  *     - noPermissions@EXAMPLE.COM X
+  *  - The password for these two principals is "MITiys4K5".
+  *
+  * These assumptions are valid when:
+  *  - Running the tests locally with docker-compose (look at the folder kerberos-docker).
+  *  - Running the tests in the Travis CI (look at .travis.yml, which makes use of the kerberos-docker).
+  */
 trait TestUtils extends ScalaFutures with Matchers {
   def computePatience(e: Expect[_]): PatienceConfig = PatienceConfig(
     timeout = Span(e.settings.timeout.toSeconds + 2, Seconds),

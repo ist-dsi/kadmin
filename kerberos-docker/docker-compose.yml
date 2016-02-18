@@ -15,5 +15,5 @@ services:
     env_file: kerberos.env
     #links:
     #  - kdc-kadmin
-    volumes:
-      - ../:/tmp/kadmin/
+    #volumes:
+    #  - ../:/tmp/kadmin/

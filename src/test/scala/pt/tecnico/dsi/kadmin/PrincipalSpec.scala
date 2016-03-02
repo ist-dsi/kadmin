@@ -1,22 +1,19 @@
 package pt.tecnico.dsi.kadmin
 
-import com.typesafe.scalalogging.LazyLogging
-import org.joda.time.DateTimeZone
 import org.scalatest.FlatSpec
-import squants.time.TimeConversions._
-
+import org.joda.time.{DateTime, DateTimeZone}
 import scala.util.matching.Regex.Match
 
 /**
   * $assumptions
   */
-class PrincipalSpec extends FlatSpec with TestUtils with LazyLogging {
+class PrincipalSpec extends FlatSpec with TestUtils {
   import authenticatedKadmin._
 
   "addPrincipal" should "idempotently succeed" in {
     val principal = "add"
     //Ensure the principal does not exist
-    deletePrincipal(principal).value shouldBe Right(true)
+    deletePrincipal(principal) shouldReturn Right(true)
 
     //Create the principal
     //This also tests adding a principal when a principal already exists
@@ -29,13 +26,13 @@ class PrincipalSpec extends FlatSpec with TestUtils with LazyLogging {
         .returning { m: Match =>
           Right(m.group(1) == getFullPrincipalName(principal))
         }
-    }.value shouldBe Right(true)
+    } shouldReturn Right(true)
   }
 
   "deletePrincipal" should "idempotently succeed" in {
     val principal = "delete"
     //Ensure the principal exists
-    addPrincipal("-nokey", principal).value shouldBe Right(true)
+    addPrincipal("-nokey", principal) shouldReturn Right(true)
 
     //Delete the principal
     //This also tests deleting a principal when there is no longer a principal
@@ -52,7 +49,7 @@ class PrincipalSpec extends FlatSpec with TestUtils with LazyLogging {
   "modifyPrincipal" should "return NoSuchPrincipal when the principal does not exists" in {
     val principal = "modifyNoSuchPrincipal"
     //Ensure the principal does not exist
-    deletePrincipal(principal).value shouldBe Right(true)
+    deletePrincipal(principal) shouldReturn Right(true)
 
     //Try to modify it
     testNoSuchPrincipal {
@@ -62,7 +59,7 @@ class PrincipalSpec extends FlatSpec with TestUtils with LazyLogging {
   it should "idempotently succeed" in {
     val principal = "modify"
     //Ensure the principal exists
-    addPrincipal("-nokey", principal).value shouldBe Right(true)
+    addPrincipal("-nokey", principal) shouldReturn Right(true)
 
     //Modify the principal
     //TODO: test with all the options, maybe property based testing is helpful for this
@@ -74,13 +71,13 @@ class PrincipalSpec extends FlatSpec with TestUtils with LazyLogging {
         .returning { m: Match =>
           Right(m.group(1).contains("DISALLOW_FORWARDABLE"))
         }
-    }.value shouldBe Right(true)
+    } shouldReturn Right(true)
   }
 
   "getPrincipal" should "return NoSuchPrincipal when the principal does not exists" in {
     val principal = "getNoSuchPrincipal"
     //Ensure the principal does not exist
-    deletePrincipal(principal).value shouldBe Right(true)
+    deletePrincipal(principal) shouldReturn Right(true)
 
     //Try to get it
     testNoSuchPrincipal {
@@ -92,7 +89,7 @@ class PrincipalSpec extends FlatSpec with TestUtils with LazyLogging {
   it should "idempotently succeed" in {
     val principal = "get"
     //Ensure the principal exists
-    addPrincipal("-nokey", principal).value shouldBe Right(true)
+    addPrincipal("-nokey", principal) shouldReturn Right(true)
 
     //Read it
     withPrincipal[Boolean](principal){ expectBlock =>
@@ -100,36 +97,35 @@ class PrincipalSpec extends FlatSpec with TestUtils with LazyLogging {
         .returning { m: Match =>
           Right(m.group(1) == getFullPrincipalName(principal))
         }
-    }.value shouldBe Right(true)
+    } shouldReturn Right(true)
   }
 
-  val expireDateTime = 2.hours.toAbsolute
-  val utcExpireDateTime = new AbsoluteDateTime(expireDateTime.dateTime.withZone(DateTimeZone.forID("UTC")))
+  val expireDateTime = new DateTime(DateTimeZone.forID("UTC")).plusHours(2)
   "expirePrincipal and getExpirationDate" should "idempotently succeed" in {
     //expirePrincipal uses internally the modifyPrincipal so we do not test for NoSuchPrincipal nor lack of privilege
-
     val principal = "expire"
+
     //Ensure the principal exists
-    addPrincipal("-nokey", principal).value shouldBe Right(true)
+    addPrincipal("-nokey", principal) shouldReturn Right(true)
 
     //Expire it
     expirePrincipal(principal, expireDateTime) shouldIdempotentlyReturn Right(true)
 
     //Ensure the expiration date changed
-    getExpirationDate(principal) shouldIdempotentlyReturn Right(utcExpireDateTime)
+    getExpirationDate(principal) shouldIdempotentlyReturn Right(expireDateTime)
   }
   "expirePrincipalPassword and getPasswordExpirationDate" should "idempotently succeed" in {
     //expirePrincipal uses internally the modifyPrincipal so we do not test for NoSuchPrincipal nor lack of privilege
-    val principal = "expire"
+    val principal = "expirePassword"
 
     //Ensure the principal exists
-    addPrincipal("-nokey", principal).value shouldBe Right(true)
+    addPrincipal("-nokey", principal) shouldReturn Right(true)
 
     //Expire the principal password
     expirePrincipalPassword(principal, expireDateTime) shouldIdempotentlyReturn Right(true)
 
     //Ensure the password expiration date changed
-    getPasswordExpirationDate(principal) shouldIdempotentlyReturn Right(utcExpireDateTime)
+    getPasswordExpirationDate(principal) shouldIdempotentlyReturn Right(expireDateTime)
   }
 
   //ChangePassword has a dedicated suite since it interlaces with policies

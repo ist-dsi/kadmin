@@ -27,6 +27,10 @@ libraryDependencies ++= Seq(
 
   "work.martins.simon" %% "scala-expect" % "1.10.2"
 )
+resolvers += Opts.resolver.sonatypeReleases
+
+autoAPIMappings := true
+scalacOptions in (Compile,doc) ++= Seq("-groups", "-implicits", "-diagrams")
 
 scalacOptions ++= Seq(
   "-deprecation",                   //Emit warning and location for usages of deprecated APIs.

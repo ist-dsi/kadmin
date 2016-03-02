@@ -443,7 +443,7 @@ class Kadmin(val settings: Settings = new Settings()) extends LazyLogging {
     * This operation is NOT idempotent, since multiple invocations lead to the keytab file being appended
     * with the same tickets but with different keys.
     *
-    * @param principal
+    * @param principal the principal for whom to create the keytab.
     * @return an Expect that creates the keytab for `principal`.
     */
   def createKeytab(principal: String): Expect[Either[ErrorCase, Boolean]] = {
@@ -542,9 +542,7 @@ class Kadmin(val settings: Settings = new Settings()) extends LazyLogging {
         .sendln(s"get_principal $fullPrincipal")
       e.expect
         .addWhen(principalDoesNotExist)
-          .addActions(preemptiveExit)
         .addWhen(insufficientPermission)
-          .addActions(preemptiveExit)
         .addWhens(f)
     }
   }
@@ -554,7 +552,7 @@ class Kadmin(val settings: Settings = new Settings()) extends LazyLogging {
     *
     * See the `parseDateTime` method to understand how the datetime is parsed.
     *
-    * The returned ExpirationDateTime will either be of type `Never` or `AbsoluteDateTime`, and never of types
+    * The returned ExpirationDateTime will either be of type `Never` or `AbsoluteDateTime`, and never of type
     * `Now` or `RelativeDateTime`.
     *
     * $idempotentOperation
@@ -583,7 +581,7 @@ class Kadmin(val settings: Settings = new Settings()) extends LazyLogging {
     *
     * See the `parseDateTime` method to understand how the datetime is parsed.
     *
-    * The returned ExpirationDateTime will either be of type `Never` or `AbsoluteDateTime`, and never of types
+    * The returned ExpirationDateTime will either be of type `Never` or `AbsoluteDateTime`, and never of type
     * `Now` or `RelativeDateTime`.
     *
     * $idempotentOperation
@@ -679,9 +677,13 @@ class Kadmin(val settings: Settings = new Settings()) extends LazyLogging {
   def checkPassword(principal: String, password: String): Expect[Either[ErrorCase, Boolean]] = {
     val fullPrincipal = getFullPrincipalName(principal)
     val defaultValue: Either[ErrorCase, Boolean] = Left(UnknownError())
-    //By setting the credential cache to /dev/null we no longer have the need to remove the generated
-    //credential (the ticket) from the cache, nor do we have to carefully manage the lifetime of the ticket.
-    val e = new Expect(s"""kinit -c /dev/null $fullPrincipal""", defaultValue)
+    //-l sets the lifetime of the obtained ticket to 1 second
+    //val e = new Expect(s"""kinit -V -l 0:00:01 $fullPrincipal""", defaultValue)
+
+    //Setting the credential cache to /dev/null would be better than setting the lifetime of the ticket to 1 second.
+    //Because this way no ticket is ever created.
+    val e = new Expect(s"""kinit -V -c /dev/null $fullPrincipal""", defaultValue)
+
     e.expect
       .when(s"Password for $fullPrincipal:")
         .sendln(password)
@@ -691,6 +693,8 @@ class Kadmin(val settings: Settings = new Settings()) extends LazyLogging {
       .when("Internal credentials cache error while storing credentials")
         //Because we set the credential cache to /dev/null kadmin fails when trying to write the ticket to the cache.
         //This means the authentication was successful and thus the password is correct.
+        .returning(Right(true))
+      .when("Authenticated to Kerberos")
         .returning(Right(true))
       .addWhen(passwordIncorrect)
       .addWhen(passwordExpired)
@@ -718,7 +722,7 @@ class Kadmin(val settings: Settings = new Settings()) extends LazyLogging {
       e.expect(kadminPrompt)
         .sendln(command)
       e.expect
-        .when("Principal or policy already exists")
+        .when("Principal or policy already exists|Unknown code adb 1 while creating policy".r)
           .returningExpect(modifyPolicy(options, policy))
         .addWhen(insufficientPermission)
         .addWhen(unknownError)
@@ -781,6 +785,8 @@ class Kadmin(val settings: Settings = new Settings()) extends LazyLogging {
         //With the -force option it no longer prompts for deletion.
         .sendln(command)
       e.expect
+        .when("Policy is in use")
+          .returning(Left(PolicyIsInUse))
         .addWhen(policyDoesNotExist)
           //This is what makes this operation idempotent
           .returning(Right(true))
@@ -820,9 +826,7 @@ class Kadmin(val settings: Settings = new Settings()) extends LazyLogging {
         .sendln(s"get_policy $policy")
       e.expect
         .addWhen(policyDoesNotExist)
-          .addActions(preemptiveExit)
         .addWhen(insufficientPermission)
-          .addActions(preemptiveExit)
         .addWhens(f)
     }
   }

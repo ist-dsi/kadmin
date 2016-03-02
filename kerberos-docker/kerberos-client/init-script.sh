@@ -12,6 +12,7 @@ cat > /etc/krb5.conf <<EOF
 		admin_server = $KDC_KADMIN_SERVER:749
 		default_domain = $DOMAIN
 	}
+
 [domain_realm]
 	.$DOMAIN = $REALM
 	$DOMAIN = $REALM

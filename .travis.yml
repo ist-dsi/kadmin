@@ -19,11 +19,14 @@ services:
  
 before_install:
  - sudo apt-get update
+ - docker -v
+ - docker-compose -v
  # Install the latest version of docker-compose
- #- echo https://github.com/docker/compose/releases/download/1.6.2/docker-compose-`uname -s`-`uname -m`
- #- curl -L https://github.com/docker/compose/releases/download/1.6.2/docker-compose-linux-x86_64 > docker-compose
- #- chmod +x docker-compose
- #- sudo mv docker-compose /usr/local/bin
+ - echo https://github.com/docker/compose/releases/download/1.6.2/docker-compose-`uname -s`-`uname -m`
+ - curl -L https://github.com/docker/compose/releases/download/1.6.2/docker-compose-linux-x86_64 > docker-compose
+ - chmod +x docker-compose
+ - sudo mv docker-compose /usr/local/bin
+ - docker-compose -v
  #- sudo ./kerberos-lxc/createContainer.sh
 
 script:

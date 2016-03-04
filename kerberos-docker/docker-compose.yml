@@ -10,9 +10,9 @@ services:
     volumes:
       - /dev/urandom:/dev/random
 
-  kerberos-client:
-    build: ./kerberos-client
-    env_file: kerberos.env
+  #kerberos-client:
+    #build: ./kerberos-client
+    #env_file: kerberos.env
     #links:
     #  - kdc-kadmin
     #volumes:

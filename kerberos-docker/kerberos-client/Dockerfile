@@ -1,5 +1,5 @@
 FROM debian:jessie-backports
-MAINTAINER Simão Martins "simao.martins@tecnico.ulisboa.pt
+MAINTAINER Simão Martins "simao.martins@tecnico.ulisboa.pt"
 
 RUN apt-get -qq -y update && \
   DEBIAN_FRONTEND=noninteractive apt-get install -y krb5-user apt-transport-https

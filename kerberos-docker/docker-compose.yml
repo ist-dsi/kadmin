@@ -1,9 +1,9 @@
 version: '2'
 
-services:
-  kdc-kadmin:
-    build: ./kdc-kadmin
-    env_file: kerberos.env
+#services:
+  #kdc-kadmin:
+    #build: ./kdc-kadmin
+    #env_file: kerberos.env
     #ports:
     #  - "749:749"
     #  - "750:750"

@@ -4,11 +4,11 @@ services:
   kdc-kadmin:
     build: ./kdc-kadmin
     env_file: kerberos.env
-    ports:
-      - "749:749"
-      - "750:750"
-    volumes:
-      - /dev/urandom:/dev/random
+    #ports:
+    #  - "749:749"
+    #  - "750:750"
+    #volumes:
+    #  - /dev/urandom:/dev/random
 
   #kerberos-client:
     #build: ./kerberos-client

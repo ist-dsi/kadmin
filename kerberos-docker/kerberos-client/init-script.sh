@@ -1,6 +1,20 @@
 #!/usr/bin/env bash
 
-cat > /etc/krb5.conf <<EOF
+[[ -z $DOMAIN ]] && DOMAIN=$(hostname -d)
+if [[ -z $DOMAIN ]]; then
+  # If the domain is still empty then the user did not define a hostname
+  # In these cases we use the example.com
+  DOMAIN=example.com
+  REALM=$(echo $DOMAIN | sed 's/.*/\U&/')
+fi
+[[ -z $REALM ]] && REALM=$(hostname -d | sed 's/.*/\U&/')
+[[ -z $KDC_KADMIN_SERVER ]] && KDC_KADMIN_SERVER=kdc-kadmin
+[[ -z $ADMIN_PASSWORD ]] && ADMIN_PASSWORD=MITiys4K5
+
+echo "================================================================"
+echo "==== /etc/krb5.conf ============================================"
+echo "================================================================"
+tee /etc/krb5.conf <<EOF
 [libdefaults]
 	default_realm = $REALM
 	dns_lookup_realm = false
@@ -17,25 +31,21 @@ cat > /etc/krb5.conf <<EOF
 	.$DOMAIN = $REALM
 	$DOMAIN = $REALM
 EOF
+echo ""
 
-echo -e "\nTrying kinit kadmin/admin@EXAMPLE.TEST (should fail)"
-kinit kadmin/admin@EXAMPLE.TEST <<EOF
-$ADMIN_PASSWORD
-EOF
+echo "================================================================"
+echo "==== Preliminar testing ========================================"
+echo "================================================================"
+echo "kadmin kadmin/admin@EXAMPLE.TEST (should fail)"
+kadmin -p kadmin/admin@EXAMPLE.TEST -w $ADMIN_PASSWORD -q "get_principal kadmin/admin@EXAMPLE.TEST"
+echo ""
 
-echo -e "\nTrying kinit kadmin/admin@$REALM (should work)"
-kinit kadmin/admin@$REALM <<EOF
-$ADMIN_PASSWORD
-EOF
+echo "kadmin kadmin/admin@$REALM (should work)"
+kadmin -p kadmin/admin@$REALM -w $ADMIN_PASSWORD -q "get_principal kadmin/admin@$REALM"
+echo ""
 
-echo -e "\nKlist"
-klist && echo -e "\nKerberos fully operational"
-
-echo -e "\nKadmin"
-kadmin -p kadmin/admin@$REALM <<EOF
-$ADMIN_PASSWORD
-get_principal kadmin/admin@$REALM
-EOF
-
+echo "================================================================"
+echo "==== Run tests ================================================="
+echo "================================================================"
 cd /tmp/kadmin
-sbt test
+#sbt test

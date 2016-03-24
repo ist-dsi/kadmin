@@ -2,7 +2,7 @@ organization := "pt.tecnico.dsi"
 name := "kadmin"
 version := "0.0.1"
 
-scalaVersion := "2.11.7"
+scalaVersion := "2.11.8"
 initialize := {
   val required = "1.8"
   val current  = sys.props("java.specification.version")

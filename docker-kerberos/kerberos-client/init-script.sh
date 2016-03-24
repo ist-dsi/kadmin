@@ -6,3 +6,6 @@ source `dirname $0`/configureKerberosClient.sh
 
 # You can use the `kadminCommand` function to perform kadmin commands. Example:
 # kadminCommand "get_principal yourprincipal@$REALM"
+
+cd /tmp/kadmin
+sbt test

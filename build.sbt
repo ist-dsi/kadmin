@@ -45,6 +45,11 @@ scalacOptions ++= Seq(
   "-Ywarn-dead-code"                //Warn when dead code is identified.
 )
 
+site.settings
+site.includeScaladoc()
+ghpages.settings
+git.remoteRepo := s"git@github.com:ist-dsi/${name.value}.git"
+
 licenses += "MIT" -> url("http://opensource.org/licenses/MIT")
 homepage := Some(url(s"https://github.com/ist-dsi/${name.value}"))
 scmInfo := Some(ScmInfo(homepage.value.get, s"git@github.com:ist-dsi/${name.value}.git"))

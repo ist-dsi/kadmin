@@ -48,7 +48,7 @@ scalacOptions ++= Seq(
 site.settings
 site.includeScaladoc()
 ghpages.settings
-git.remoteRepo := s"git@github.com:ist-dsi/${name.value}.git"
+git.remoteRepo := s"https://github.com/ist-dsi/${name.value}.git"
 
 licenses += "MIT" -> url("http://opensource.org/licenses/MIT")
 homepage := Some(url(s"https://github.com/ist-dsi/${name.value}"))

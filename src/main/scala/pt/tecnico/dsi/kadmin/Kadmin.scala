@@ -48,7 +48,7 @@ class Kadmin(val settings: Settings = new Settings()) extends LazyLogging {
     *
     * @return Either an ErrorCase or a date time of when the obtained ticked must be renewed.
     */
-  def obtainTicketGrantingTicket(authenticatingPrincipal: String = authenticatingPrincipal,
+  def obtainTicketGrantingTicket(options: String = "", authenticatingPrincipal: String = authenticatingPrincipal,
                                  authenticatingPrincipalPassword: String = authenticatingPrincipalPassword): Expect[Either[ErrorCase, DateTime]] = {
     require(authenticatingPrincipal.isEmpty, "authenticatingPrincipal cannot be empty.")
     require(authenticatingPrincipalPassword.isEmpty, "authenticatingPrincipalPassword cannot be empty.")
@@ -56,7 +56,7 @@ class Kadmin(val settings: Settings = new Settings()) extends LazyLogging {
     val fullPrincipal = getFullPrincipalName(authenticatingPrincipal)
 
     val defaultValue: Either[ErrorCase, DateTime] = Left(UnknownError())
-    val e = new Expect(s"kinit $fullPrincipal", defaultValue)
+    val e = new Expect(s"kinit $options $fullPrincipal", defaultValue)
     e.expect
       .when(s"Password for $fullPrincipal: ")
         .sendln(authenticatingPrincipalPassword)
@@ -224,9 +224,10 @@ class Kadmin(val settings: Settings = new Settings()) extends LazyLogging {
           //Is modifying the existing principal the best approach?
           //Would deleting the existing principal and create a new one be a better one?
           //  · By deleting we will be losing the password history. Which would make the add idempotent when using the
-          //    change password options (-pw, -e and -randkey). But we would partially lose the restraint that prohibits
+          //    change password option (-pw). But we would partially lose the restraint that prohibits
           //    the reuse of the password.
-          //  · By modifying we run into troubles when using the change password options (-pw, -e or -randkey).
+          //  · By modifying we run into troubles when using the change password options (-pw, -e or -randkey) since
+          //    these operations are not idempotent.
           //TODO: would invoking changePassword for these options solve the problem?
         .addWhen(insufficientPermission)
         .addWhen(unknownError)
@@ -680,8 +681,7 @@ class Kadmin(val settings: Settings = new Settings()) extends LazyLogging {
     //-l sets the lifetime of the obtained ticket to 1 second
     //val e = new Expect(s"""kinit -V -l 0:00:01 $fullPrincipal""", defaultValue)
 
-    //Setting the credential cache to /dev/null would be better than setting the lifetime of the ticket to 1 second.
-    //Because this way no ticket is ever created.
+    //-c sets the credential cache to /dev/null. This ensures no ticket is ever created.
     val e = new Expect(s"""kinit -V -c /dev/null $fullPrincipal""", defaultValue)
 
     e.expect
@@ -832,29 +832,29 @@ class Kadmin(val settings: Settings = new Settings()) extends LazyLogging {
   }
   //endregion
 
-  private def insufficientPermission[R](expectBlock: ExpectBlock[Either[ErrorCase, R]]) = {
+  def insufficientPermission[R](expectBlock: ExpectBlock[Either[ErrorCase, R]]) = {
     expectBlock.when("""Operation requires ``([^']+)'' privilege""".r)
       .returning { m: Match =>
         Left(InsufficientPermissions(m.group(1)))
       }
   }
-  private def principalDoesNotExist[R](expectBlock: ExpectBlock[Either[ErrorCase, R]]) = {
+  def principalDoesNotExist[R](expectBlock: ExpectBlock[Either[ErrorCase, R]]) = {
     expectBlock.when("Principal does not exist")
       .returning(Left(NoSuchPrincipal))
   }
-  private def policyDoesNotExist[R](expectBlock: ExpectBlock[Either[ErrorCase, R]]) = {
+  def policyDoesNotExist[R](expectBlock: ExpectBlock[Either[ErrorCase, R]]) = {
     expectBlock.when("Policy does not exist")
       .returning(Left(NoSuchPolicy))
   }
-  private def passwordIncorrect[R](expectBlock: ExpectBlock[Either[ErrorCase, R]]) = {
+  def passwordIncorrect[R](expectBlock: ExpectBlock[Either[ErrorCase, R]]) = {
     expectBlock.when("Password incorrect")
       .returning(Left(PasswordIncorrect))
   }
-  private def passwordExpired[R](expectBlock: ExpectBlock[Either[ErrorCase, R]]) = {
+  def passwordExpired[R](expectBlock: ExpectBlock[Either[ErrorCase, R]]) = {
     expectBlock.when("Password expired")
-      .returning(Left(PasswordIncorrect))
+      .returning(Left(PasswordExpired))
   }
-  private def unknownError[R](expectBlock: ExpectBlock[Either[ErrorCase, R]]) = {
+  def unknownError[R](expectBlock: ExpectBlock[Either[ErrorCase, R]]) = {
     //(?s) inline regex flag for dotall mode. In this mode '.' matches any character, including a line terminator.
     expectBlock.when(s"(?s)(.+?)(?=\n$kadminPrompt)".r)
       .returning { m: Match =>
@@ -862,7 +862,7 @@ class Kadmin(val settings: Settings = new Settings()) extends LazyLogging {
       }
   }
 
-  private def preemptiveExit[R](when: When[Either[ErrorCase, R]]): Unit = {
+  def preemptiveExit[R](when: When[Either[ErrorCase, R]]): Unit = {
     when
       //We send the quit to allow kadmin a graceful shutdown
       .sendln("quit")

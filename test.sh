@@ -1,7 +1,5 @@
 #!/bin/bash
 
-sbt compile
-
 cd docker-kerberos
 
 # Build the containers

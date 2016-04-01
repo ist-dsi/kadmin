@@ -19,7 +19,7 @@ before_install:
  - sudo mv docker-compose /usr/local/bin
 
 script:
-  - sudo bash test.sh
+  - sudo ./test.sh
 
 notifications:
   slack:

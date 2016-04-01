@@ -1,4 +1,4 @@
-# Kadmin
+# Kadmin [![Build Status](https://travis-ci.org/ist-dsi/kadmin.svg?branch=master)](https://travis-ci.org/ist-dsi/kadmin)[![Codacy Badge](https://api.codacy.com/project/badge/grade/a5fead3a55db40cd96470ed7a8efe9c5)](https://www.codacy.com/app/Whatever/kadmin)
 A type-safe, idempotent wrapper around the kadmin command for Scala.
 
 In the JVM its possible to obtain Kerberos tickets but to create or delete principals is outright impossible.
@@ -8,6 +8,8 @@ very hard to do correctly.
 We solve the problem of Kerberos administration in JVM via the only other alternative which is to launch the kadmin
 command and write to its standard input and read from its standard output.
 To simplify this process we use [scala-expect](https://github.com/Lasering/scala-expect).
+
+[Latest scaladoc documentation](http://ist-dsi.github.io/kadmin/latest/api/)
 
 ## Available functions
  - Adding a principal
@@ -42,3 +44,6 @@ Besides the kadmin commands the following functions are also available:
    these functions match against common kadmin errors and return the appropriate `ErrorCase`.
  - `preemptiveExit` - allows you to gracefully terminate the kadmin cli and ensure the next `ExpectBlock`s in the current
    `Expect` do not get executed.
+
+All of these functions are available in the Kadmin class. Refer to the [documentation](https://ist-dsi.github.io/kadmin/latest/api/index.html#pt.tecnico.dsi.kadmin.Kadmin)
+for more detailed information.

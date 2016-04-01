@@ -780,9 +780,9 @@ class Kadmin(val settings: Settings = new Settings()) extends LazyLogging {
     */
   def deletePolicy(policy: String): Expect[Either[ErrorCase, Boolean]] = {
     doOperation { e =>
+      //With the -force option kadmin no longer prompts for deletion.
       val command = s"delete_policy -force $policy"
       e.expect(kadminPrompt)
-        //With the -force option it no longer prompts for deletion.
         .sendln(command)
       e.expect
         .when("Policy is in use")
@@ -803,7 +803,7 @@ class Kadmin(val settings: Settings = new Settings()) extends LazyLogging {
     }
   }
   /**
-    * Performs the operation `f` over the output returned by "get_policy policy".
+    * Performs the operation `f` over the output returned by "get_policy $$policy".
     * This is useful to read the policy attributes.
     *
     * $startedWithDoOperation

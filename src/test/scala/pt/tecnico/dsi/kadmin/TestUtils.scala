@@ -38,33 +38,30 @@ trait TestUtils extends ScalaFutures with Matchers {
   val authenticatedKadmin = new Kadmin(createConfigFor("kadmin/admin").resolve())
   val unAuthenticatedKadmin = new Kadmin(createConfigFor("noPermissions").resolve())
 
-  def idempotent[T](test: Expect[T])(expectedResult: T): Unit = idempotent[T]()(test)(expectedResult)
-  def idempotent[T](repetitions: Int = 3)(test: Expect[T])(expectedResult: T): Unit = {
-    require(repetitions >= 2, "To test for idempotency at least 2 repetitions must be made")
-    //If this fails we do not want to catch its exception, because failing in the first attempt means
-    //whatever is being tested in `test` is not implemented correctly. Therefore we do not want to mask
-    //the failure with a "Operation is not idempotent".
-    val firstResult = test.value
-    firstResult shouldEqual expectedResult
-
-    //This code will only be executed if the previous test succeed.
-    //And now we want to catch the exception because if `test` fails here it means it is not idempotent.
-    val results = (1 until repetitions).map(_ => test.value)
-    try {
-      results.foreach(_ shouldEqual expectedResult)
-    } catch {
-      case e: TestFailedException =>
-        throw new TestFailedException(s"""Operation is not idempotent. Results:
-                                         |  1st:
-                                         |    $firstResult
-                                         |  Rest:
-                                         |    ${results.mkString("\n    ")}
-                                         |${e.message}""".stripMargin,
-          e, e.failedCodeStackDepth + 1)
-    }
-  }
   implicit class RichExpect[T](expect: Expect[T]) {
-    def shouldIdempotentlyReturn(expectedResult: T): Unit = idempotent[T](expect)(expectedResult)
+    def shouldIdempotentlyReturn(expectedResult: T, repetitions: Int = 3): Unit = {
+      require(repetitions >= 2, "To test for idempotency at least 2 repetitions must be made")
+      //If this fails we do not want to catch its exception, because failing in the first attempt means
+      //whatever is being tested in `test` is not implemented correctly. Therefore we do not want to mask
+      //the failure with a "Operation is not idempotent".
+      val firstResult = shouldReturn(expectedResult)
+
+      //This code will only be executed if the previous test succeed.
+      //And now we want to catch the exception because if `test` fails here it means it is not idempotent.
+      val results = (1 until repetitions).map(_ => value)
+      try {
+        results.foreach(_ shouldBe expectedResult)
+      } catch {
+        case e: TestFailedException =>
+          throw new TestFailedException(s"""Operation is not idempotent. Results:
+                                            |  1st:
+                                            |    $firstResult
+                                            |  Rest:
+                                            |    ${results.mkString("\n    ")}
+                                            |${e.message}""".stripMargin,
+            e, e.failedCodeStackDepth + 1)
+      }
+    }
     def shouldReturn(expectedResult: T): Unit = value shouldBe expectedResult
     def value: T = expect.run().futureValue(new PatienceConfig(
       timeout = Span(expect.settings.timeout.toSeconds + 2, Seconds),
@@ -81,9 +78,13 @@ trait TestUtils extends ScalaFutures with Matchers {
     }
   }
 
-  def testNoSuchPrincipal[R](e: Expect[Either[ErrorCase, R]]): Unit = idempotent(e)(Left(NoSuchPrincipal))
-  def testNoSuchPolicy[R](e: Expect[Either[ErrorCase, R]]): Unit = idempotent(e)(Left(NoSuchPolicy))
+  def testNoSuchPrincipal[R](e: Expect[Either[ErrorCase, R]]): Unit = {
+    e shouldIdempotentlyReturn Left(NoSuchPrincipal)
+  }
+  def testNoSuchPolicy[R](e: Expect[Either[ErrorCase, R]]): Unit = {
+    e shouldIdempotentlyReturn Left(NoSuchPolicy)
+  }
   def testInsufficientPermission[R](permission: String)(e: Expect[Either[ErrorCase, R]]): Unit = {
-    idempotent(e)(Left(InsufficientPermissions(permission)))
+    e shouldIdempotentlyReturn Left(InsufficientPermissions(permission))
   }
 }

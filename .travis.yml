@@ -13,13 +13,18 @@ services:
 before_install:
  - sudo apt-get update
  # Install the latest version of docker-compose
- - echo https://github.com/docker/compose/releases/download/1.6.2/docker-compose-`uname -s`-`uname -m`
  - curl -L https://github.com/docker/compose/releases/download/1.6.2/docker-compose-linux-x86_64 > docker-compose
  - chmod +x docker-compose
  - sudo mv docker-compose /usr/local/bin
+ # Install the latest version of docker
+ - sudo apt-get install linux-image-extra-`uname -r` apparmor
+ - curl -L https://apt.dockerproject.org/repo/pool/main/d/docker-engine/docker-engine_1.10.3-0~trusty_amd64.deb > docker.deb
+ - sudo dpkg -i docker.deb
+ - sudo service docker start
+ - sudo docker run hello-world
 
 script:
-  - sudo ./test.sh
+  - sudo bash test.sh
 
 notifications:
   slack:

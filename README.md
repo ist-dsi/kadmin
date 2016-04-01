@@ -1,5 +1,5 @@
-# Kadmin [![Build Status](https://travis-ci.org/ist-dsi/kadmin.svg?branch=master)](https://travis-ci.org/ist-dsi/kadmin)[![Codacy Badge](https://api.codacy.com/project/badge/grade/a5fead3a55db40cd96470ed7a8efe9c5)](https://www.codacy.com/app/Whatever/kadmin)
-A type-safe, idempotent wrapper around the kadmin command for Scala.
+# Kadmin [![Build Status](https://travis-ci.org/ist-dsi/kadmin.svg?branch=master)](https://travis-ci.org/ist-dsi/kadmin) [![Codacy Badge](https://api.codacy.com/project/badge/grade/a5fead3a55db40cd96470ed7a8efe9c5)](https://www.codacy.com/app/Whatever/kadmin)
+A type-safe wrapper around the kadmin command for Scala.
 
 In the JVM its possible to obtain Kerberos tickets but to create or delete principals is outright impossible.
 The reason is that kerberos only offers a C API and interfacing with C via the Java Native Interface (JNI) is
@@ -11,7 +11,7 @@ To simplify this process we use [scala-expect](https://github.com/Lasering/scala
 
 [Latest scaladoc documentation](http://ist-dsi.github.io/kadmin/latest/api/)
 
-## Available functions
+## Available kadmin commands
  - Adding a principal
  - Modifying a principal
    - Expiring a principal
@@ -29,7 +29,10 @@ To simplify this process we use [scala-expect](https://github.com/Lasering/scala
 
 All of these commands can be made with authentication, ie using the **kadmin** command or without authentication
 using the **kadmin.local** command. Whether of not to perform authentication can be defined in the configuration.
-Besides the kadmin commands the following functions are also available:
+
+Every command is idempotent except when changing either a password, a salt or a key.
+
+Besides these kadmin commands the following functions are also available:
 
  - `getFullPrincipalName` - returns the principal name with the realm, eg: kadmin/admin@EXAMPLE.COM.
  - `obtainTicketGrantingTicket` - invokes `kinit` to obtain a ticket and returns the DateTime in which the ticket must be renewed.

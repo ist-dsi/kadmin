@@ -6,10 +6,10 @@ import java.util.Locale
 
 import com.typesafe.config.Config
 import com.typesafe.scalalogging.LazyLogging
-import org.joda.time.{DateTimeZone, DateTime}
+import org.joda.time.{DateTime, DateTimeZone}
 import org.joda.time.format.DateTimeFormat
 import work.martins.simon.expect.EndOfFile
-import work.martins.simon.expect.fluent.{RegexWhen, ExpectBlock, Expect, When}
+import work.martins.simon.expect.fluent.{Expect, ExpectBlock, RegexWhen, When}
 
 import scala.util.{Failure, Success, Try}
 import scala.util.matching.Regex.Match
@@ -88,6 +88,22 @@ class Kadmin(val settings: Settings = new Settings()) extends LazyLogging {
   }
 
   //region <Generic commands>
+  private def catchInitializationErrorRunOperationThenExit[R](e: Expect[Either[ErrorCase, R]],
+                                                             f: Expect[Either[ErrorCase, R]] => Unit): Expect[Either[ErrorCase, R]] = {
+    e.expect
+      .when(kadminPrompt)
+        //All good. We can continue.
+        //We need to send a newline in order for `f` to see the KadminPrompt
+        .sendln("")
+      .addWhen(unknownError)
+        .addActions(preemptiveExit)
+    e.addExpectBlock(f)
+    e.expect(kadminPrompt)
+      .sendln("quit")
+      .exit()
+    e
+  }
+
   /**
     * Creates an Expect that performs an authenticated kadmin operation `f` and then quits kadmin.
     *
@@ -123,17 +139,7 @@ class Kadmin(val settings: Settings = new Settings()) extends LazyLogging {
       .when("Incorrect password")
         .returning(Left(PasswordIncorrect))
         .addActions(preemptiveExit)
-      .when(kadminPrompt)
-        //All good. The password was correct. We can continue.
-        //We need to send a newline in order for `f` to see the KadminPrompt
-        .sendln("")
-      .addWhen(unknownError)
-        .addActions(preemptiveExit)
-    e.addExpectBlock(f)
-    e.expect(kadminPrompt)
-      .sendln("quit")
-      .exit()
-    e
+    catchInitializationErrorRunOperationThenExit(e, f)
   }
 
   /**
@@ -157,17 +163,7 @@ class Kadmin(val settings: Settings = new Settings()) extends LazyLogging {
   def withoutAuthentication[R](f: Expect[Either[ErrorCase, R]] => Unit): Expect[Either[ErrorCase, R]] = {
     val defaultValue: Either[ErrorCase, R] = Left(UnknownError())
     val e = new Expect(commandWithoutAuthentication, defaultValue)
-    e.expect
-      .when(kadminPrompt)
-        //All good. We can continue.
-        //We need to send a newline in order for `f` to see KadminPrompt
-        .sendln("")
-      .addWhen(unknownError)
-        .addActions(preemptiveExit)
-    e.addExpectBlock(f)
-    e.expect(kadminPrompt)
-      .sendln("quit")
-    e
+    catchInitializationErrorRunOperationThenExit(e, f)
   }
 
   /**

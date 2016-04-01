@@ -35,6 +35,7 @@ case class Now() extends ExpirationDateTime {
 
   def canEqual(that: Any): Boolean = that.isInstanceOf[Now]
   //We want to ignore the dateTime in the comparison
+  override def hashCode(): Int = toString.hashCode
   override def equals(other: Any): Boolean = canEqual(other)
 }
 
@@ -45,6 +46,8 @@ object Never extends ExpirationDateTime {
 
   def canEqual(other: Any): Boolean = other.isInstanceOf[Never.type]
   override def hashCode(): Int = toString.hashCode
+  //We want to ignore the dateTime in the comparison
+  override def equals(other: Any): Boolean = canEqual(other)
 }
 
 class RelativeDateTime(duration: Time) extends ExpirationDateTime {

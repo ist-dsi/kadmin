@@ -5,13 +5,8 @@ language: scala
 scala: 2.11.7
 jdk: oraclejdk8
 
-services:
-  - docker
-
-# We cannot cache sbt dependencies because we need sudo to use lxc/docker
- 
 before_install:
- - sudo bash setupDocker.sh
+  - sudo bash setupDocker.sh
 
 script:
   - sudo bash test.sh

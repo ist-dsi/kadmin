@@ -7,9 +7,8 @@ mv docker-compose /usr/local/bin
 
 # Install the latest version of docker
 apt-get -y purge docker
-apt-get -y install linux-image-extra-`uname -r` apparmor libsystemd-journal0
+# The last two packages are already installed in the travis environment
+# but we left it here because this might change in the future
+apt-get -y install libsystemd-journal0  #linux-image-extra-`uname -r` apparmor
 curl -L https://apt.dockerproject.org/repo/pool/main/d/docker-engine/docker-engine_1.10.3-0~trusty_amd64.deb > docker-engine.deb
-cat /etc/default/docker
 dpkg --force-confold -i docker-engine.deb
-service docker start
-docker run hello-world

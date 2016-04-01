@@ -64,7 +64,7 @@ trait TestUtils extends ScalaFutures with Matchers {
     }
     def shouldReturn(expectedResult: T): Unit = value shouldBe expectedResult
     def value: T = expect.run().futureValue(new PatienceConfig(
-      timeout = Span(expect.settings.timeout.toSeconds + 2, Seconds),
+      timeout = Span(expect.settings.timeout.toSeconds, Seconds),
       interval = Span(500, Millis)
     ))
   }

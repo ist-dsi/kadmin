@@ -17,9 +17,11 @@ before_install:
  - chmod +x docker-compose
  - sudo mv docker-compose /usr/local/bin
  # Install the latest version of docker
- - sudo apt-get install linux-image-extra-`uname -r` apparmor
- - curl -L https://apt.dockerproject.org/repo/pool/main/d/docker-engine/docker-engine_1.10.3-0~trusty_amd64.deb > docker.deb
- - sudo dpkg -i docker.deb
+ - sudo dpkg -l | grep docker
+ - sudo apt-get purge docker
+ - sudo apt-get install linux-image-extra-`uname -r` apparmor libsystemd-journal0
+ - curl -L https://apt.dockerproject.org/repo/pool/main/d/docker-engine/docker-engine_1.10.3-0~trusty_amd64.deb > docker-engine.deb
+ - sudo dpkg -i docker-engine.deb
  - sudo service docker start
  - sudo docker run hello-world
 

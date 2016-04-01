@@ -88,22 +88,6 @@ class Kadmin(val settings: Settings = new Settings()) extends LazyLogging {
   }
 
   //region <Generic commands>
-  private def catchInitializationErrorRunOperationThenExit[R](e: Expect[Either[ErrorCase, R]],
-                                                             f: Expect[Either[ErrorCase, R]] => Unit): Expect[Either[ErrorCase, R]] = {
-    e.expect
-      .when(kadminPrompt)
-        //All good. We can continue.
-        //We need to send a newline in order for `f` to see the KadminPrompt
-        .sendln("")
-      .addWhen(unknownError)
-        .addActions(preemptiveExit)
-    e.addExpectBlock(f)
-    e.expect(kadminPrompt)
-      .sendln("quit")
-      .exit()
-    e
-  }
-
   /**
     * Creates an Expect that performs an authenticated kadmin operation `f` and then quits kadmin.
     *
@@ -139,7 +123,16 @@ class Kadmin(val settings: Settings = new Settings()) extends LazyLogging {
       .when("Incorrect password")
         .returning(Left(PasswordIncorrect))
         .addActions(preemptiveExit)
-    catchInitializationErrorRunOperationThenExit(e, f)
+      .when(kadminPrompt)
+        //The password was correct we can continue. We need to send a newline in order for `f` to see the KadminPrompt
+        .sendln("")
+      .addWhen(unknownError)
+        .addActions(preemptiveExit)
+    e.addExpectBlock(f)
+    e.expect(kadminPrompt)
+      .sendln("quit")
+      .exit()
+    e
   }
 
   /**
@@ -163,7 +156,17 @@ class Kadmin(val settings: Settings = new Settings()) extends LazyLogging {
   def withoutAuthentication[R](f: Expect[Either[ErrorCase, R]] => Unit): Expect[Either[ErrorCase, R]] = {
     val defaultValue: Either[ErrorCase, R] = Left(UnknownError())
     val e = new Expect(commandWithoutAuthentication, defaultValue)
-    catchInitializationErrorRunOperationThenExit(e, f)
+    e.expect
+      .when(kadminPrompt)
+        //All good. We can continue. We need to send a newline in order for `f` to see the KadminPrompt
+        .sendln("")
+      .addWhen(unknownError)
+        .addActions(preemptiveExit)
+    e.addExpectBlock(f)
+    e.expect(kadminPrompt)
+      .sendln("quit")
+      .exit()
+    e
   }
 
   /**

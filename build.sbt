@@ -48,11 +48,11 @@ scalacOptions ++= Seq(
 site.settings
 site.includeScaladoc()
 ghpages.settings
-git.remoteRepo := s"https://github.com/ist-dsi/${name.value}.git"
+git.remoteRepo := s"git@github.com:ist-dsi/${name.value}.git"
 
 licenses += "MIT" -> url("http://opensource.org/licenses/MIT")
 homepage := Some(url(s"https://github.com/ist-dsi/${name.value}"))
-scmInfo := Some(ScmInfo(homepage.value.get, s"git@github.com:ist-dsi/${name.value}.git"))
+scmInfo := Some(ScmInfo(homepage.value.get, git.remoteRepo.value))
 
 publishMavenStyle := true
 publishTo := Some(if (isSnapshot.value) Opts.resolver.sonatypeSnapshots else Opts.resolver.sonatypeStaging)

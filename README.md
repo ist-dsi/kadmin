@@ -1,11 +1,10 @@
-# Kadmin [![Build Status](https://travis-ci.org/ist-dsi/kadmin.svg?branch=master)](https://travis-ci.org/ist-dsi/kadmin) [![Codacy Badge](https://api.codacy.com/project/badge/grade/a5fead3a55db40cd96470ed7a8efe9c5)](https://www.codacy.com/app/Whatever/kadmin)
+# kadmin [![Build Status](https://travis-ci.org/ist-dsi/kadmin.svg?branch=master)](https://travis-ci.org/ist-dsi/kadmin) [![Codacy Badge](https://api.codacy.com/project/badge/grade/a5fead3a55db40cd96470ed7a8efe9c5)](https://www.codacy.com/app/Whatever/kadmin)
 A type-safe wrapper around the kadmin command for Scala.
 
-In the JVM its possible to obtain Kerberos tickets but to create or delete principals is outright impossible.
-The reason is that kerberos only offers a C API and interfacing with C via the Java Native Interface (JNI) is
-very hard to do correctly.
+In JVM it's possible to obtain Kerberos tickets, but to create or delete principals is outright impossible.
+Kerberos only offers a C API, and interfacing with it via the Java Native Interface (JNI) can be a hard task to accomplish properly.
 
-We solve the problem of Kerberos administration in JVM via the only other alternative which is to launch the kadmin
+We solve the problem of Kerberos administration in JVM via the only other alternative: by launching the kadmin
 command and write to its standard input and read from its standard output.
 To simplify this process we use [scala-expect](https://github.com/Lasering/scala-expect).
 
@@ -33,7 +32,7 @@ libraryDependencies += "pt.tecnico.dsi" %% "kadmin" % "0.0.2"
  - [Deleting a policy](https://ist-dsi.github.io/kadmin/latest/api/index.html#pt.tecnico.dsi.kadmin.Kadmin@deletePolicy(policy:String):work.martins.simon.expect.fluent.Expect[Either[pt.tecnico.dsi.kadmin.ErrorCase,Boolean]])
  - [Reading policy attributes](https://ist-dsi.github.io/kadmin/latest/api/index.html#pt.tecnico.dsi.kadmin.Kadmin@withPolicy[R](policy:String)(f:work.martins.simon.expect.fluent.ExpectBlock[Either[pt.tecnico.dsi.kadmin.ErrorCase,R]]=>Unit):work.martins.simon.expect.fluent.Expect[Either[pt.tecnico.dsi.kadmin.ErrorCase,R]])
 
-All of these commands can be made with authentication, ie using the **kadmin** command or without authentication
+All of these commands can be made with authentication, i.e. using the **kadmin** command or without authentication
 using the **kadmin.local** command. Whether of not to perform authentication can be defined in the configuration.
 
 Every command is idempotent except when changing either a password, a salt or a key.

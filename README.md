@@ -11,6 +11,12 @@ To simplify this process we use [scala-expect](https://github.com/Lasering/scala
 
 [Latest scaladoc documentation](http://ist-dsi.github.io/kadmin/latest/api/)
 
+## Install
+Add the following dependency to your `build.sbt`:
+```scala
+libraryDependencies += "pt.tecnico.dsi" %% "kadmin" % "0.0.2"
+```
+
 ## Available kadmin commands
  - Adding a principal
  - Modifying a principal

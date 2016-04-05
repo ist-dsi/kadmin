@@ -33,7 +33,7 @@ libraryDependencies += "pt.tecnico.dsi" %% "kadmin" % "0.0.2"
  - [Reading policy attributes](https://ist-dsi.github.io/kadmin/latest/api/index.html#pt.tecnico.dsi.kadmin.Kadmin@withPolicy[R](policy:String)(f:work.martins.simon.expect.fluent.ExpectBlock[Either[pt.tecnico.dsi.kadmin.ErrorCase,R]]=>Unit):work.martins.simon.expect.fluent.Expect[Either[pt.tecnico.dsi.kadmin.ErrorCase,R]])
 
 All of these commands can be made with authentication, i.e. using the **kadmin** command or without authentication
-using the **kadmin.local** command. Whether of not to perform authentication can be defined in the configuration.
+using the **kadmin.local** command. Whether or not to perform authentication can be defined in the configuration.
 
 Every command is idempotent except when changing either a password, a salt or a key.
 
@@ -60,7 +60,7 @@ Besides these kadmin commands the following functions are also available:
 
 ## How to test kadmin
 In the project root run `./test.sh`. This script will run `docker-compose up` inside the docker-kerberos folder.
-Be sure to have docker and docker-compose installed on your computer.
+Be sure to have [docker](https://docs.docker.com/engine/installation/) and [docker-compose](https://docs.docker.com/compose/install/) installed on your computer.
 
 ## Note on the docker-kerberos folder
 This folder is a [git fake submodule](http://debuggable.com/posts/git-fake-submodules:4b563ee4-f3cc-4061-967e-0e48cbdd56cb)

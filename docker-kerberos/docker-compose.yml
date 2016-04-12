@@ -17,6 +17,9 @@ services:
       - kdc-kadmin
     volumes:
       - ../:/tmp/kadmin/
+      # This bootstraps running sbt inside the container
+      - ~/.sbt:/root/.sbt
+      - ~/.ivy2:/root/.ivy2
 
 # NOTE:
 #  "env_file: kerberos.env" is optional.

@@ -13,7 +13,7 @@ To simplify this process we use [scala-expect](https://github.com/Lasering/scala
 ## Install
 Add the following dependency to your `build.sbt`:
 ```scala
-libraryDependencies += "pt.tecnico.dsi" %% "kadmin" % "0.0.2"
+libraryDependencies += "pt.tecnico.dsi" %% "kadmin" % "1.0.2"
 ```
 
 ## Available kadmin commands

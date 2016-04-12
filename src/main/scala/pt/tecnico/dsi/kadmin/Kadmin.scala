@@ -9,7 +9,7 @@ import com.typesafe.scalalogging.LazyLogging
 import org.joda.time.{DateTime, DateTimeZone}
 import org.joda.time.format.DateTimeFormat
 import work.martins.simon.expect.EndOfFile
-import work.martins.simon.expect.fluent.{Expect, ExpectBlock, RegexWhen, When}
+import work.martins.simon.expect.fluent.{Expect, ExpectBlock, When}
 
 import scala.util.{Failure, Success, Try}
 import scala.util.matching.Regex.Match
@@ -210,14 +210,14 @@ class Kadmin(val settings: Settings = new Settings()) extends LazyLogging {
     * Principal (MIT Kerberos)]] for a full list. The parameters are not checked for validity.
     * @return an Expect that creates `principal`.
     */
-  def addPrincipal(options: String, principal: String): Expect[Either[ErrorCase, Boolean]] = {
+  def addPrincipal(options: String, principal: String): Expect[Either[ErrorCase, Unit]] = {
     val fullPrincipal = getFullPrincipalName(principal)
     doOperation { e =>
       e.expect(kadminPrompt)
         .sendln(s"add_principal $options $fullPrincipal")
       e.expect
         .when(s"""Principal "$fullPrincipal" (created|added).""".r)
-          .returning(Right(true))
+          .returning(Right(Unit): Either[ErrorCase, Unit])
         .when("Principal or policy already exists")
           .returningExpect(modifyPrincipal(options, principal))
           //Is modifying the existing principal the best approach?
@@ -249,7 +249,7 @@ class Kadmin(val settings: Settings = new Settings()) extends LazyLogging {
     * Principal (MIT Kerberos)]] for a full list. The parameters are not checked for validity.
     * @return an Expect that modifies `principal`.
     */
-  def modifyPrincipal(options: String, principal: String): Expect[Either[ErrorCase, Boolean]] = {
+  def modifyPrincipal(options: String, principal: String): Expect[Either[ErrorCase, Unit]] = {
     val fullPrincipal = getFullPrincipalName(principal)
     val clearPolicy = options.contains("-clearpolicy")
     val cleanedOptions = options
@@ -288,7 +288,7 @@ class Kadmin(val settings: Settings = new Settings()) extends LazyLogging {
         .sendln(s"""modify_principal $cleanedOptions $fullPrincipal""")
       val w = e.expect
         .when(s"""Principal "$fullPrincipal" modified.""")
-          .returning(Right(true))
+          .returning(Right(Unit))
       if (clearPolicy == false) {
         //We just need to check for these cases when the policy was not cleared. Because in the case the policy
         //was cleared these cases will already have been caught.
@@ -306,7 +306,6 @@ class Kadmin(val settings: Settings = new Settings()) extends LazyLogging {
     *   expirePrincipal(principal)
     * }}}
     * To expire the principal 2 days from now: {{{
-    *   import squants.time.TimeConversions._
     *   expirePrincipal(principal, 2.days)
     * }}}
     * To ensure a principal never expires: {{{
@@ -320,7 +319,7 @@ class Kadmin(val settings: Settings = new Settings()) extends LazyLogging {
     * @param principal the principal to expire.
     * @return an Expect that expires `principal`.
     */
-  def expirePrincipal(principal: String, expirationDateTime: ExpirationDateTime = Now()): Expect[Either[ErrorCase, Boolean]] = {
+  def expirePrincipal(principal: String, expirationDateTime: ExpirationDateTime = Now()): Expect[Either[ErrorCase, Unit]] = {
     val dateTimeString = expirationDateTime.toKadminRepresentation
     modifyPrincipal(s"""-expire "$dateTimeString"""", principal)
   }
@@ -352,7 +351,7 @@ class Kadmin(val settings: Settings = new Settings()) extends LazyLogging {
     * @return an Expect that sets the password expiration date of `principal` to `date`.
     */
   def expirePrincipalPassword(principal: String, datetime: ExpirationDateTime = Now(),
-                              force: Boolean = false): Expect[Either[ErrorCase, Boolean]] = {
+                              force: Boolean = false): Expect[Either[ErrorCase, Unit]] = {
     val dateTimeString = datetime.toKadminRepresentation
     modifyPrincipal(s"""${if (force) "-clearpolicy " else ""}-pwexpire "$dateTimeString"""", principal)
     // Sometimes there isn't the need to clear the policy. This is true when `date` lies ahead of how soon the
@@ -389,7 +388,7 @@ class Kadmin(val settings: Settings = new Settings()) extends LazyLogging {
     * @return an Expect that changes `principal` password.
     */
   def changePassword(principal: String, newPassword: Option[String] = None,
-                     randKey: Boolean = false, salt: Option[String] = None): Expect[Either[ErrorCase, Boolean]] = {
+                     randKey: Boolean = false, salt: Option[String] = None): Expect[Either[ErrorCase, Unit]] = {
     require(newPassword.nonEmpty || randKey || salt.nonEmpty,
       "At least one of newPassword, randKey or salt must be defined " +
       "(be a Some, for newPassword and salt. Or set to true, for the randKey).")
@@ -405,7 +404,7 @@ class Kadmin(val settings: Settings = new Settings()) extends LazyLogging {
         .sendln(s"""change_password $options $fullPrincipal""")
       e.expect
         .when(s"""Password for "$fullPrincipal" changed.""")
-          .returning(Right(true))
+          .returning(Right(Unit))
         .when("Password is too short")
           .returning(Left(PasswordTooShort))
         .when("Password does not contain enough character classes")
@@ -446,7 +445,7 @@ class Kadmin(val settings: Settings = new Settings()) extends LazyLogging {
     * @param principal the principal for whom to create the keytab.
     * @return an Expect that creates the keytab for `principal`.
     */
-  def createKeytab(principal: String): Expect[Either[ErrorCase, Boolean]] = {
+  def createKeytab(principal: String): Expect[Either[ErrorCase, Unit]] = {
     val fullPrincipal = getFullPrincipalName(principal)
     val keytabPath = getKeytabFile(principal).getAbsolutePath
     doOperation{ e =>
@@ -454,7 +453,7 @@ class Kadmin(val settings: Settings = new Settings()) extends LazyLogging {
         .sendln(s"ktadd -keytab $keytabPath $fullPrincipal")
       e.expect
         .when("Entry for principal (.*?) added to keytab".r)
-          .returning(Right(true))
+          .returning(Right(Unit): Either[ErrorCase, Unit])
         .addWhen(insufficientPermission)
         .addWhen(unknownError)
     }
@@ -494,7 +493,7 @@ class Kadmin(val settings: Settings = new Settings()) extends LazyLogging {
     * @param principal the principal to delete.
     * @return an Expect that deletes `principal`.
     */
-  def deletePrincipal(principal: String): Expect[Either[ErrorCase, Boolean]] = {
+  def deletePrincipal(principal: String): Expect[Either[ErrorCase, Unit]] = {
     val fullPrincipal = getFullPrincipalName(principal)
     doOperation { e =>
       e.expect(kadminPrompt)
@@ -502,10 +501,10 @@ class Kadmin(val settings: Settings = new Settings()) extends LazyLogging {
         .sendln(s"delete_principal -force $fullPrincipal")
       e.expect
         .when(s"""Principal "$fullPrincipal" deleted.""")
-          .returning(Right(true))
+          .returning(Right(Unit))
         .addWhen(principalDoesNotExist)
           //This is what makes this operation idempotent
-          .returning(Right(true))
+          .returning(Right(Unit))
         .addWhen(insufficientPermission)
         .addWhen(unknownError)
     }
@@ -570,7 +569,7 @@ class Kadmin(val settings: Settings = new Settings()) extends LazyLogging {
             parseDateTime(m.group(1))
           } match {
             case Success(datetime) => Right(datetime)
-            case Failure(e) => Left(UnknownError(Some(e.getMessage)))
+            case Failure(e) => Left(UnknownError(Some(e)))
           }
         }
     }
@@ -599,7 +598,7 @@ class Kadmin(val settings: Settings = new Settings()) extends LazyLogging {
             parseDateTime(m.group(1))
           } match {
             case Success(datetime) => Right(datetime)
-            case Failure(e) => Left(UnknownError(Some(e.getMessage)))
+            case Failure(e) => Left(UnknownError(Some(e)))
           }
         }
     }
@@ -674,9 +673,9 @@ class Kadmin(val settings: Settings = new Settings()) extends LazyLogging {
     * @param password the password to test.
     * @return an Expect that checks if the password of `principal` is `password`.
     */
-  def checkPassword(principal: String, password: String): Expect[Either[ErrorCase, Boolean]] = {
+  def checkPassword(principal: String, password: String): Expect[Either[ErrorCase, Unit]] = {
     val fullPrincipal = getFullPrincipalName(principal)
-    val defaultValue: Either[ErrorCase, Boolean] = Left(UnknownError())
+    val defaultValue: Either[ErrorCase, Unit] = Left(UnknownError())
     //-l sets the lifetime of the obtained ticket to 1 second
     //val e = new Expect(s"""kinit -V -l 0:00:01 $fullPrincipal""", defaultValue)
 
@@ -692,9 +691,9 @@ class Kadmin(val settings: Settings = new Settings()) extends LazyLogging {
       .when("Internal credentials cache error while storing credentials")
         //Because we set the credential cache to /dev/null kadmin fails when trying to write the ticket to the cache.
         //This means the authentication was successful and thus the password is correct.
-        .returning(Right(true))
+        .returning(Right(Unit))
       .when("Authenticated to Kerberos")
-        .returning(Right(true))
+        .returning(Right(Unit))
       .addWhen(passwordIncorrect)
       .addWhen(passwordExpired)
     e
@@ -715,7 +714,7 @@ class Kadmin(val settings: Settings = new Settings()) extends LazyLogging {
     * Policy (MIT Kerberos)]] for a full list. The parameters are not checked for validity.
     * @return an Expect that creates `policy`.
     */
-  def addPolicy(options: String, policy: String): Expect[Either[ErrorCase, Boolean]] = {
+  def addPolicy(options: String, policy: String): Expect[Either[ErrorCase, Unit]] = {
     doOperation { e =>
       val command: String = s"add_policy $options $policy"
       e.expect(kadminPrompt)
@@ -728,9 +727,9 @@ class Kadmin(val settings: Settings = new Settings()) extends LazyLogging {
           .returning { m: Match =>
             val error = m.group(1)
             if (error.trim == command) {
-              Right(true)
+              Right(Unit)
             } else {
-              Left(UnknownError(Some(error)))
+              Left(UnknownError(Some(new IllegalArgumentException(error))))
             }
           }
     }
@@ -748,7 +747,7 @@ class Kadmin(val settings: Settings = new Settings()) extends LazyLogging {
     * policy (MIT Kerberos)]] for a full list. The parameters are not checked for validity.
     * @return an Expect that modifies `policy`.
     */
-  def modifyPolicy(options: String, policy: String): Expect[Either[ErrorCase, Boolean]] = {
+  def modifyPolicy(options: String, policy: String): Expect[Either[ErrorCase, Unit]] = {
     doOperation { e =>
       val command: String = s"modify_policy $options $policy"
       e.expect(kadminPrompt)
@@ -760,9 +759,9 @@ class Kadmin(val settings: Settings = new Settings()) extends LazyLogging {
           .returning { m: Match =>
             val error = m.group(1)
             if (error.trim == command) {
-              Right(true)
+              Right(Unit)
             } else {
-              Left(UnknownError(Some(error)))
+              Left(UnknownError(Some(new IllegalArgumentException(error))))
             }
           }
     }
@@ -777,7 +776,7 @@ class Kadmin(val settings: Settings = new Settings()) extends LazyLogging {
     * @param policy the policy to delete.
     * @return an Expect that deletes `policy`.
     */
-  def deletePolicy(policy: String): Expect[Either[ErrorCase, Boolean]] = {
+  def deletePolicy(policy: String): Expect[Either[ErrorCase, Unit]] = {
     doOperation { e =>
       //With the -force option kadmin no longer prompts for deletion.
       val command = s"delete_policy -force $policy"
@@ -788,15 +787,15 @@ class Kadmin(val settings: Settings = new Settings()) extends LazyLogging {
           .returning(Left(PolicyIsInUse))
         .addWhen(policyDoesNotExist)
           //This is what makes this operation idempotent
-          .returning(Right(true))
+          .returning(Right(Unit))
         .addWhen(insufficientPermission)
         .addWhen(unknownError)
           .returning { m: Match =>
             val error = m.group(1)
             if (error.trim == command) {
-              Right(true)
+              Right(Unit)
             } else {
-              Left(UnknownError(Some(error)))
+              Left(UnknownError(Some(new IllegalArgumentException(error))))
             }
           }
     }
@@ -857,7 +856,7 @@ class Kadmin(val settings: Settings = new Settings()) extends LazyLogging {
     //(?s) inline regex flag for dotall mode. In this mode '.' matches any character, including a line terminator.
     expectBlock.when(s"(?s)(.+?)(?=\n$kadminPrompt)".r)
       .returning { m: Match =>
-        Left(UnknownError(Some(m.group(1))))
+        Left(UnknownError(Some(new IllegalArgumentException(m.group(1)))))
       }
   }
 

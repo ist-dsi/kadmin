@@ -12,30 +12,30 @@ class PolicySpec extends FlatSpec with TestUtils {
   "addPolicy" should "idempotently succeed" in {
     val policy = "add"
     //Ensure the policy does not exist
-    deletePolicy(policy) shouldReturn Right(true)
+    deletePolicy(policy) shouldReturn Right(Unit)
 
     //Create the policy
     //This also tests adding a policy when a policy already exists
     //TODO: test with all the options, maybe property based testing is helpful for this
-    addPolicy("-minlength 6 -minclasses 2", policy) shouldIdempotentlyReturn Right(true)
+    addPolicy("-minlength 6 -minclasses 2", policy) shouldIdempotentlyReturn Right(Unit)
 
     //Ensure it was in fact created
-    withPolicy[Boolean](policy){ expectBlock =>
+    withPolicy[Unit](policy){ expectBlock =>
       expectBlock.when("""Policy: ([^\n]+)\n""".r)
         .returning { m: Match =>
           Right(m.group(1) == policy)
         }
-    } shouldReturn Right(true)
+    } shouldReturn Right(Unit)
   }
 
   "deletePolicy" should "idempotently succeed" in {
     val policy = "delete"
     //Ensure the policy exists
-    addPolicy("-minlength 6", policy) shouldReturn Right(true)
+    addPolicy("-minlength 6", policy) shouldReturn Right(Unit)
 
     //Delete the policy
     //This also tests deleting a policy when there is no longer a policy
-    deletePolicy(policy) shouldIdempotentlyReturn Right(true)
+    deletePolicy(policy) shouldIdempotentlyReturn Right(Unit)
 
     //Ensure the policy was in fact deleted
     testNoSuchPolicy {
@@ -48,7 +48,7 @@ class PolicySpec extends FlatSpec with TestUtils {
   "modifyPolicy" should "return NoSuchPolicy when the policy does not exists" in {
     val policy = "modifyNoSuchPolicy"
     //Ensure the policy does not exist
-    deletePolicy(policy) shouldReturn Right(true)
+    deletePolicy(policy) shouldReturn Right(Unit)
 
     //Try to modify it
     testNoSuchPolicy {
@@ -59,11 +59,11 @@ class PolicySpec extends FlatSpec with TestUtils {
     val policy = "modify"
     val minLength = 9
     //Ensure the policy exists
-    addPolicy("-minlength 6", policy) shouldReturn Right(true)
+    addPolicy("-minlength 6", policy) shouldReturn Right(Unit)
 
     //Modify the policy
     //TODO: test with all the options, maybe property based testing is helpful for this
-    modifyPolicy(s"-minlength $minLength", policy) shouldIdempotentlyReturn Right(true)
+    modifyPolicy(s"-minlength $minLength", policy) shouldIdempotentlyReturn Right(Unit)
 
     //Ensure it was in fact modified
     policyMinimumLength(authenticatedKadmin, policy) shouldReturn Right(minLength)
@@ -72,7 +72,7 @@ class PolicySpec extends FlatSpec with TestUtils {
   "getPolicy" should "return NoSuchPolicy when the policy does not exists" in {
     val policy = "getNoSuchPolicy"
     //Ensure the policy does not exist
-    deletePolicy(policy) shouldReturn Right(true)
+    deletePolicy(policy) shouldReturn Right(Unit)
 
     //Try to get it
     testNoSuchPolicy {
@@ -85,7 +85,7 @@ class PolicySpec extends FlatSpec with TestUtils {
     val policy = "get"
     val minLength = 13
     //Ensure the principal exists
-    addPolicy(s"-minlength $minLength", policy) shouldReturn Right(true)
+    addPolicy(s"-minlength $minLength", policy) shouldReturn Right(Unit)
 
     //Read it
     policyMinimumLength(authenticatedKadmin, policy) shouldReturn Right(minLength)

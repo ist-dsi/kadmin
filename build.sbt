@@ -1,6 +1,6 @@
 organization := "pt.tecnico.dsi"
 name := "kadmin"
-version := "0.0.2"
+version := "1.0.2"
 
 scalaVersion := "2.11.8"
 initialize := {
@@ -23,7 +23,6 @@ libraryDependencies ++= Seq(
   //See http://stackoverflow.com/questions/13856266/class-broken-error-with-joda-time-using-scala
   //as to why this library must be included
   "org.joda" % "joda-convert" % "1.8.1",
-  "com.squants"  %% "squants"  % "0.5.3",
 
   "work.martins.simon" %% "scala-expect" % "1.10.2"
 )

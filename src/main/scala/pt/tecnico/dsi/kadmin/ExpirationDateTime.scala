@@ -3,7 +3,8 @@ package pt.tecnico.dsi.kadmin
 import com.typesafe.scalalogging.LazyLogging
 import org.joda.time.DateTime
 import org.joda.time.format.DateTimeFormat
-import squants.time.Time
+
+import scala.concurrent.duration.FiniteDuration
 
 trait ExpirationDateTime extends Equals {
   protected def dateTime: DateTime
@@ -50,8 +51,8 @@ object Never extends ExpirationDateTime {
   override def equals(other: Any): Boolean = canEqual(other)
 }
 
-class RelativeDateTime(duration: Time) extends ExpirationDateTime {
-  protected val dateTime = new DateTime(DateTime.now().getMillis + duration.millis)
+class RelativeDateTime(duration: FiniteDuration) extends ExpirationDateTime {
+  protected val dateTime = new DateTime(DateTime.now().getMillis + duration.toMillis)
   val toAbsolute = new AbsoluteDateTime(dateTime)
 
   def canEqual(other: Any): Boolean = other.isInstanceOf[RelativeDateTime]

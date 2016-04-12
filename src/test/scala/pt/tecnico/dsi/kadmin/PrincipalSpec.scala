@@ -13,30 +13,30 @@ class PrincipalSpec extends FlatSpec with TestUtils {
   "addPrincipal" should "idempotently succeed" in {
     val principal = "add"
     //Ensure the principal does not exist
-    deletePrincipal(principal) shouldReturn Right(true)
+    deletePrincipal(principal) shouldReturn Right(Unit)
 
     //Create the principal
     //This also tests adding a principal when a principal already exists
     //TODO: test with all the options, maybe property based testing is helpful for this
-    addPrincipal("-nokey", principal) shouldIdempotentlyReturn Right(true)
+    addPrincipal("-nokey", principal) shouldIdempotentlyReturn Right(Unit)
 
     //Ensure it was in fact created
-    withPrincipal[Boolean](principal){ expectBlock =>
+    withPrincipal[Unit](principal){ expectBlock =>
       expectBlock.when("""Principal: ([^\n]+)\n""".r)
         .returning { m: Match =>
           Right(m.group(1) == getFullPrincipalName(principal))
         }
-    } shouldReturn Right(true)
+    } shouldReturn Right(Unit)
   }
 
   "deletePrincipal" should "idempotently succeed" in {
     val principal = "delete"
     //Ensure the principal exists
-    addPrincipal("-nokey", principal) shouldReturn Right(true)
+    addPrincipal("-nokey", principal) shouldReturn Right(Unit)
 
     //Delete the principal
     //This also tests deleting a principal when there is no longer a principal
-    deletePrincipal(principal) shouldIdempotentlyReturn Right(true)
+    deletePrincipal(principal) shouldIdempotentlyReturn Right(Unit)
 
     //Ensure the principal was in fact deleted
     testNoSuchPrincipal {
@@ -49,7 +49,7 @@ class PrincipalSpec extends FlatSpec with TestUtils {
   "modifyPrincipal" should "return NoSuchPrincipal when the principal does not exists" in {
     val principal = "modifyNoSuchPrincipal"
     //Ensure the principal does not exist
-    deletePrincipal(principal) shouldReturn Right(true)
+    deletePrincipal(principal) shouldReturn Right(Unit)
 
     //Try to modify it
     testNoSuchPrincipal {
@@ -59,11 +59,11 @@ class PrincipalSpec extends FlatSpec with TestUtils {
   it should "idempotently succeed" in {
     val principal = "modify"
     //Ensure the principal exists
-    addPrincipal("-nokey", principal) shouldReturn Right(true)
+    addPrincipal("-nokey", principal) shouldReturn Right(Unit)
 
     //Modify the principal
     //TODO: test with all the options, maybe property based testing is helpful for this
-    modifyPrincipal("-allow_forwardable", principal) shouldIdempotentlyReturn Right(true)
+    modifyPrincipal("-allow_forwardable", principal) shouldIdempotentlyReturn Right(Unit)
 
     //Ensure it was in fact modified
     withPrincipal[Boolean](principal){ expectBlock =>
@@ -77,7 +77,7 @@ class PrincipalSpec extends FlatSpec with TestUtils {
   "getPrincipal" should "return NoSuchPrincipal when the principal does not exists" in {
     val principal = "getNoSuchPrincipal"
     //Ensure the principal does not exist
-    deletePrincipal(principal) shouldReturn Right(true)
+    deletePrincipal(principal) shouldReturn Right(Unit)
 
     //Try to get it
     testNoSuchPrincipal {
@@ -89,7 +89,7 @@ class PrincipalSpec extends FlatSpec with TestUtils {
   it should "idempotently succeed" in {
     val principal = "get"
     //Ensure the principal exists
-    addPrincipal("-nokey", principal) shouldReturn Right(true)
+    addPrincipal("-nokey", principal) shouldReturn Right(Unit)
 
     //Read it
     withPrincipal[Boolean](principal){ expectBlock =>
@@ -106,10 +106,10 @@ class PrincipalSpec extends FlatSpec with TestUtils {
     val principal = "expire"
 
     //Ensure the principal exists
-    addPrincipal("-nokey", principal) shouldReturn Right(true)
+    addPrincipal("-nokey", principal) shouldReturn Right(Unit)
 
     //Expire it
-    expirePrincipal(principal, expireDateTime) shouldIdempotentlyReturn Right(true)
+    expirePrincipal(principal, expireDateTime) shouldIdempotentlyReturn Right(Unit)
 
     //Ensure the expiration date changed
     getExpirationDate(principal) shouldIdempotentlyReturn Right(expireDateTime)
@@ -119,10 +119,10 @@ class PrincipalSpec extends FlatSpec with TestUtils {
     val principal = "expirePassword"
 
     //Ensure the principal exists
-    addPrincipal("-nokey", principal) shouldReturn Right(true)
+    addPrincipal("-nokey", principal) shouldReturn Right(Unit)
 
     //Expire the principal password
-    expirePrincipalPassword(principal, expireDateTime) shouldIdempotentlyReturn Right(true)
+    expirePrincipalPassword(principal, expireDateTime) shouldIdempotentlyReturn Right(Unit)
 
     //Ensure the password expiration date changed
     getPasswordExpirationDate(principal) shouldIdempotentlyReturn Right(expireDateTime)

@@ -9,7 +9,8 @@ import scala.concurrent.duration.FiniteDuration
 trait ExpirationDateTime extends Equals {
   protected def dateTime: DateTime
 
-  private val format = DateTimeFormat.forPattern("yyyy-MM-dd HH:mm:ss zzz")
+  //We cannot include the timezone in the format because kadmin cannot interpret some timezones such as WEST
+  private val format = DateTimeFormat.forPattern("yyyy-MM-dd HH:mm:ss")
   val toKadminRepresentation: String = format.print(dateTime)
 
   override def equals(other: Any): Boolean = other match {

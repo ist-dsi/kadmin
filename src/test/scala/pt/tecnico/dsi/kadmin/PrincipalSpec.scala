@@ -100,6 +100,8 @@ class PrincipalSpec extends FlatSpec with TestUtils {
     } shouldReturn Right(true)
   }
 
+  //TODO: test with different time zones (the time zone will be ignored)
+
   val expireDateTime = new DateTime(DateTimeZone.forID("UTC")).plusHours(2)
   "expirePrincipal and getExpirationDate" should "idempotently succeed" in {
     //expirePrincipal uses internally the modifyPrincipal so we do not test for NoSuchPrincipal nor lack of privilege

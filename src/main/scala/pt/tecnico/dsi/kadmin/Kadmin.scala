@@ -317,6 +317,7 @@ class Kadmin(val settings: Settings = new Settings()) extends LazyLogging {
     * $startedWithDoOperation
     *
     * @param principal the principal to expire.
+    * @param expirationDateTime the datetime to set as the principal expiration date. The timezone will be ignored.
     * @return an Expect that expires `principal`.
     */
   def expirePrincipal(principal: String, expirationDateTime: ExpirationDateTime = Now()): Expect[Either[ErrorCase, Unit]] = {
@@ -346,13 +347,13 @@ class Kadmin(val settings: Settings = new Settings()) extends LazyLogging {
     * $startedWithDoOperation
     *
     * @param principal the principal to set the password expiration date.
-    * @param datetime the datetime to set as the password expiration date.
+    * @param expirationDateTime the datetime to set as the password expiration date. The timezone will be ignored.
     * @param force whether or not to clear the principal policy. By default this is set to false.
     * @return an Expect that sets the password expiration date of `principal` to `date`.
     */
-  def expirePrincipalPassword(principal: String, datetime: ExpirationDateTime = Now(),
+  def expirePrincipalPassword(principal: String, expirationDateTime: ExpirationDateTime = Now(),
                               force: Boolean = false): Expect[Either[ErrorCase, Unit]] = {
-    val dateTimeString = datetime.toKadminRepresentation
+    val dateTimeString = expirationDateTime.toKadminRepresentation
     modifyPrincipal(s"""${if (force) "-clearpolicy " else ""}-pwexpire "$dateTimeString"""", principal)
     // Sometimes there isn't the need to clear the policy. This is true when `date` lies ahead of how soon the
     // password can expire according to the policy. We could avoid the clear policy in two different ways:

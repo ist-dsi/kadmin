@@ -1,4 +1,9 @@
-# kadmin [![Build Status](https://travis-ci.org/ist-dsi/kadmin.svg?branch=master)](https://travis-ci.org/ist-dsi/kadmin) [![Codacy Badge](https://api.codacy.com/project/badge/grade/a5fead3a55db40cd96470ed7a8efe9c5)](https://www.codacy.com/app/Whatever/kadmin)
+# kadmin
+[![SemVer](http://img.shields.io/:semver-1.0.3-brightgreen.svg)](http://semver.org)
+[![Build Status](https://travis-ci.org/ist-dsi/kadmin.svg?branch=master)](https://travis-ci.org/ist-dsi/kadmin)
+[![Codacy Badge](https://api.codacy.com/project/badge/grade/a5fead3a55db40cd96470ed7a8efe9c5)](https://www.codacy.com/app/Whatever/kadmin)
+[![license](https://img.shields.io/github/license/mashape/apistatus.svg?maxAge=2592000?style=plastic)](LICENSE)
+
 A type-safe wrapper around the kadmin command for Scala.
 
 In JVM it's possible to obtain Kerberos tickets, but to create or delete principals is outright impossible.
@@ -13,7 +18,7 @@ To simplify this process we use [scala-expect](https://github.com/Lasering/scala
 ## Install
 Add the following dependency to your `build.sbt`:
 ```scala
-libraryDependencies += "pt.tecnico.dsi" %% "kadmin" % "1.0.2"
+libraryDependencies += "pt.tecnico.dsi" %% "kadmin" % "1.0.3"
 ```
 
 ## Available kadmin commands
@@ -65,3 +70,6 @@ Be sure to have [docker](https://docs.docker.com/engine/installation/) and [dock
 ## Note on the docker-kerberos folder
 This folder is a [git fake submodule](http://debuggable.com/posts/git-fake-submodules:4b563ee4-f3cc-4061-967e-0e48cbdd56cb)
 to the [docker-kerberos repository](https://github.com/ist-dsi/docker-kerberos).
+
+## License
+kadmin is open source and available under the [MIT license](LICENSE).

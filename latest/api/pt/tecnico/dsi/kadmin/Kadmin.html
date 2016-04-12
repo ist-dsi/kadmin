@@ -586,9 +586,9 @@ Otherwise it will be unauthenticated.
  it will be successful in both invocations. This means that this operation can be repeated or retried as
  often as necessary without causing unintended effects.</p><p> Kadmin will be started with the <code>doOperation</code> method, that is, it will perform
  authentication as specified in the configuration.
-</p></div><dl class="paramcmts block"><dt class="param">principal</dt><dd class="cmt"><p>the principal to expire.</p></dd><dt>returns</dt><dd class="cmt"><p>an Expect that expires <code>principal</code>.</p></dd></dl></div>
+</p></div><dl class="paramcmts block"><dt class="param">principal</dt><dd class="cmt"><p>the principal to expire.</p></dd><dt class="param">expirationDateTime</dt><dd class="cmt"><p>the datetime to set as the principal expiration date. The timezone will be ignored.</p></dd><dt>returns</dt><dd class="cmt"><p>an Expect that expires <code>principal</code>.</p></dd></dl></div>
     </li><li name="pt.tecnico.dsi.kadmin.Kadmin#expirePrincipalPassword" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
-      <a id="expirePrincipalPassword(principal:String,datetime:pt.tecnico.dsi.kadmin.ExpirationDateTime,force:Boolean):work.martins.simon.expect.fluent.Expect[Either[pt.tecnico.dsi.kadmin.ErrorCase,Unit]]"></a>
+      <a id="expirePrincipalPassword(principal:String,expirationDateTime:pt.tecnico.dsi.kadmin.ExpirationDateTime,force:Boolean):work.martins.simon.expect.fluent.Expect[Either[pt.tecnico.dsi.kadmin.ErrorCase,Unit]]"></a>
       <a id="expirePrincipalPassword(String,ExpirationDateTime,Boolean):Expect[Either[ErrorCase,Unit]]"></a>
       <h4 class="signature">
       <span class="modifier_kind">
@@ -596,10 +596,10 @@ Otherwise it will be unauthenticated.
         <span class="kind">def</span>
       </span>
       <span class="symbol">
-        <span class="name">expirePrincipalPassword</span><span class="params">(<span name="principal">principal: <span class="extype" name="scala.Predef.String">String</span></span>, <span name="datetime">datetime: <a href="ExpirationDateTime.html" class="extype" name="pt.tecnico.dsi.kadmin.ExpirationDateTime">ExpirationDateTime</a> = <span class="symbol">Now()</span></span>, <span name="force">force: <a href="http://www.scala-lang.org/api/2.11.8/index.html#scala.Boolean" class="extype" target="_top">Boolean</a> = <span class="symbol">false</span></span>)</span><span class="result">: <span class="extype" name="work.martins.simon.expect.fluent.Expect">Expect</span>[<span class="extype" name="scala.Either">Either</span>[<a href="ErrorCase.html" class="extype" name="pt.tecnico.dsi.kadmin.ErrorCase">ErrorCase</a>, <a href="http://www.scala-lang.org/api/2.11.8/index.html#scala.Unit" class="extype" target="_top">Unit</a>]]</span>
+        <span class="name">expirePrincipalPassword</span><span class="params">(<span name="principal">principal: <span class="extype" name="scala.Predef.String">String</span></span>, <span name="expirationDateTime">expirationDateTime: <a href="ExpirationDateTime.html" class="extype" name="pt.tecnico.dsi.kadmin.ExpirationDateTime">ExpirationDateTime</a> = <span class="symbol">Now()</span></span>, <span name="force">force: <a href="http://www.scala-lang.org/api/2.11.8/index.html#scala.Boolean" class="extype" target="_top">Boolean</a> = <span class="symbol">false</span></span>)</span><span class="result">: <span class="extype" name="work.martins.simon.expect.fluent.Expect">Expect</span>[<span class="extype" name="scala.Either">Either</span>[<a href="ErrorCase.html" class="extype" name="pt.tecnico.dsi.kadmin.ErrorCase">ErrorCase</a>, <a href="http://www.scala-lang.org/api/2.11.8/index.html#scala.Unit" class="extype" target="_top">Unit</a>]]</span>
       </span>
       </h4><span class="permalink">
-      <a href="../../../../index.html#pt.tecnico.dsi.kadmin.Kadmin@expirePrincipalPassword(principal:String,datetime:pt.tecnico.dsi.kadmin.ExpirationDateTime,force:Boolean):work.martins.simon.expect.fluent.Expect[Either[pt.tecnico.dsi.kadmin.ErrorCase,Unit]]" title="Permalink" target="_top">
+      <a href="../../../../index.html#pt.tecnico.dsi.kadmin.Kadmin@expirePrincipalPassword(principal:String,expirationDateTime:pt.tecnico.dsi.kadmin.ExpirationDateTime,force:Boolean):work.martins.simon.expect.fluent.Expect[Either[pt.tecnico.dsi.kadmin.ErrorCase,Unit]]" title="Permalink" target="_top">
         <img src="../../../../lib/permalink.png" alt="Permalink" />
       </a>
     </span>
@@ -613,7 +613,7 @@ However if the policy is cleared and <code>getPasswordExpirationDate</code> is i
 will be the one set by this method. This caveat comes from the kadmin utility and not from this library.</p><p>Due to its caveats this method SHOULD ONLY BE USED FOR DEBUGGING applications where the fact that the principal
 password is about to expire or has expired changes the behavior of the application.</p><p> Kadmin will be started with the <code>doOperation</code> method, that is, it will perform
  authentication as specified in the configuration.
-</p></div><dl class="paramcmts block"><dt class="param">principal</dt><dd class="cmt"><p>the principal to set the password expiration date.</p></dd><dt class="param">datetime</dt><dd class="cmt"><p>the datetime to set as the password expiration date.</p></dd><dt class="param">force</dt><dd class="cmt"><p>whether or not to clear the principal policy. By default this is set to false.</p></dd><dt>returns</dt><dd class="cmt"><p>an Expect that sets the password expiration date of <code>principal</code> to <code>date</code>.</p></dd></dl></div>
+</p></div><dl class="paramcmts block"><dt class="param">principal</dt><dd class="cmt"><p>the principal to set the password expiration date.</p></dd><dt class="param">expirationDateTime</dt><dd class="cmt"><p>the datetime to set as the password expiration date. The timezone will be ignored.</p></dd><dt class="param">force</dt><dd class="cmt"><p>whether or not to clear the principal policy. By default this is set to false.</p></dd><dt>returns</dt><dd class="cmt"><p>an Expect that sets the password expiration date of <code>principal</code> to <code>date</code>.</p></dd></dl></div>
     </li><li name="scala.AnyRef#finalize" visbl="prt" data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="finalize():Unit"></a>
       <a id="finalize():Unit"></a>

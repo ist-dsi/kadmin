@@ -8,7 +8,7 @@ import scala.util.matching.Regex.Match
   * $assumptions
   */
 class PrincipalSpec extends FlatSpec with TestUtils {
-  import authenticatedKadmin._
+  import fullPermissionsKadmin._
 
   "addPrincipal" should "idempotently succeed" in {
     val principal = "add"

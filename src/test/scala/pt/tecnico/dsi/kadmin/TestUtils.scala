@@ -26,18 +26,13 @@ import scala.util.matching.Regex.Match
 trait TestUtils extends ScalaFutures with Matchers {
   def createConfigFor(principal: String) = ConfigFactory.parseString(s"""
     kadmin {
-      perform-authentication = true
-
       realm = "EXAMPLE.COM"
 
       authenticating-principal = "$principal"
       authenticating-principal-password = "MITiys4K5"
-
-      command-with-authentication = "kadmin -p "$${kadmin.authenticating-principal}"@"$${kadmin.realm}
     }""")
-  val authenticatedKadmin = new Kadmin(createConfigFor("kadmin/admin").resolve())
-  val unAuthenticatedKadmin = new Kadmin(createConfigFor("noPermissions").resolve())
-
+  val fullPermissionsKadmin = new Kadmin(createConfigFor("kadmin/admin"))
+  val noPermissionsKadmin = new Kadmin(createConfigFor("noPermissions"))
 
   def idempotent[T](test: Expect[T])(expectedResult: T): Unit = idempotent[T]()(test)(expectedResult)
   def idempotent[T](repetitions: Int = 3)(test: Expect[T])(expectedResult: T): Unit = {

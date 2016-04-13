@@ -20,9 +20,9 @@ import com.typesafe.config.{ConfigFactory, Config}
   *      object YourSettings extends Settings() {
   *        override val realm: String = "YOUR.DOMAIN.TLD"
   *        override val keytabsLocation: String = "/var/local/keytabs"
-  *        override val commandWithAuthentication: String = s"""ssh user@server:port "kadmin -p \$authenticatingPrincipal""""
+  *        override val commandWithAuthentication: String = s"""ssh user@server:port "kadmin -p $authenticatingPrincipal""""
   *      }
-  *      new Kadmin(YourSettings
+  *      new Kadmin(YourSettings)
   *    }}}
   * @param config
   */
@@ -47,6 +47,7 @@ class Settings(config: Config = ConfigFactory.load()) {
     throw new IllegalArgumentException("When performing authentication authenticating-principal-password cannot be empty.")
 
   val commandWithAuthentication = getString("command-with-authentication")
+    .replaceAllLiterally("$FULL_PRINCIPAL", s"$authenticatingPrincipal@$realm")
   require(commandWithAuthentication.nonEmpty, "command-with-authentication cannot be empty.")
 
   val commandWithoutAuthentication = getString("command-without-authentication")

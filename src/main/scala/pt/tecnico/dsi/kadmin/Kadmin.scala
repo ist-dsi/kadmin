@@ -27,14 +27,11 @@ class Kadmin(val settings: Settings = new Settings()) extends LazyLogging {
   def this(config: Config) = this(new Settings(config))
   import settings._
 
-  def getFullPrincipalName(principal: String): String = {
-    if (principal.trim.endsWith(s"@$realm")){
-      principal
-    } else if (principal.contains("@")) {
+  def getFullPrincipalName(principal: String): String = principal.trim match {
+    case p if p.endsWith(s"@$realm") => p
+    case p if p.contains("@") =>
       throw new IllegalArgumentException("Principal with unknown realm: " + principal.substring(principal.indexOf("@")))
-    } else {
-      s"$principal@$realm"
-    }
+    case p => s"$p@$realm"
   }
 
   /**

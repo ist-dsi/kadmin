@@ -1,5 +1,5 @@
 #!/bin/bash
-
+START=$(date +%s)
 cd docker-kerberos
 
 # Build the containers
@@ -11,5 +11,8 @@ EXIT_CODE=$(docker-compose ps "kerberos-client" | grep -oP "(?<=Exit )\d+")
 
 # Remove the containers to ensure a clean slate the next time this script in ran.
 docker-compose rm -f
+
+END=$(date +%s)
+echo $(($END-$START)) "seconds"
 
 exit $EXIT_CODE

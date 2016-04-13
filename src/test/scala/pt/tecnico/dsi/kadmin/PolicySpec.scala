@@ -7,7 +7,7 @@ import scala.util.matching.Regex.Match
   * $assumptions
   */
 class PolicySpec extends FlatSpec with TestUtils {
-  import authenticatedKadmin._
+  import fullPermissionsKadmin._
 
   "addPolicy" should "idempotently succeed" in {
     val policy = "add"
@@ -66,7 +66,7 @@ class PolicySpec extends FlatSpec with TestUtils {
     modifyPolicy(s"-minlength $minLength", policy) shouldIdempotentlyReturn Right(Unit)
 
     //Ensure it was in fact modified
-    policyMinimumLength(authenticatedKadmin, policy) shouldReturn Right(minLength)
+    policyMinimumLength(fullPermissionsKadmin, policy) shouldReturn Right(minLength)
   }
 
   "getPolicy" should "return NoSuchPolicy when the policy does not exists" in {
@@ -88,6 +88,6 @@ class PolicySpec extends FlatSpec with TestUtils {
     addPolicy(s"-minlength $minLength", policy) shouldReturn Right(Unit)
 
     //Read it
-    policyMinimumLength(authenticatedKadmin, policy) shouldReturn Right(minLength)
+    policyMinimumLength(fullPermissionsKadmin, policy) shouldReturn Right(minLength)
   }
 }

@@ -2,7 +2,7 @@
 [![SemVer](http://img.shields.io/:semver-1.0.3-brightgreen.svg)](http://semver.org)
 [![Build Status](https://travis-ci.org/ist-dsi/kadmin.svg?branch=master)](https://travis-ci.org/ist-dsi/kadmin)
 [![Codacy Badge](https://api.codacy.com/project/badge/grade/a5fead3a55db40cd96470ed7a8efe9c5)](https://www.codacy.com/app/Whatever/kadmin)
-[![license](https://img.shields.io/github/license/mashape/apistatus.svg?maxAge=2592000?style=plastic)](LICENSE)
+[![license](http://img.shields.io/:license-MIT-blue.svg)](LICENSE)
 
 A type-safe wrapper around the kadmin command for Scala.
 
@@ -17,8 +17,8 @@ To simplify this process we use [scala-expect](https://github.com/Lasering/scala
 
 ## Install
 Add the following dependency to your `build.sbt`:
-```scala
-libraryDependencies += "pt.tecnico.dsi" %% "kadmin" % "1.0.3"
+```sbt
+libraryDependencies += "pt.tecnico.dsi" %% "kadmin" % "2.0.0"
 ```
 
 ## Available kadmin commands
@@ -62,6 +62,44 @@ Besides these kadmin commands the following functions are also available:
    these functions match against common kadmin errors and return the appropriate `ErrorCase`.
  - [`preemptiveExit`](https://ist-dsi.github.io/kadmin/latest/api/index.html#pt.tecnico.dsi.kadmin.Kadmin@preemptiveExit[R](when:work.martins.simon.expect.fluent.When[Either[pt.tecnico.dsi.kadmin.ErrorCase,R]]):Unit) - allows you to gracefully terminate the kadmin cli and ensure the next `ExpectBlock`s in the current
    `Expect` do not get executed.
+
+
+## Configurations
+Kadmin uses [typesafe-config](https://github.com/typesafehub/config).
+
+The [reference.conf](src/main/resources/reference.conf) file was the following keys:
+```
+kadmin {
+  realm = "EXAMPLE.COM"
+
+  perform-authentication = true
+
+  //If perform-authentication is true then these are the credentials used to perform the authentication
+  authenticating-principal = "kadmin/admin"
+  authenticating-principal-password = ""
+
+  //This is the command used to start kadmin when authentication is to be performed.
+  //The string "$FULL_PRINCIPAL" will be replaced with s"$authenticating-principal@$realm"
+  command-with-authentication = "kadmin -p $FULL_PRINCIPAL"
+  //This is the command used to start kadmin when no authentication is necessary
+  command-without-authentication = "kadmin.local"
+
+  //The location to which keytabs will be generated to.
+  //Make sure this location is NOT volatile, is not world readable, the user running the application has suficient
+  //permissions to write and to read from it.
+  keytabs-location = "/tmp"
+
+  //Regex that matches against the kadmin command prompt
+  prompt = "kadmin(.local)?: "
+}
+```
+
+You will need to define at least the `realm` and the `authenticating-principal-password` in your `application.conf`.
+If you don't require authentication you can simply set `perform-authentication` to false and define the `realm`.
+
+Alternatively you can pass your Config object to the kadmin constructor, or subclass the
+[Settings](https://ist-dsi.github.io/kadmin/latest/api/#pt.tecnico.dsi.kadmin.Settings) class for a mixed approach.
+The scaladoc of the Settings class has examples explaining the different options.
 
 ## How to test kadmin
 In the project root run `./test.sh`. This script will run `docker-compose up` inside the docker-kerberos folder.

@@ -6,7 +6,7 @@ import org.scalatest.WordSpec
   * $assumptions
   */
 class ChangePasswordSpec extends WordSpec with TestUtils {
-  import authenticatedKadmin._
+  import fullPermissionsKadmin._
 
   "ChangePassword" when {
     "the principal has no policy" should {

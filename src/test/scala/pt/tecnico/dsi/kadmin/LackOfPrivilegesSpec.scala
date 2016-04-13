@@ -6,7 +6,7 @@ import org.scalatest.WordSpec
   * $assumptions
   */
 class LackOfPrivilegesSpec extends WordSpec with TestUtils {
-  import unAuthenticatedKadmin._
+  import noPermissionsKadmin._
 
   "An Expect" when {
     "the authenticating principal does not have sufficient permissions" should {

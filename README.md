@@ -1,5 +1,5 @@
 # kadmin
-[![SemVer](http://img.shields.io/:semver-1.0.3-brightgreen.svg)](http://semver.org)
+[![SemVer](http://img.shields.io/:semver-2.0.0-brightgreen.svg)](http://semver.org)
 [![Build Status](https://travis-ci.org/ist-dsi/kadmin.svg?branch=master)](https://travis-ci.org/ist-dsi/kadmin)
 [![Codacy Badge](https://api.codacy.com/project/badge/grade/a5fead3a55db40cd96470ed7a8efe9c5)](https://www.codacy.com/app/Whatever/kadmin)
 [![license](http://img.shields.io/:license-MIT-blue.svg)](LICENSE)

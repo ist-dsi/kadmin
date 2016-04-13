@@ -20,6 +20,7 @@ Add the following dependency to your `build.sbt`:
 ```sbt
 libraryDependencies += "pt.tecnico.dsi" %% "kadmin" % "2.0.0"
 ```
+We use [semantic versioning](http://semver.org).
 
 ## Available kadmin commands
  - [Adding a principal](https://ist-dsi.github.io/kadmin/latest/api/index.html#pt.tecnico.dsi.kadmin.Kadmin@addPrincipal(options:String,principal:String):work.martins.simon.expect.fluent.Expect[Either[pt.tecnico.dsi.kadmin.ErrorCase,Boolean]])

@@ -68,7 +68,7 @@ Besides these kadmin commands the following functions are also available:
 Kadmin uses [typesafe-config](https://github.com/typesafehub/config).
 
 The [reference.conf](src/main/resources/reference.conf) file was the following keys:
-```
+```scala
 kadmin {
   realm = "EXAMPLE.COM"
 

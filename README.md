@@ -1,7 +1,7 @@
 # kadmin
 [![Maven Central](https://maven-badges.herokuapp.com/maven-central/pt.tecnico.dsi/kadmin_2.11/badge.svg)](https://maven-badges.herokuapp.com/maven-central/pt.tecnico.dsi/kadmin_2.11)
 [![Build Status](https://travis-ci.org/ist-dsi/kadmin.svg?branch=master)](https://travis-ci.org/ist-dsi/kadmin)
-[![Codacy Badge](https://api.codacy.com/project/badge/grade/a5fead3a55db40cd96470ed7a8efe9c5)](https://www.codacy.com/app/Whatever/kadmin)
+[![Codacy Badge](https://api.codacy.com/project/badge/grade/a5fead3a55db40cd96470ed7a8efe9c5)](https://www.codacy.com/app/IST-DSI/kadmin)
 [![license](http://img.shields.io/:license-MIT-blue.svg)](LICENSE)
 
 A type-safe wrapper around the kadmin command for Scala.

@@ -4,7 +4,7 @@
 [![Reference Status](https://www.versioneye.com/java/pt.tecnico.dsi:kadmin_2.11/reference_badge.svg?style=plastic)](https://www.versioneye.com/java/pt.tecnico.dsi:kadmin_2.11/references)
 [![Build Status](https://travis-ci.org/ist-dsi/kadmin.svg?branch=master)](https://travis-ci.org/ist-dsi/kadmin)
 [![Codacy Badge](https://api.codacy.com/project/badge/grade/a5fead3a55db40cd96470ed7a8efe9c5)](https://www.codacy.com/app/Whatever/kadmin)
-[![Scaladoc](http://javadoc-badge.appspot.com/pt.tecnico.dsi/kadmin_2.11.svg?label=scaladoc)](http://javadoc-badge.appspot.com/pt.tecnico.dsi/kadmin_2.11/index.html#pt.tecnico.dsi.package)
+[![Scaladoc](http://javadoc-badge.appspot.com/pt.tecnico.dsi/kadmin_2.11.svg?label=scaladoc)](https://ist-dsi.github.io/kadmin/latest/api/#pt.tecnico.dsi.kadmin.package)
 [![license](http://img.shields.io/:license-MIT-blue.svg)](LICENSE)
 
 A type-safe wrapper around the kadmin command for Scala.

@@ -1,7 +1,7 @@
 # kadmin
 [![Maven Central](https://maven-badges.herokuapp.com/maven-central/pt.tecnico.dsi/kadmin_2.11/badge.svg)](https://maven-badges.herokuapp.com/maven-central/pt.tecnico.dsi/kadmin_2.11)
-[![Dependency Status](https://www.versioneye.com/user/projects/5718ed91fcd19a00454417b5/badge.svg?style=flat)](https://www.versioneye.com/user/projects/5718ed91fcd19a00454417b5)
-[![Reference Status](https://www.versioneye.com/java/pt.tecnico.dsi:kadmin_2.11/reference_badge.svg?style=flat)](https://www.versioneye.com/java/pt.tecnico.dsi:kadmin_2.11/references)
+[![Dependency Status](https://www.versioneye.com/user/projects/5718ed91fcd19a00454417b5/badge.svg?style=plastic)](https://www.versioneye.com/user/projects/5718ed91fcd19a00454417b5)
+[![Reference Status](https://www.versioneye.com/java/pt.tecnico.dsi:kadmin_2.11/reference_badge.svg?style=plastic)](https://www.versioneye.com/java/pt.tecnico.dsi:kadmin_2.11/references)
 [![Build Status](https://travis-ci.org/ist-dsi/kadmin.svg?branch=master)](https://travis-ci.org/ist-dsi/kadmin)
 [![Codacy Badge](https://api.codacy.com/project/badge/grade/a5fead3a55db40cd96470ed7a8efe9c5)](https://www.codacy.com/app/Whatever/kadmin)
 [![Scaladoc](http://javadoc-badge.appspot.com/pt.tecnico.dsi/kadmin_2.11.svg?label=scaladoc)](http://javadoc-badge.appspot.com/pt.tecnico.dsi/kadmin_2.11/index.html#pt.tecnico.dsi.package)

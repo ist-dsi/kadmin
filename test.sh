@@ -7,6 +7,10 @@ cd docker-kerberos
 
 # Build the containers
 docker-compose build
+BUILD_EXIT_CODE=$?
+if (( BUILD_EXIT_CODE != 0)); then
+    exit BUILD_EXIT_CODE
+fi
 
 # Run them. The --abort-on-container-exit stops all containers if any container was stopped.
 docker-compose up --abort-on-container-exit

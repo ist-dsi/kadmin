@@ -1,13 +1,14 @@
 package pt.tecnico.dsi.kadmin
 
 import com.typesafe.config.ConfigFactory
-import org.scalatest.Matchers
+import com.typesafe.scalalogging.LazyLogging
+import org.scalatest.{EitherValues, Matchers}
 import org.scalatest.concurrent.ScalaFutures
 import org.scalatest.exceptions.TestFailedException
 import org.scalatest.time.{Millis, Seconds, Span}
 import work.martins.simon.expect.fluent.Expect
+
 import scala.concurrent.ExecutionContext.Implicits.global
-import scala.util.matching.Regex.Match
 
 /**
   * @define assumptions These tests make the following assumptions:
@@ -23,7 +24,7 @@ import scala.util.matching.Regex.Match
   *  - Running the tests locally with docker-compose (look at the folder kerberos-docker).
   *  - Running the tests in the Travis CI (look at .travis.yml, which makes use of the kerberos-docker).
   */
-trait TestUtils extends ScalaFutures with Matchers {
+trait TestUtils extends ScalaFutures with Matchers with EitherValues with LazyLogging {
   def createConfigFor(principal: String) = ConfigFactory.parseString(s"""
     kadmin {
       realm = "EXAMPLE.COM"
@@ -34,20 +35,19 @@ trait TestUtils extends ScalaFutures with Matchers {
   val fullPermissionsKadmin = new Kadmin(createConfigFor("kadmin/admin"))
   val noPermissionsKadmin = new Kadmin(createConfigFor("noPermissions"))
 
-  def idempotent[T](test: Expect[T])(expectedResult: T): Unit = idempotent[T]()(test)(expectedResult)
-  def idempotent[T](repetitions: Int = 3)(test: Expect[T])(expectedResult: T): Unit = {
+  def idempotent[T](expect: Expect[Either[ErrorCase, T]], repetitions: Int = 3)(test: Either[ErrorCase, T] => Unit): Unit = {
     require(repetitions >= 2, "To test for idempotency at least 2 repetitions must be made")
     //If this fails we do not want to catch its exception, because failing in the first attempt means
     //whatever is being tested in `test` is not implemented correctly. Therefore we do not want to mask
     //the failure with a "Operation is not idempotent".
-    val firstResult = test.value
-    firstResult shouldEqual expectedResult
+    val firstResult = expect.value
+    test(firstResult)
 
     //This code will only be executed if the previous test succeed.
     //And now we want to catch the exception because if `test` fails here it means it is not idempotent.
-    val results = (1 until repetitions).map(_ => test.value)
+    val results = (1 until repetitions).map(_ => expect.value)
     try {
-      results.foreach(_ shouldEqual expectedResult)
+      results.foreach(test)
     } catch {
       case e: TestFailedException =>
         throw new TestFailedException(s"""Operation is not idempotent. Results:
@@ -60,31 +60,26 @@ trait TestUtils extends ScalaFutures with Matchers {
     }
   }
 
-  implicit class RichExpect[T](expect: Expect[T]) {
-    def shouldIdempotentlyReturn(expectedResult: T): Unit = idempotent[T](expect)(expectedResult)
-    def shouldReturn(expectedResult: T): Unit = value shouldBe expectedResult
-    def value: T = expect.run().futureValue(new PatienceConfig(
+  implicit class RichExpect[T](expect: Expect[Either[ErrorCase, T]]) {
+    def leftValue: ErrorCase = value.left.value
+    def rightValue: T = value.right.value
+    def rightValueShouldBeUnit(): Unit = rightValue.shouldBe(())
+
+    def leftValueShouldIdempotentlyBe(leftValue: ErrorCase): Unit = idempotent(expect)(_.left.value shouldBe leftValue)
+    def rightValueShouldIdempotentlyBe(rightValue: T): Unit = idempotent(expect)(_.right.value shouldBe rightValue)
+    def rightValueShouldIdempotentlyBeUnit(): Unit = idempotent(expect)(_.right.value.shouldBe(()))
+
+    def idempotentRightValue(rightValue: T => Unit): Unit = idempotent(expect)(t => rightValue(t.right.value))
+
+    def value: Either[ErrorCase, T] = expect.run().futureValue(new PatienceConfig(
       timeout = Span(expect.settings.timeout.toSeconds, Seconds),
       interval = Span(500, Millis)
     ))
   }
 
-  def policyMinimumLength(kadmin: Kadmin, policy: String): Expect[Either[ErrorCase, Int]] = {
-    kadmin.withPolicy[Int](policy) { expectBlock =>
-      expectBlock.when("""Minimum password length: (\d+)\n""".r)
-        .returning { m: Match =>
-          Right(m.group(1).toInt)
-        }
-    }
-  }
-
-  def testNoSuchPrincipal[R](e: Expect[Either[ErrorCase, R]]): Unit = {
-    e shouldIdempotentlyReturn Left(NoSuchPrincipal)
-  }
-  def testNoSuchPolicy[R](e: Expect[Either[ErrorCase, R]]): Unit = {
-    e shouldIdempotentlyReturn Left(NoSuchPolicy)
-  }
+  def testNoSuchPrincipal[R](e: Expect[Either[ErrorCase, R]]): Unit = e leftValueShouldIdempotentlyBe NoSuchPrincipal
+  def testNoSuchPolicy[R](e: Expect[Either[ErrorCase, R]]): Unit = e leftValueShouldIdempotentlyBe NoSuchPolicy
   def testInsufficientPermission[R](permission: String)(e: Expect[Either[ErrorCase, R]]): Unit = {
-    e shouldIdempotentlyReturn Left(InsufficientPermissions(permission))
+    e leftValueShouldIdempotentlyBe InsufficientPermissions(permission)
   }
 }

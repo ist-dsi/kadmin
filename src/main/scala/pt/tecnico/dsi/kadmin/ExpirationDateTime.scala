@@ -10,8 +10,8 @@ trait ExpirationDateTime extends Equals {
   protected def dateTime: DateTime
 
   //We cannot include the timezone in the format because kadmin cannot interpret some timezones such as WEST
-  private val format = DateTimeFormat.forPattern("yyyy-MM-dd HH:mm:ss")
-  val toKadminRepresentation: String = format.print(dateTime)
+  protected val format = DateTimeFormat.forPattern("yyyy-MM-dd HH:mm:ss")
+  def toKadminRepresentation: String = format.print(dateTime)
 
   override def equals(other: Any): Boolean = other match {
     case that: ExpirationDateTime => (that canEqual this) &&

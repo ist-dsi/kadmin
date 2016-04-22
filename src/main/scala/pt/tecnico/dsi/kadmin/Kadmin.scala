@@ -2,17 +2,17 @@ package pt.tecnico.dsi.kadmin
 
 import java.io.File
 import java.nio.file.Files
-import java.util.Locale
 
 import com.typesafe.config.Config
 import com.typesafe.scalalogging.LazyLogging
-import org.joda.time.{DateTime, DateTimeZone}
+import org.joda.time.DateTime
 import org.joda.time.format.DateTimeFormat
 import work.martins.simon.expect.EndOfFile
-import work.martins.simon.expect.fluent.{Expect, ExpectBlock, When}
+import work.martins.simon.expect.fluent.{Expect, ExpectBlock}
 
-import scala.util.{Failure, Success, Try}
+import scala.concurrent.duration.{Duration, DurationInt, FiniteDuration}
 import scala.util.matching.Regex.Match
+import pt.tecnico.dsi.kadmin.KadminUtils._
 
 /**
   * @define idempotentOperation
@@ -511,20 +511,18 @@ class Kadmin(val settings: Settings = new Settings()) extends LazyLogging {
   //region <Get/Read commands>
   /**
     * Performs the operation `f` over the output returned by "get_principal principal".
-    * This is useful to read the principal attributes.
+    * This is useful to read the principal attributes that are not included with `getPrincipal`.
     *
     * $startedWithDoOperation
     *
-    * Specialized functions to obtain the principal expiration date and the password expiration date already exist.
-    * See [getExpirationDate] and [getPasswordExpirationDate].
-    *
     * Consider using the `parseDateTime` method if `f` is to parse a date time.
+    * And `parseDuration` method if `f` is to parse a duration.
     *
     * @example {{{
     *   withPrincipal(principal){ expectBlock =>
     *     expectBlock.when("""Maximum ticket life: ([^\n]+)\n""".r)
     *       .returning{ m: Match =>
-    *         //m.group(1) will contain the maximum ticket life.
+    *         val maximumTicketLife = parseDuration(m.group(1))
     *       }
     * }}}
     * @param principal the principal to get the attributes.
@@ -545,117 +543,57 @@ class Kadmin(val settings: Settings = new Settings()) extends LazyLogging {
   }
 
   /**
-    * Gets the expiration date of `principal`.
-    *
-    * See the `parseDateTime` method to understand how the datetime is parsed.
-    *
-    * The returned ExpirationDateTime will either be of type `Never` or `AbsoluteDateTime`, and never of type
-    * `Now` or `RelativeDateTime`.
-    *
-    * $idempotentOperation
+    * Performs a "get_principal principal" and parses the output to the domain class `Principal`.
     *
     * $startedWithDoOperation
     *
-    * @param principal the principal to read the expiration date from.
-    * @return an Expect that get the expiration date of `principal`.
+    * @param principal the principal name.
+    * @return an Expect that returns the `Principal`.
     */
-  def getExpirationDate(principal: String): Expect[Either[ErrorCase, ExpirationDateTime]] = {
-    withPrincipal(principal){ expectBlock =>
-      expectBlock.when("Expiration date: ([^\n]+)\n".r)
-        .returning{ m: Match =>
-          Try {
-            parseDateTime(m.group(1))
-          } match {
-            case Success(datetime) => Right(datetime)
-            case Failure(e) => Left(UnknownError(Some(e)))
-          }
+  def getPrincipal(principal: String): Expect[Either[ErrorCase, Principal]] = withPrincipal(principal){ expectBlock =>
+    //(?s) inline regex flag for dotall mode. In this mode '.' matches any character, including a line terminator.
+    expectBlock.when("""(?s)Expiration date: ([^\n]+)
+                      |Last password change: ([^\n]+)
+                      |Password expiration date: ([^\n]+)
+                      |Maximum ticket life: ([^\n]+)
+                      |Maximum renewable life: ([^\n]+)
+                      |Last modified: ([^(]+) \((.*)\)
+                      |Last successful authentication: ([^\n]+)
+                      |Last failed authentication: ([^\n]+)
+                      |Failed password attempts: (\d+)
+                      |Number of keys: \d+
+                      |(.*?)MKey: vno (\d+)
+                      |Attributes: ([^\n]*)
+                      |Policy: ([^\n]+)""".stripMargin.r(
+            "expirationDateTime", "lastPasswordChangeDateTime", "passwordExpirationDateTime",
+            "maximumTicketLife", "maximumRenewableLife",
+            "lastModifiedDateTime", "lastModifiedBy",
+            "lastSuccessfulAuthenticationDateTime", "lastFailedAuthenticationDateTime", "failedPasswordAttempts",
+            "keys", "masterKey", "attributes", "policy"))
+      .returning { m: Match =>
+        val groups = for (n <- m.groupNames) yield (n, m.group(n))
+        val (datesString, others) = groups.toMap.partition(_._1.contains("DateTime"))
+        val datesStream = datesString.toStream.map { case (key, value) => (key, parseDateTime(value)) }
+        datesStream.find(_._2.isLeft) match {
+          case Some((_, Left(errorCase))) => Left(errorCase)
+          case Some(_) => Left(UnknownError(None))
+          case None =>
+            //We know that every value must be a Right
+            val dates = datesStream.collect { case (key, Right(date)) => (key, date) }.toMap
+            Right(new Principal(getFullPrincipalName(principal), dates("expirationDateTime"),
+              dates("lastPasswordChangeDateTime"), dates("passwordExpirationDateTime"),
+              parseDuration(others("maximumTicketLife")), parseDuration(others("maximumRenewableLife")),
+              dates("lastModifiedDateTime"), m.group("lastModifiedBy"),
+              dates("lastSuccessfulAuthenticationDateTime"), dates("lastFailedAuthenticationDateTime"), others("failedPasswordAttempts").toInt,
+              others("keys").split("\n").flatMap { keyString =>
+                """Key: vno (\d+), (.+)""".r.findFirstMatchIn(keyString).map { m =>
+                  new Key(m.group(1).toInt, m.group(2))
+                }
+              }.toSet, others("masterKey").toInt,
+              others("attributes").split(" ").toSet, Option(others("policy")).map(_.trim).filter(_ != "[none]")
+            ))
         }
-    }
-  }
-
-  /**
-    * Gets the password expiration datetime of `principal`.
-    *
-    * See the `parseDateTime` method to understand how the datetime is parsed.
-    *
-    * The returned ExpirationDateTime will either be of type `Never` or `AbsoluteDateTime`, and never of type
-    * `Now` or `RelativeDateTime`.
-    *
-    * $idempotentOperation
-    *
-    * $startedWithDoOperation
-    *
-    * @param principal the principal to read the password expiration date from.
-    * @return an Expect that get the password expiration date of `principal`.
-    */
-  def getPasswordExpirationDate(principal: String): Expect[Either[ErrorCase, ExpirationDateTime]] = {
-    withPrincipal(principal){ expectBlock =>
-      expectBlock.when("Password expiration date: ([^\n]+)\n".r)
-        .returning{ m: Match =>
-          Try {
-            parseDateTime(m.group(1))
-          } match {
-            case Success(datetime) => Right(datetime)
-            case Failure(e) => Left(UnknownError(Some(e)))
-          }
-        }
-    }
-  }
-
-  /**
-    * Tries to parse a date time string returned by a kadmin `get_principal` operation.
-    *
-    * The string must be in the format `"EEE MMM dd HH:mm:ss zzz yyyy"`, see
-    * [[http://www.joda.org/joda-time/apidocs/org/joda/time/format/DateTimeFormat.html Joda Time DateTimeFormat]]
-    * for an explanation of the format.
-    *
-    * If the string is either `"[never]"` or `"[none]"` the `Never` will be returned.
-    * Otherwise the string will be parsed in the following way:
-    *
-    *  1. Any text following the year, as long as it is separated with a space, will be removed from `dateTimeString`.
-    *  1. Since `DateTimeFormat` cannot process time zones, the timezone will be removed from `dateTimeString`, and an
-    *    attempt to match it against one of `DateTimeZone.getAvailableIDs` will be made. If no match is found the default
-    *    timezone will be used.
-    *  1. The default locale will be used when reading the date. This is necessary for the day of the week (EEE) and
-    *    the month of the year (MMM) parts.
-    *  1. Finally a `DateTimeFormat` will be constructed using the format above (except the time zone), the
-    *    computed timezone and the default locale.
-    *  1. The clean `dateString` (the result of step 1 and 2) will be parsed to a `DateTime` using the format
-    *    constructed in step 4.
-    *
-    * @param dateTimeString the string containing the date time.
-    * @return `Never` or an `AbsoluteDateTime`
-    */
-  def parseDateTime(dateTimeString: String): ExpirationDateTime = dateTimeString.trim match {
-    case "[never]" | "[none]" => Never
-    case trimmedDateString =>
-      //dateString must be in the format: EEE MMM 19 15:49:03 z* 2016 .*
-      //EEE = three letter day of the week, eg: English: Tue, Portuguese: Ter
-      //MMM = three letter month of the year, eg: English: Feb, Portuguese: Fev
-      //zzz = the timezone
-      val parts = trimmedDateString.split("""\s+""")
-      require(parts.size >= 6, s"""Not enough fields in "$trimmedDateString" for format "EEE MMM dd HH:mm:ss zzz yyyy".""")
-
-      //Discards any field after the year
-      val Array(dayOfWeek, month, day, time, timezone, year, _*) = parts
-
-      val finalTimeZone = if (DateTimeZone.getAvailableIDs.contains(timezone)) {
-        DateTimeZone.forID(timezone)
-      } else {
-        val default = DateTimeZone.getDefault
-        logger.warn(s"Unknown timezone: $timezone. Using the default one: $default.")
-        default
       }
-
-      val fmt = DateTimeFormat.forPattern("EEE MMM dd HH:mm:ss yyyy")
-        //We cannot parse the time zone with the DateTimeFormat because is does not support it.
-        .withZone(finalTimeZone)
-        //We define the locale because the text corresponding to the EEE and MMM patterns
-        //mostly likely is locale specific.
-        .withLocale(Locale.getDefault)
-
-      val dateTime = fmt.parseDateTime(s"$dayOfWeek $month $day $time $year")
-      new AbsoluteDateTime(dateTime)
   }
 
   /**
@@ -826,44 +764,41 @@ class Kadmin(val settings: Settings = new Settings()) extends LazyLogging {
         .addWhens(f)
     }
   }
-  //endregion
-
-  def insufficientPermission[R](expectBlock: ExpectBlock[Either[ErrorCase, R]]) = {
-    expectBlock.when("""Operation requires ``([^']+)'' privilege""".r)
+  /**
+    * Performs a "get_policy $$policy" and parses the output to the domain class `Policy`.
+    *
+    * $startedWithDoOperation
+    *
+    * @param policy the policy name.
+    * @return an Expect that returns the `Policy`.
+    */
+  def getPolicy(policy: String): Expect[Either[ErrorCase, Policy]] = withPolicy(policy){ expectBlock =>
+    expectBlock.when("""Maximum password life: (\d+)
+                       |Minimum password life: (\d+)
+                       |Minimum password length: (\d+)
+                       |Minimum number of password character classes: (\d+)
+                       |Number of old keys kept: (\d+)
+                       |Maximum password failures before lockout: (\d+)
+                       |Password failure count reset interval: ([^\n]+)
+                       |Password lockout duration: ([^\n]+)""".stripMargin.r(
+      "maximumLife", "minimumLife",
+      "minimumLength", "minimumCharacterClasses",
+      "oldKeysKept", "maximumFailuresBeforeLockout",
+      "failureCountResetInterval", "lockoutDuration"))
       .returning { m: Match =>
-        Left(InsufficientPermissions(m.group(1)))
+        Right(new Policy(policy, parseDuration(m.group("maximumLife")), parseDuration(m.group("minimumLife")),
+          m.group("minimumLength").toInt, m.group("minimumCharacterClasses").toInt,
+          m.group("oldKeysKept").toInt, m.group("maximumFailuresBeforeLockout").toInt,
+          parseDuration(m.group("failureCountResetInterval")), parseDuration(m.group("lockoutDuration"))))
       }
   }
-  def principalDoesNotExist[R](expectBlock: ExpectBlock[Either[ErrorCase, R]]) = {
-    expectBlock.when("Principal does not exist")
-      .returning(Left(NoSuchPrincipal))
-  }
-  def policyDoesNotExist[R](expectBlock: ExpectBlock[Either[ErrorCase, R]]) = {
-    expectBlock.when("Policy does not exist")
-      .returning(Left(NoSuchPolicy))
-  }
-  def passwordIncorrect[R](expectBlock: ExpectBlock[Either[ErrorCase, R]]) = {
-    expectBlock.when("Password incorrect")
-      .returning(Left(PasswordIncorrect))
-  }
-  def passwordExpired[R](expectBlock: ExpectBlock[Either[ErrorCase, R]]) = {
-    expectBlock.when("Password expired")
-      .returning(Left(PasswordExpired))
-  }
+  //endregion
+
   def unknownError[R](expectBlock: ExpectBlock[Either[ErrorCase, R]]) = {
     //(?s) inline regex flag for dotall mode. In this mode '.' matches any character, including a line terminator.
     expectBlock.when(s"(?s)(.+?)(?=\n$kadminPrompt)".r)
       .returning { m: Match =>
         Left(UnknownError(Some(new IllegalArgumentException(m.group(1)))))
       }
-  }
-
-  def preemptiveExit[R](when: When[Either[ErrorCase, R]]): Unit = {
-    when
-      //We send the quit to allow kadmin a graceful shutdown
-      .sendln("quit")
-      //This ensures the next expect(s) (if any) do not get executed and
-      //we don't end up returning something else by mistake.
-      .exit()
   }
 }

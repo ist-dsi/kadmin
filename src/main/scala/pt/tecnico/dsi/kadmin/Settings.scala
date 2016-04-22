@@ -20,7 +20,7 @@ import com.typesafe.config.{ConfigFactory, Config}
   *      object YourSettings extends Settings() {
   *        override val realm: String = "YOUR.DOMAIN.TLD"
   *        override val keytabsLocation: String = "/var/local/keytabs"
-  *        override val commandWithAuthentication: String = s"""ssh user@server:port "kadmin -p $authenticatingPrincipal""""
+  *        override val commandWithAuthentication: String = s"""ssh user@server:port "kadmin -p \$authenticatingPrincipal""""
   *      }
   *      new Kadmin(YourSettings)
   *    }}}

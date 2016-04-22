@@ -678,28 +678,6 @@ password is about to expire or has expired changes the behavior of the applicati
       </a>
     </span>
       <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>AnyRef → Any</dd></dl></div>
-    </li><li name="pt.tecnico.dsi.kadmin.Kadmin#getExpirationDate" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
-      <a id="getExpirationDate(principal:String):work.martins.simon.expect.fluent.Expect[Either[pt.tecnico.dsi.kadmin.ErrorCase,pt.tecnico.dsi.kadmin.ExpirationDateTime]]"></a>
-      <a id="getExpirationDate(String):Expect[Either[ErrorCase,ExpirationDateTime]]"></a>
-      <h4 class="signature">
-      <span class="modifier_kind">
-        <span class="modifier"></span>
-        <span class="kind">def</span>
-      </span>
-      <span class="symbol">
-        <span class="name">getExpirationDate</span><span class="params">(<span name="principal">principal: <span class="extype" name="scala.Predef.String">String</span></span>)</span><span class="result">: <a href="https://oss.sonatype.org/service/local/repositories/releases/archive/work/martins/simon/scala-expect_2.11/1.10.2/scala-expect_2.11-1.10.2-javadoc.jar/!/index.html#work.martins.simon.expect.fluent.Expect" class="extype" target="_top">Expect</a>[<span class="extype" name="scala.Either">Either</span>[<a href="ErrorCase.html" class="extype" name="pt.tecnico.dsi.kadmin.ErrorCase">ErrorCase</a>, <a href="ExpirationDateTime.html" class="extype" name="pt.tecnico.dsi.kadmin.ExpirationDateTime">ExpirationDateTime</a>]]</span>
-      </span>
-      </h4><span class="permalink">
-      <a href="../../../../index.html#pt.tecnico.dsi.kadmin.Kadmin@getExpirationDate(principal:String):work.martins.simon.expect.fluent.Expect[Either[pt.tecnico.dsi.kadmin.ErrorCase,pt.tecnico.dsi.kadmin.ExpirationDateTime]]" title="Permalink" target="_top">
-        <img src="../../../../lib/permalink.png" alt="Permalink" />
-      </a>
-    </span>
-      <p class="shortcomment cmt">Gets the expiration date of <code>principal</code>.</p><div class="fullcomment"><div class="comment cmt"><p>Gets the expiration date of <code>principal</code>.</p><p>See the <code>parseDateTime</code> method to understand how the datetime is parsed.</p><p>The returned ExpirationDateTime will either be of type <code>Never</code> or <code>AbsoluteDateTime</code>, and never of type
-<code>Now</code> or <code>RelativeDateTime</code>.</p><p> This operation is idempotent, that is, if this method is invoked twice for the same principal
- it will be successful in both invocations. This means that this operation can be repeated or retried as
- often as necessary without causing unintended effects.</p><p> Kadmin will be started with the <code>doOperation</code> method, that is, it will perform
- authentication as specified in the configuration.
-</p></div><dl class="paramcmts block"><dt class="param">principal</dt><dd class="cmt"><p>the principal to read the expiration date from.</p></dd><dt>returns</dt><dd class="cmt"><p>an Expect that get the expiration date of <code>principal</code>.</p></dd></dl></div>
     </li><li name="pt.tecnico.dsi.kadmin.Kadmin#getFullPrincipalName" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
       <a id="getFullPrincipalName(principal:String):String"></a>
       <a id="getFullPrincipalName(String):String"></a>
@@ -734,28 +712,44 @@ password is about to expire or has expired changes the behavior of the applicati
       </a>
     </span>
       <p class="shortcomment cmt"></p><div class="fullcomment"><div class="comment cmt"></div><dl class="paramcmts block"><dt>returns</dt><dd class="cmt"><p>The File for the <code>principal</code> keytab.</p></dd></dl><dl class="attributes block"> <dt>Attributes</dt><dd>protected </dd></dl></div>
-    </li><li name="pt.tecnico.dsi.kadmin.Kadmin#getPasswordExpirationDate" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
-      <a id="getPasswordExpirationDate(principal:String):work.martins.simon.expect.fluent.Expect[Either[pt.tecnico.dsi.kadmin.ErrorCase,pt.tecnico.dsi.kadmin.ExpirationDateTime]]"></a>
-      <a id="getPasswordExpirationDate(String):Expect[Either[ErrorCase,ExpirationDateTime]]"></a>
+    </li><li name="pt.tecnico.dsi.kadmin.Kadmin#getPolicy" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="getPolicy(policy:String):work.martins.simon.expect.fluent.Expect[Either[pt.tecnico.dsi.kadmin.ErrorCase,pt.tecnico.dsi.kadmin.Policy]]"></a>
+      <a id="getPolicy(String):Expect[Either[ErrorCase,Policy]]"></a>
       <h4 class="signature">
       <span class="modifier_kind">
         <span class="modifier"></span>
         <span class="kind">def</span>
       </span>
       <span class="symbol">
-        <span class="name">getPasswordExpirationDate</span><span class="params">(<span name="principal">principal: <span class="extype" name="scala.Predef.String">String</span></span>)</span><span class="result">: <a href="https://oss.sonatype.org/service/local/repositories/releases/archive/work/martins/simon/scala-expect_2.11/1.10.2/scala-expect_2.11-1.10.2-javadoc.jar/!/index.html#work.martins.simon.expect.fluent.Expect" class="extype" target="_top">Expect</a>[<span class="extype" name="scala.Either">Either</span>[<a href="ErrorCase.html" class="extype" name="pt.tecnico.dsi.kadmin.ErrorCase">ErrorCase</a>, <a href="ExpirationDateTime.html" class="extype" name="pt.tecnico.dsi.kadmin.ExpirationDateTime">ExpirationDateTime</a>]]</span>
+        <span class="name">getPolicy</span><span class="params">(<span name="policy">policy: <span class="extype" name="scala.Predef.String">String</span></span>)</span><span class="result">: <a href="https://oss.sonatype.org/service/local/repositories/releases/archive/work/martins/simon/scala-expect_2.11/1.10.2/scala-expect_2.11-1.10.2-javadoc.jar/!/index.html#work.martins.simon.expect.fluent.Expect" class="extype" target="_top">Expect</a>[<span class="extype" name="scala.Either">Either</span>[<a href="ErrorCase.html" class="extype" name="pt.tecnico.dsi.kadmin.ErrorCase">ErrorCase</a>, <a href="Policy.html" class="extype" name="pt.tecnico.dsi.kadmin.Policy">Policy</a>]]</span>
       </span>
       </h4><span class="permalink">
-      <a href="../../../../index.html#pt.tecnico.dsi.kadmin.Kadmin@getPasswordExpirationDate(principal:String):work.martins.simon.expect.fluent.Expect[Either[pt.tecnico.dsi.kadmin.ErrorCase,pt.tecnico.dsi.kadmin.ExpirationDateTime]]" title="Permalink" target="_top">
+      <a href="../../../../index.html#pt.tecnico.dsi.kadmin.Kadmin@getPolicy(policy:String):work.martins.simon.expect.fluent.Expect[Either[pt.tecnico.dsi.kadmin.ErrorCase,pt.tecnico.dsi.kadmin.Policy]]" title="Permalink" target="_top">
         <img src="../../../../lib/permalink.png" alt="Permalink" />
       </a>
     </span>
-      <p class="shortcomment cmt">Gets the password expiration datetime of <code>principal</code>.</p><div class="fullcomment"><div class="comment cmt"><p>Gets the password expiration datetime of <code>principal</code>.</p><p>See the <code>parseDateTime</code> method to understand how the datetime is parsed.</p><p>The returned ExpirationDateTime will either be of type <code>Never</code> or <code>AbsoluteDateTime</code>, and never of type
-<code>Now</code> or <code>RelativeDateTime</code>.</p><p> This operation is idempotent, that is, if this method is invoked twice for the same principal
- it will be successful in both invocations. This means that this operation can be repeated or retried as
- often as necessary without causing unintended effects.</p><p> Kadmin will be started with the <code>doOperation</code> method, that is, it will perform
+      <p class="shortcomment cmt">Performs a &quot;get_policy $$policy&quot; and parses the output to the domain class <code>Policy</code>.</p><div class="fullcomment"><div class="comment cmt"><p>Performs a &quot;get_policy $$policy&quot; and parses the output to the domain class <code>Policy</code>.</p><p> Kadmin will be started with the <code>doOperation</code> method, that is, it will perform
  authentication as specified in the configuration.
-</p></div><dl class="paramcmts block"><dt class="param">principal</dt><dd class="cmt"><p>the principal to read the password expiration date from.</p></dd><dt>returns</dt><dd class="cmt"><p>an Expect that get the password expiration date of <code>principal</code>.</p></dd></dl></div>
+</p></div><dl class="paramcmts block"><dt class="param">policy</dt><dd class="cmt"><p>the policy name.</p></dd><dt>returns</dt><dd class="cmt"><p>an Expect that returns the <code>Policy</code>.</p></dd></dl></div>
+    </li><li name="pt.tecnico.dsi.kadmin.Kadmin#getPrincipal" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="getPrincipal(principal:String):work.martins.simon.expect.fluent.Expect[Either[pt.tecnico.dsi.kadmin.ErrorCase,pt.tecnico.dsi.kadmin.Principal]]"></a>
+      <a id="getPrincipal(String):Expect[Either[ErrorCase,Principal]]"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">getPrincipal</span><span class="params">(<span name="principal">principal: <span class="extype" name="scala.Predef.String">String</span></span>)</span><span class="result">: <a href="https://oss.sonatype.org/service/local/repositories/releases/archive/work/martins/simon/scala-expect_2.11/1.10.2/scala-expect_2.11-1.10.2-javadoc.jar/!/index.html#work.martins.simon.expect.fluent.Expect" class="extype" target="_top">Expect</a>[<span class="extype" name="scala.Either">Either</span>[<a href="ErrorCase.html" class="extype" name="pt.tecnico.dsi.kadmin.ErrorCase">ErrorCase</a>, <a href="Principal.html" class="extype" name="pt.tecnico.dsi.kadmin.Principal">Principal</a>]]</span>
+      </span>
+      </h4><span class="permalink">
+      <a href="../../../../index.html#pt.tecnico.dsi.kadmin.Kadmin@getPrincipal(principal:String):work.martins.simon.expect.fluent.Expect[Either[pt.tecnico.dsi.kadmin.ErrorCase,pt.tecnico.dsi.kadmin.Principal]]" title="Permalink" target="_top">
+        <img src="../../../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
+      <p class="shortcomment cmt">Performs a &quot;get_principal principal&quot; and parses the output to the domain class <code>Principal</code>.</p><div class="fullcomment"><div class="comment cmt"><p>Performs a &quot;get_principal principal&quot; and parses the output to the domain class <code>Principal</code>.</p><p> Kadmin will be started with the <code>doOperation</code> method, that is, it will perform
+ authentication as specified in the configuration.
+</p></div><dl class="paramcmts block"><dt class="param">principal</dt><dd class="cmt"><p>the principal name.</p></dd><dt>returns</dt><dd class="cmt"><p>an Expect that returns the <code>Principal</code>.</p></dd></dl></div>
     </li><li name="scala.AnyRef#hashCode" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="hashCode():Int"></a>
       <a id="hashCode():Int"></a>
@@ -773,23 +767,6 @@ password is about to expire or has expired changes the behavior of the applicati
       </a>
     </span>
       <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>AnyRef → Any</dd></dl></div>
-    </li><li name="pt.tecnico.dsi.kadmin.Kadmin#insufficientPermission" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
-      <a id="insufficientPermission[R](expectBlock:work.martins.simon.expect.fluent.ExpectBlock[Either[pt.tecnico.dsi.kadmin.ErrorCase,R]]):work.martins.simon.expect.fluent.RegexWhen[Either[pt.tecnico.dsi.kadmin.ErrorCase,R]]"></a>
-      <a id="insufficientPermission[R](ExpectBlock[Either[ErrorCase,R]]):RegexWhen[Either[ErrorCase,R]]"></a>
-      <h4 class="signature">
-      <span class="modifier_kind">
-        <span class="modifier"></span>
-        <span class="kind">def</span>
-      </span>
-      <span class="symbol">
-        <span class="name">insufficientPermission</span><span class="tparams">[<span name="R">R</span>]</span><span class="params">(<span name="expectBlock">expectBlock: <a href="https://oss.sonatype.org/service/local/repositories/releases/archive/work/martins/simon/scala-expect_2.11/1.10.2/scala-expect_2.11-1.10.2-javadoc.jar/!/index.html#work.martins.simon.expect.fluent.ExpectBlock" class="extype" target="_top">ExpectBlock</a>[<span class="extype" name="scala.Either">Either</span>[<a href="ErrorCase.html" class="extype" name="pt.tecnico.dsi.kadmin.ErrorCase">ErrorCase</a>, <span class="extype" name="pt.tecnico.dsi.kadmin.Kadmin.insufficientPermission.R">R</span>]]</span>)</span><span class="result">: <a href="https://oss.sonatype.org/service/local/repositories/releases/archive/work/martins/simon/scala-expect_2.11/1.10.2/scala-expect_2.11-1.10.2-javadoc.jar/!/index.html#work.martins.simon.expect.fluent.RegexWhen" class="extype" target="_top">RegexWhen</a>[<span class="extype" name="scala.Either">Either</span>[<a href="ErrorCase.html" class="extype" name="pt.tecnico.dsi.kadmin.ErrorCase">ErrorCase</a>, <span class="extype" name="pt.tecnico.dsi.kadmin.Kadmin.insufficientPermission.R">R</span>]]</span>
-      </span>
-      </h4><span class="permalink">
-      <a href="../../../../index.html#pt.tecnico.dsi.kadmin.Kadmin@insufficientPermission[R](expectBlock:work.martins.simon.expect.fluent.ExpectBlock[Either[pt.tecnico.dsi.kadmin.ErrorCase,R]]):work.martins.simon.expect.fluent.RegexWhen[Either[pt.tecnico.dsi.kadmin.ErrorCase,R]]" title="Permalink" target="_top">
-        <img src="../../../../lib/permalink.png" alt="Permalink" />
-      </a>
-    </span>
-      
     </li><li name="scala.Any#isInstanceOf" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="isInstanceOf[T0]:Boolean"></a>
       <a id="isInstanceOf[T0]:Boolean"></a>
@@ -950,7 +927,7 @@ will be returned.
         <span class="kind">def</span>
       </span>
       <span class="symbol">
-        <span class="name">obtainTicketGrantingTicket</span><span class="params">(<span name="options">options: <span class="extype" name="scala.Predef.String">String</span> = <span class="symbol">&quot;&quot;</span></span>, <span name="authenticatingPrincipal">authenticatingPrincipal: <span class="extype" name="scala.Predef.String">String</span> = <span class="symbol">authenticatingPrincipal</span></span>, <span name="authenticatingPrincipalPassword">authenticatingPrincipalPassword: <span class="extype" name="scala.Predef.String">String</span> = <span class="symbol">authenticatingPrincipalPassword</span></span>)</span><span class="result">: <a href="https://oss.sonatype.org/service/local/repositories/releases/archive/work/martins/simon/scala-expect_2.11/1.10.2/scala-expect_2.11-1.10.2-javadoc.jar/!/index.html#work.martins.simon.expect.fluent.Expect" class="extype" target="_top">Expect</a>[<span class="extype" name="scala.Either">Either</span>[<a href="ErrorCase.html" class="extype" name="pt.tecnico.dsi.kadmin.ErrorCase">ErrorCase</a>, <a href="https://oss.sonatype.org/service/local/repositories/releases/archive/joda-time/joda-time/2.9.1/joda-time-2.9.1-javadoc.jar/!/index.html#org.joda.time.DateTime" class="extype" target="_top">DateTime</a>]]</span>
+        <span class="name">obtainTicketGrantingTicket</span><span class="params">(<span name="options">options: <span class="extype" name="scala.Predef.String">String</span> = <span class="symbol">&quot;&quot;</span></span>, <span name="authenticatingPrincipal">authenticatingPrincipal: <span class="extype" name="scala.Predef.String">String</span> = <span class="symbol">authenticatingPrincipal</span></span>, <span name="authenticatingPrincipalPassword">authenticatingPrincipalPassword: <span class="extype" name="scala.Predef.String">String</span> = <span class="symbol">authenticatingPrincipalPassword</span></span>)</span><span class="result">: <a href="https://oss.sonatype.org/service/local/repositories/releases/archive/work/martins/simon/scala-expect_2.11/1.10.2/scala-expect_2.11-1.10.2-javadoc.jar/!/index.html#work.martins.simon.expect.fluent.Expect" class="extype" target="_top">Expect</a>[<span class="extype" name="scala.Either">Either</span>[<a href="ErrorCase.html" class="extype" name="pt.tecnico.dsi.kadmin.ErrorCase">ErrorCase</a>, <a href="https://oss.sonatype.org/service/local/repositories/releases/archive/joda-time/joda-time/2.9.3/joda-time-2.9.3-javadoc.jar/!/index.html#org.joda.time.DateTime" class="extype" target="_top">DateTime</a>]]</span>
       </span>
       </h4><span class="permalink">
       <a href="../../../../index.html#pt.tecnico.dsi.kadmin.Kadmin@obtainTicketGrantingTicket(options:String,authenticatingPrincipal:String,authenticatingPrincipalPassword:String):work.martins.simon.expect.fluent.Expect[Either[pt.tecnico.dsi.kadmin.ErrorCase,org.joda.time.DateTime]]" title="Permalink" target="_top">
@@ -962,117 +939,6 @@ will be returned.
 <code>authenticatingPrincipalPassword</code> as the password.</p><p>If the intended use case is to check whether the principal password is the correct one, then the function
 <code>checkPassword</code> is more suited to that effect.</p><p>The ticket will be obtained in the machine that invokes this code.
 </p></div><dl class="paramcmts block"><dt>returns</dt><dd class="cmt"><p>Either an ErrorCase or a date time of when the obtained ticked must be renewed.</p></dd></dl></div>
-    </li><li name="pt.tecnico.dsi.kadmin.Kadmin#parseDateTime" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
-      <a id="parseDateTime(dateTimeString:String):pt.tecnico.dsi.kadmin.ExpirationDateTime"></a>
-      <a id="parseDateTime(String):ExpirationDateTime"></a>
-      <h4 class="signature">
-      <span class="modifier_kind">
-        <span class="modifier"></span>
-        <span class="kind">def</span>
-      </span>
-      <span class="symbol">
-        <span class="name">parseDateTime</span><span class="params">(<span name="dateTimeString">dateTimeString: <span class="extype" name="scala.Predef.String">String</span></span>)</span><span class="result">: <a href="ExpirationDateTime.html" class="extype" name="pt.tecnico.dsi.kadmin.ExpirationDateTime">ExpirationDateTime</a></span>
-      </span>
-      </h4><span class="permalink">
-      <a href="../../../../index.html#pt.tecnico.dsi.kadmin.Kadmin@parseDateTime(dateTimeString:String):pt.tecnico.dsi.kadmin.ExpirationDateTime" title="Permalink" target="_top">
-        <img src="../../../../lib/permalink.png" alt="Permalink" />
-      </a>
-    </span>
-      <p class="shortcomment cmt">Tries to parse a date time string returned by a kadmin <code>get_principal</code> operation.</p><div class="fullcomment"><div class="comment cmt"><p>Tries to parse a date time string returned by a kadmin <code>get_principal</code> operation.</p><p>The string must be in the format <code>&quot;EEE MMM dd HH:mm:ss zzz yyyy&quot;</code>, see
-<a href="http://www.joda.org/joda-time/apidocs/org/joda/time/format/DateTimeFormat.html" target="_blank">Joda Time DateTimeFormat</a>
-for an explanation of the format.</p><p>If the string is either <code>&quot;[never]&quot;</code> or <code>&quot;[none]&quot;</code> the <code>Never</code> will be returned.
-Otherwise the string will be parsed in the following way:</p><ol class="decimal"><li>Any text following the year, as long as it is separated with a space, will be removed from <code>dateTimeString</code>.</li><li>Since <code>DateTimeFormat</code> cannot process time zones, the timezone will be removed from <code>dateTimeString</code>, and an
-   attempt to match it against one of <code>DateTimeZone.getAvailableIDs</code> will be made. If no match is found the default
-   timezone will be used.</li><li>The default locale will be used when reading the date. This is necessary for the day of the week (EEE) and
-   the month of the year (MMM) parts.</li><li>Finally a <code>DateTimeFormat</code> will be constructed using the format above (except the time zone), the
-   computed timezone and the default locale.</li><li>The clean <code>dateString</code> (the result of step 1 and 2) will be parsed to a <code>DateTime</code> using the format
-   constructed in step 4.
-</li></ol></div><dl class="paramcmts block"><dt class="param">dateTimeString</dt><dd class="cmt"><p>the string containing the date time.</p></dd><dt>returns</dt><dd class="cmt"><p><code>Never</code> or an <code>AbsoluteDateTime</code></p></dd></dl></div>
-    </li><li name="pt.tecnico.dsi.kadmin.Kadmin#passwordExpired" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
-      <a id="passwordExpired[R](expectBlock:work.martins.simon.expect.fluent.ExpectBlock[Either[pt.tecnico.dsi.kadmin.ErrorCase,R]]):work.martins.simon.expect.fluent.StringWhen[Either[pt.tecnico.dsi.kadmin.ErrorCase,R]]"></a>
-      <a id="passwordExpired[R](ExpectBlock[Either[ErrorCase,R]]):StringWhen[Either[ErrorCase,R]]"></a>
-      <h4 class="signature">
-      <span class="modifier_kind">
-        <span class="modifier"></span>
-        <span class="kind">def</span>
-      </span>
-      <span class="symbol">
-        <span class="name">passwordExpired</span><span class="tparams">[<span name="R">R</span>]</span><span class="params">(<span name="expectBlock">expectBlock: <a href="https://oss.sonatype.org/service/local/repositories/releases/archive/work/martins/simon/scala-expect_2.11/1.10.2/scala-expect_2.11-1.10.2-javadoc.jar/!/index.html#work.martins.simon.expect.fluent.ExpectBlock" class="extype" target="_top">ExpectBlock</a>[<span class="extype" name="scala.Either">Either</span>[<a href="ErrorCase.html" class="extype" name="pt.tecnico.dsi.kadmin.ErrorCase">ErrorCase</a>, <span class="extype" name="pt.tecnico.dsi.kadmin.Kadmin.passwordExpired.R">R</span>]]</span>)</span><span class="result">: <a href="https://oss.sonatype.org/service/local/repositories/releases/archive/work/martins/simon/scala-expect_2.11/1.10.2/scala-expect_2.11-1.10.2-javadoc.jar/!/index.html#work.martins.simon.expect.fluent.StringWhen" class="extype" target="_top">StringWhen</a>[<span class="extype" name="scala.Either">Either</span>[<a href="ErrorCase.html" class="extype" name="pt.tecnico.dsi.kadmin.ErrorCase">ErrorCase</a>, <span class="extype" name="pt.tecnico.dsi.kadmin.Kadmin.passwordExpired.R">R</span>]]</span>
-      </span>
-      </h4><span class="permalink">
-      <a href="../../../../index.html#pt.tecnico.dsi.kadmin.Kadmin@passwordExpired[R](expectBlock:work.martins.simon.expect.fluent.ExpectBlock[Either[pt.tecnico.dsi.kadmin.ErrorCase,R]]):work.martins.simon.expect.fluent.StringWhen[Either[pt.tecnico.dsi.kadmin.ErrorCase,R]]" title="Permalink" target="_top">
-        <img src="../../../../lib/permalink.png" alt="Permalink" />
-      </a>
-    </span>
-      
-    </li><li name="pt.tecnico.dsi.kadmin.Kadmin#passwordIncorrect" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
-      <a id="passwordIncorrect[R](expectBlock:work.martins.simon.expect.fluent.ExpectBlock[Either[pt.tecnico.dsi.kadmin.ErrorCase,R]]):work.martins.simon.expect.fluent.StringWhen[Either[pt.tecnico.dsi.kadmin.ErrorCase,R]]"></a>
-      <a id="passwordIncorrect[R](ExpectBlock[Either[ErrorCase,R]]):StringWhen[Either[ErrorCase,R]]"></a>
-      <h4 class="signature">
-      <span class="modifier_kind">
-        <span class="modifier"></span>
-        <span class="kind">def</span>
-      </span>
-      <span class="symbol">
-        <span class="name">passwordIncorrect</span><span class="tparams">[<span name="R">R</span>]</span><span class="params">(<span name="expectBlock">expectBlock: <a href="https://oss.sonatype.org/service/local/repositories/releases/archive/work/martins/simon/scala-expect_2.11/1.10.2/scala-expect_2.11-1.10.2-javadoc.jar/!/index.html#work.martins.simon.expect.fluent.ExpectBlock" class="extype" target="_top">ExpectBlock</a>[<span class="extype" name="scala.Either">Either</span>[<a href="ErrorCase.html" class="extype" name="pt.tecnico.dsi.kadmin.ErrorCase">ErrorCase</a>, <span class="extype" name="pt.tecnico.dsi.kadmin.Kadmin.passwordIncorrect.R">R</span>]]</span>)</span><span class="result">: <a href="https://oss.sonatype.org/service/local/repositories/releases/archive/work/martins/simon/scala-expect_2.11/1.10.2/scala-expect_2.11-1.10.2-javadoc.jar/!/index.html#work.martins.simon.expect.fluent.StringWhen" class="extype" target="_top">StringWhen</a>[<span class="extype" name="scala.Either">Either</span>[<a href="ErrorCase.html" class="extype" name="pt.tecnico.dsi.kadmin.ErrorCase">ErrorCase</a>, <span class="extype" name="pt.tecnico.dsi.kadmin.Kadmin.passwordIncorrect.R">R</span>]]</span>
-      </span>
-      </h4><span class="permalink">
-      <a href="../../../../index.html#pt.tecnico.dsi.kadmin.Kadmin@passwordIncorrect[R](expectBlock:work.martins.simon.expect.fluent.ExpectBlock[Either[pt.tecnico.dsi.kadmin.ErrorCase,R]]):work.martins.simon.expect.fluent.StringWhen[Either[pt.tecnico.dsi.kadmin.ErrorCase,R]]" title="Permalink" target="_top">
-        <img src="../../../../lib/permalink.png" alt="Permalink" />
-      </a>
-    </span>
-      
-    </li><li name="pt.tecnico.dsi.kadmin.Kadmin#policyDoesNotExist" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
-      <a id="policyDoesNotExist[R](expectBlock:work.martins.simon.expect.fluent.ExpectBlock[Either[pt.tecnico.dsi.kadmin.ErrorCase,R]]):work.martins.simon.expect.fluent.StringWhen[Either[pt.tecnico.dsi.kadmin.ErrorCase,R]]"></a>
-      <a id="policyDoesNotExist[R](ExpectBlock[Either[ErrorCase,R]]):StringWhen[Either[ErrorCase,R]]"></a>
-      <h4 class="signature">
-      <span class="modifier_kind">
-        <span class="modifier"></span>
-        <span class="kind">def</span>
-      </span>
-      <span class="symbol">
-        <span class="name">policyDoesNotExist</span><span class="tparams">[<span name="R">R</span>]</span><span class="params">(<span name="expectBlock">expectBlock: <a href="https://oss.sonatype.org/service/local/repositories/releases/archive/work/martins/simon/scala-expect_2.11/1.10.2/scala-expect_2.11-1.10.2-javadoc.jar/!/index.html#work.martins.simon.expect.fluent.ExpectBlock" class="extype" target="_top">ExpectBlock</a>[<span class="extype" name="scala.Either">Either</span>[<a href="ErrorCase.html" class="extype" name="pt.tecnico.dsi.kadmin.ErrorCase">ErrorCase</a>, <span class="extype" name="pt.tecnico.dsi.kadmin.Kadmin.policyDoesNotExist.R">R</span>]]</span>)</span><span class="result">: <a href="https://oss.sonatype.org/service/local/repositories/releases/archive/work/martins/simon/scala-expect_2.11/1.10.2/scala-expect_2.11-1.10.2-javadoc.jar/!/index.html#work.martins.simon.expect.fluent.StringWhen" class="extype" target="_top">StringWhen</a>[<span class="extype" name="scala.Either">Either</span>[<a href="ErrorCase.html" class="extype" name="pt.tecnico.dsi.kadmin.ErrorCase">ErrorCase</a>, <span class="extype" name="pt.tecnico.dsi.kadmin.Kadmin.policyDoesNotExist.R">R</span>]]</span>
-      </span>
-      </h4><span class="permalink">
-      <a href="../../../../index.html#pt.tecnico.dsi.kadmin.Kadmin@policyDoesNotExist[R](expectBlock:work.martins.simon.expect.fluent.ExpectBlock[Either[pt.tecnico.dsi.kadmin.ErrorCase,R]]):work.martins.simon.expect.fluent.StringWhen[Either[pt.tecnico.dsi.kadmin.ErrorCase,R]]" title="Permalink" target="_top">
-        <img src="../../../../lib/permalink.png" alt="Permalink" />
-      </a>
-    </span>
-      
-    </li><li name="pt.tecnico.dsi.kadmin.Kadmin#preemptiveExit" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
-      <a id="preemptiveExit[R](when:work.martins.simon.expect.fluent.When[Either[pt.tecnico.dsi.kadmin.ErrorCase,R]]):Unit"></a>
-      <a id="preemptiveExit[R](When[Either[ErrorCase,R]]):Unit"></a>
-      <h4 class="signature">
-      <span class="modifier_kind">
-        <span class="modifier"></span>
-        <span class="kind">def</span>
-      </span>
-      <span class="symbol">
-        <span class="name">preemptiveExit</span><span class="tparams">[<span name="R">R</span>]</span><span class="params">(<span name="when">when: <a href="https://oss.sonatype.org/service/local/repositories/releases/archive/work/martins/simon/scala-expect_2.11/1.10.2/scala-expect_2.11-1.10.2-javadoc.jar/!/index.html#work.martins.simon.expect.fluent.When" class="extype" target="_top">When</a>[<span class="extype" name="scala.Either">Either</span>[<a href="ErrorCase.html" class="extype" name="pt.tecnico.dsi.kadmin.ErrorCase">ErrorCase</a>, <span class="extype" name="pt.tecnico.dsi.kadmin.Kadmin.preemptiveExit.R">R</span>]]</span>)</span><span class="result">: <a href="http://www.scala-lang.org/api/2.11.8/index.html#scala.Unit" class="extype" target="_top">Unit</a></span>
-      </span>
-      </h4><span class="permalink">
-      <a href="../../../../index.html#pt.tecnico.dsi.kadmin.Kadmin@preemptiveExit[R](when:work.martins.simon.expect.fluent.When[Either[pt.tecnico.dsi.kadmin.ErrorCase,R]]):Unit" title="Permalink" target="_top">
-        <img src="../../../../lib/permalink.png" alt="Permalink" />
-      </a>
-    </span>
-      
-    </li><li name="pt.tecnico.dsi.kadmin.Kadmin#principalDoesNotExist" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
-      <a id="principalDoesNotExist[R](expectBlock:work.martins.simon.expect.fluent.ExpectBlock[Either[pt.tecnico.dsi.kadmin.ErrorCase,R]]):work.martins.simon.expect.fluent.StringWhen[Either[pt.tecnico.dsi.kadmin.ErrorCase,R]]"></a>
-      <a id="principalDoesNotExist[R](ExpectBlock[Either[ErrorCase,R]]):StringWhen[Either[ErrorCase,R]]"></a>
-      <h4 class="signature">
-      <span class="modifier_kind">
-        <span class="modifier"></span>
-        <span class="kind">def</span>
-      </span>
-      <span class="symbol">
-        <span class="name">principalDoesNotExist</span><span class="tparams">[<span name="R">R</span>]</span><span class="params">(<span name="expectBlock">expectBlock: <a href="https://oss.sonatype.org/service/local/repositories/releases/archive/work/martins/simon/scala-expect_2.11/1.10.2/scala-expect_2.11-1.10.2-javadoc.jar/!/index.html#work.martins.simon.expect.fluent.ExpectBlock" class="extype" target="_top">ExpectBlock</a>[<span class="extype" name="scala.Either">Either</span>[<a href="ErrorCase.html" class="extype" name="pt.tecnico.dsi.kadmin.ErrorCase">ErrorCase</a>, <span class="extype" name="pt.tecnico.dsi.kadmin.Kadmin.principalDoesNotExist.R">R</span>]]</span>)</span><span class="result">: <a href="https://oss.sonatype.org/service/local/repositories/releases/archive/work/martins/simon/scala-expect_2.11/1.10.2/scala-expect_2.11-1.10.2-javadoc.jar/!/index.html#work.martins.simon.expect.fluent.StringWhen" class="extype" target="_top">StringWhen</a>[<span class="extype" name="scala.Either">Either</span>[<a href="ErrorCase.html" class="extype" name="pt.tecnico.dsi.kadmin.ErrorCase">ErrorCase</a>, <span class="extype" name="pt.tecnico.dsi.kadmin.Kadmin.principalDoesNotExist.R">R</span>]]</span>
-      </span>
-      </h4><span class="permalink">
-      <a href="../../../../index.html#pt.tecnico.dsi.kadmin.Kadmin@principalDoesNotExist[R](expectBlock:work.martins.simon.expect.fluent.ExpectBlock[Either[pt.tecnico.dsi.kadmin.ErrorCase,R]]):work.martins.simon.expect.fluent.StringWhen[Either[pt.tecnico.dsi.kadmin.ErrorCase,R]]" title="Permalink" target="_top">
-        <img src="../../../../lib/permalink.png" alt="Permalink" />
-      </a>
-    </span>
-      
     </li><li name="pt.tecnico.dsi.kadmin.Kadmin#settings" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
       <a id="settings:pt.tecnico.dsi.kadmin.Settings"></a>
       <a id="settings:Settings"></a>
@@ -1279,14 +1145,14 @@ This is useful to read the policy attributes.</p><p> Kadmin will be started with
       </a>
     </span>
       <p class="shortcomment cmt">Performs the operation <code>f</code> over the output returned by &quot;get_principal principal&quot;.</p><div class="fullcomment"><div class="comment cmt"><p>Performs the operation <code>f</code> over the output returned by &quot;get_principal principal&quot;.
-This is useful to read the principal attributes.</p><p> Kadmin will be started with the <code>doOperation</code> method, that is, it will perform
- authentication as specified in the configuration.</p><p>Specialized functions to obtain the principal expiration date and the password expiration date already exist.
-See [getExpirationDate] and [getPasswordExpirationDate].</p><p>Consider using the <code>parseDateTime</code> method if <code>f</code> is to parse a date time.
+This is useful to read the principal attributes that are not included with <code>getPrincipal</code>.</p><p> Kadmin will be started with the <code>doOperation</code> method, that is, it will perform
+ authentication as specified in the configuration.</p><p>Consider using the <code>parseDateTime</code> method if <code>f</code> is to parse a date time.
+And <code>parseDuration</code> method if <code>f</code> is to parse a duration.
 </p></div><dl class="paramcmts block"><dt class="tparam">R</dt><dd class="cmt"><p>the type for the Right of the Either returned by the Expect.</p></dd><dt class="param">principal</dt><dd class="cmt"><p>the principal to get the attributes.</p></dd><dt class="param">f</dt><dd class="cmt"><p>the operation to perform upon the principal attributes.</p></dd><dt>returns</dt><dd class="cmt"><p>an Expect that lists the <code>principal</code> attributes, performs the operation <code>f</code> and then quits kadmin.</p></dd></dl><dl class="attributes block"> <div class="block">Example:
                <ol><li class="cmt"><p></p><pre>withPrincipal(principal){ expectBlock <span class="kw">=&gt;</span>
   expectBlock.when(<span class="lit">""</span><span class="lit">"Maximum ticket life: ([^\n]+)\n"</span><span class="lit">""</span>.r)
     .returning{ m: Match <span class="kw">=&gt;</span>
-      <span class="cmt">//m.group(1) will contain the maximum ticket life.</span>
+      <span class="kw">val</span> maximumTicketLife = parseDuration(m.group(<span class="num">1</span>))
     }</pre></li></ol>
             </div></dl></div>
     </li><li name="pt.tecnico.dsi.kadmin.Kadmin#withoutAuthentication" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">

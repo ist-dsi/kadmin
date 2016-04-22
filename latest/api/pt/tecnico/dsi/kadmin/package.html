@@ -176,6 +176,23 @@
       </a>
     </span>
       <p class="shortcomment cmt"></p>
+    </li><li name="pt.tecnico.dsi.kadmin.Key" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
+      <a id="KeyextendsProductwithSerializable"></a>
+      <a id="Key:Key"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">case class</span>
+      </span>
+      <span class="symbol">
+        <a href="Key.html"><span class="name">Key</span></a><span class="params">(<span name="versionNumber">versionNumber: <a href="http://www.scala-lang.org/api/2.11.8/index.html#scala.Int" class="extype" target="_top">Int</a></span>, <span name="encryptionType">encryptionType: <span class="extype" name="scala.Predef.String">String</span></span>)</span><span class="result"> extends <a href="http://www.scala-lang.org/api/2.11.8/index.html#scala.Product" class="extype" target="_top">Product</a> with <a href="http://www.scala-lang.org/api/2.11.8/index.html#scala.Serializable" class="extype" target="_top">Serializable</a></span>
+      </span>
+      </h4><span class="permalink">
+      <a href="../../../../index.html#pt.tecnico.dsi.kadmin.package@KeyextendsProductwithSerializable" title="Permalink" target="_top">
+        <img src="../../../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
+      
     </li><li name="pt.tecnico.dsi.kadmin.Now" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
       <a id="NowextendsExpirationDateTimewithProductwithSerializable"></a>
       <a id="Now:Now"></a>
@@ -189,6 +206,40 @@
       </span>
       </h4><span class="permalink">
       <a href="../../../../index.html#pt.tecnico.dsi.kadmin.package@NowextendsExpirationDateTimewithProductwithSerializable" title="Permalink" target="_top">
+        <img src="../../../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
+      
+    </li><li name="pt.tecnico.dsi.kadmin.Policy" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
+      <a id="PolicyextendsProductwithSerializable"></a>
+      <a id="Policy:Policy"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">case class</span>
+      </span>
+      <span class="symbol">
+        <a href="Policy.html"><span class="name">Policy</span></a><span class="params">(<span name="name">name: <span class="extype" name="scala.Predef.String">String</span></span>, <span name="maximumLife">maximumLife: <a href="http://www.scala-lang.org/api/2.11.8/index.html#scala.concurrent.duration.Duration" class="extype" target="_top">Duration</a></span>, <span name="minimumLife">minimumLife: <a href="http://www.scala-lang.org/api/2.11.8/index.html#scala.concurrent.duration.Duration" class="extype" target="_top">Duration</a></span>, <span name="minimumLength">minimumLength: <a href="http://www.scala-lang.org/api/2.11.8/index.html#scala.Int" class="extype" target="_top">Int</a></span>, <span name="minimumCharacterClasses">minimumCharacterClasses: <a href="http://www.scala-lang.org/api/2.11.8/index.html#scala.Int" class="extype" target="_top">Int</a></span>, <span name="oldKeysKept">oldKeysKept: <a href="http://www.scala-lang.org/api/2.11.8/index.html#scala.Int" class="extype" target="_top">Int</a></span>, <span name="maximumFailuresBeforeLockout">maximumFailuresBeforeLockout: <a href="http://www.scala-lang.org/api/2.11.8/index.html#scala.Int" class="extype" target="_top">Int</a></span>, <span name="failureCountResetInterval">failureCountResetInterval: <a href="http://www.scala-lang.org/api/2.11.8/index.html#scala.concurrent.duration.Duration" class="extype" target="_top">Duration</a></span>, <span name="lockoutDuration">lockoutDuration: <a href="http://www.scala-lang.org/api/2.11.8/index.html#scala.concurrent.duration.Duration" class="extype" target="_top">Duration</a></span>)</span><span class="result"> extends <a href="http://www.scala-lang.org/api/2.11.8/index.html#scala.Product" class="extype" target="_top">Product</a> with <a href="http://www.scala-lang.org/api/2.11.8/index.html#scala.Serializable" class="extype" target="_top">Serializable</a></span>
+      </span>
+      </h4><span class="permalink">
+      <a href="../../../../index.html#pt.tecnico.dsi.kadmin.package@PolicyextendsProductwithSerializable" title="Permalink" target="_top">
+        <img src="../../../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
+      
+    </li><li name="pt.tecnico.dsi.kadmin.Principal" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
+      <a id="PrincipalextendsProductwithSerializable"></a>
+      <a id="Principal:Principal"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">case class</span>
+      </span>
+      <span class="symbol">
+        <a href="Principal.html"><span class="name">Principal</span></a><span class="params">(<span name="name">name: <span class="extype" name="scala.Predef.String">String</span></span>, <span name="expirationDateTime">expirationDateTime: <a href="ExpirationDateTime.html" class="extype" name="pt.tecnico.dsi.kadmin.ExpirationDateTime">ExpirationDateTime</a></span>, <span name="lastPasswordChange">lastPasswordChange: <a href="ExpirationDateTime.html" class="extype" name="pt.tecnico.dsi.kadmin.ExpirationDateTime">ExpirationDateTime</a></span>, <span name="passwordExpirationDateTime">passwordExpirationDateTime: <a href="ExpirationDateTime.html" class="extype" name="pt.tecnico.dsi.kadmin.ExpirationDateTime">ExpirationDateTime</a></span>, <span name="maximumTicketLife">maximumTicketLife: <a href="http://www.scala-lang.org/api/2.11.8/index.html#scala.concurrent.duration.FiniteDuration" class="extype" target="_top">FiniteDuration</a></span>, <span name="maximumRenewableLife">maximumRenewableLife: <a href="http://www.scala-lang.org/api/2.11.8/index.html#scala.concurrent.duration.FiniteDuration" class="extype" target="_top">FiniteDuration</a></span>, <span name="lastModified">lastModified: <a href="ExpirationDateTime.html" class="extype" name="pt.tecnico.dsi.kadmin.ExpirationDateTime">ExpirationDateTime</a></span>, <span name="lastModifiedBy">lastModifiedBy: <span class="extype" name="scala.Predef.String">String</span></span>, <span name="lastSuccessfulAuthentication">lastSuccessfulAuthentication: <a href="ExpirationDateTime.html" class="extype" name="pt.tecnico.dsi.kadmin.ExpirationDateTime">ExpirationDateTime</a></span>, <span name="lastFailedAuthentication">lastFailedAuthentication: <a href="ExpirationDateTime.html" class="extype" name="pt.tecnico.dsi.kadmin.ExpirationDateTime">ExpirationDateTime</a></span>, <span name="failedPasswordAttempts">failedPasswordAttempts: <a href="http://www.scala-lang.org/api/2.11.8/index.html#scala.Int" class="extype" target="_top">Int</a></span>, <span name="keys">keys: <span class="extype" name="scala.Predef.Set">Set</span>[<a href="Key.html" class="extype" name="pt.tecnico.dsi.kadmin.Key">Key</a>]</span>, <span name="masterKeyVersionNumber">masterKeyVersionNumber: <a href="http://www.scala-lang.org/api/2.11.8/index.html#scala.Int" class="extype" target="_top">Int</a></span>, <span name="attributes">attributes: <span class="extype" name="scala.Predef.Set">Set</span>[<span class="extype" name="scala.Predef.String">String</span>]</span>, <span name="policy">policy: <a href="http://www.scala-lang.org/api/2.11.8/index.html#scala.Option" class="extype" target="_top">Option</a>[<span class="extype" name="scala.Predef.String">String</span>]</span>)</span><span class="result"> extends <a href="http://www.scala-lang.org/api/2.11.8/index.html#scala.Product" class="extype" target="_top">Product</a> with <a href="http://www.scala-lang.org/api/2.11.8/index.html#scala.Serializable" class="extype" target="_top">Serializable</a></span>
+      </span>
+      </h4><span class="permalink">
+      <a href="../../../../index.html#pt.tecnico.dsi.kadmin.package@PrincipalextendsProductwithSerializable" title="Permalink" target="_top">
         <img src="../../../../lib/permalink.png" alt="Permalink" />
       </a>
     </span>
@@ -256,7 +307,24 @@
 
         <div id="values" class="values members">
               <h3>Value Members</h3>
-              <ol><li name="pt.tecnico.dsi.kadmin.Never" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
+              <ol><li name="pt.tecnico.dsi.kadmin.KadminUtils" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
+      <a id="KadminUtils"></a>
+      <a id="KadminUtils:KadminUtils"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">object</span>
+      </span>
+      <span class="symbol">
+        <a href="KadminUtils$.html"><span class="name">KadminUtils</span></a><span class="result"> extends <a href="https://oss.sonatype.org/service/local/repositories/releases/archive/com/typesafe/scala-logging/scala-logging_2.11/3.1.0/scala-logging_2.11-3.1.0-javadoc.jar/!/index.html#com.typesafe.scalalogging.LazyLogging" class="extype" target="_top">LazyLogging</a></span>
+      </span>
+      </h4><span class="permalink">
+      <a href="../../../../index.html#pt.tecnico.dsi.kadmin.package@KadminUtils" title="Permalink" target="_top">
+        <img src="../../../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
+      
+    </li><li name="pt.tecnico.dsi.kadmin.Never" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
       <a id="Never"></a>
       <a id="Never:Never"></a>
       <h4 class="signature">
@@ -418,7 +486,7 @@
         <span class="kind">def</span>
       </span>
       <span class="symbol">
-        <span class="name">dateTime2AbsoluteDateTime</span><span class="params">(<span name="dateTime">dateTime: <a href="https://oss.sonatype.org/service/local/repositories/releases/archive/joda-time/joda-time/2.9.1/joda-time-2.9.1-javadoc.jar/!/index.html#org.joda.time.DateTime" class="extype" target="_top">DateTime</a></span>)</span><span class="result">: <a href="AbsoluteDateTime.html" class="extype" name="pt.tecnico.dsi.kadmin.AbsoluteDateTime">AbsoluteDateTime</a></span>
+        <span class="name">dateTime2AbsoluteDateTime</span><span class="params">(<span name="dateTime">dateTime: <a href="https://oss.sonatype.org/service/local/repositories/releases/archive/joda-time/joda-time/2.9.3/joda-time-2.9.3-javadoc.jar/!/index.html#org.joda.time.DateTime" class="extype" target="_top">DateTime</a></span>)</span><span class="result">: <a href="AbsoluteDateTime.html" class="extype" name="pt.tecnico.dsi.kadmin.AbsoluteDateTime">AbsoluteDateTime</a></span>
       </span>
       </h4><span class="permalink">
       <a href="../../../../index.html#pt.tecnico.dsi.kadmin.package@dateTime2AbsoluteDateTime(dateTime:org.joda.time.DateTime):pt.tecnico.dsi.kadmin.AbsoluteDateTime" title="Permalink" target="_top">

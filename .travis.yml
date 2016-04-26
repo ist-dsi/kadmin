@@ -19,7 +19,12 @@ before_install:
   - sudo bash setupDocker.sh
 
 script:
-  - sudo bash test.sh
+  - sbt test:compile
+  - cd docker-kerberos
+  - sudo docker-compose build
+  - sudo docker-compose up --abort-on-container-exit && (docker-compose ps "kerberos-client" | grep -oP "(?<=Exit )\d+")
+  - sudo docker-compose rm -f
+  #- sudo bash test.sh
 
 notifications:
   slack:

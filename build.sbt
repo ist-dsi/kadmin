@@ -1,14 +1,33 @@
 organization := "pt.tecnico.dsi"
 name := "kadmin"
-version := "3.0.0"
+version := "3.1.0"
 
-scalaVersion := "2.11.8"
 initialize := {
   val required = "1.8"
   val current  = sys.props("java.specification.version")
   assert(current == required, s"Unsupported JDK: java.specification.version $current != $required")
 }
-javacOptions ++= Seq("-source", "1.8", "-target", "1.8", "-Xlint")
+javacOptions ++= Seq(
+  "-source", "1.8",
+  "-target", "1.8",
+  "-Xlint",
+  "-encoding", "UTF-8",
+  "-Dfile.encoding=utf-8"
+)
+scalaVersion := "2.11.8"
+scalacOptions ++= Seq(
+  "-target:jvm-1.8",
+  "-deprecation",                   //Emit warning and location for usages of deprecated APIs.
+  "-encoding", "UTF-8",             //Use UTF-8 encoding. Should be default.
+  "-feature",                       //Emit warning and location for usages of features that should be imported explicitly.
+  "-language:implicitConversions",  //Explicitly enables the implicit conversions feature
+  "-unchecked",                     //Enable detailed unchecked (erasure) warnings
+  "-Xfatal-warnings",               //Fail the compilation if there are any warnings.
+  "-Xlint",                         //Enable recommended additional warnings.
+  "-Yinline-warnings",              //Emit inlining warnings.
+  "-Yno-adapted-args",              //Do not adapt an argument list (either by inserting () or creating a tuple) to match the receiver.
+  "-Ywarn-dead-code"                //Warn when dead code is identified.
+)
 
 libraryDependencies ++= Seq(
   //Logging
@@ -26,23 +45,9 @@ libraryDependencies ++= Seq(
 
   "work.martins.simon" %% "scala-expect" % "1.10.2"
 )
-resolvers += Opts.resolver.sonatypeReleases
 
 autoAPIMappings := true
 scalacOptions in (Compile,doc) ++= Seq("-groups", "-implicits", "-diagrams")
-
-scalacOptions ++= Seq(
-  "-deprecation",                   //Emit warning and location for usages of deprecated APIs.
-  "-encoding", "UTF-8",             //Use UTF-8 encoding. Should be default.
-  "-feature",                       //Emit warning and location for usages of features that should be imported explicitly.
-  "-language:implicitConversions",  //Explicitly enables the implicit conversions feature
-  "-unchecked",                     //Enable detailed unchecked (erasure) warnings
-  "-Xfatal-warnings",               //Fail the compilation if there are any warnings.
-  "-Xlint",                         //Enable recommended additional warnings.
-  "-Yinline-warnings",              //Emit inlining warnings.
-  "-Yno-adapted-args",              //Do not adapt an argument list (either by inserting () or creating a tuple) to match the receiver.
-  "-Ywarn-dead-code"                //Warn when dead code is identified.
-)
 
 coverageEnabled := true
 

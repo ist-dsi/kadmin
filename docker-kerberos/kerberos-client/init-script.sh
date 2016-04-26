@@ -3,7 +3,7 @@
 source `dirname $0`/configureKerberosClient.sh
 
 cd /tmp/kadmin
-sbt clean coverage test
+sbt coverage test
 sbt coverageReport
 sbt coverageAggregate
 sbt codacyCoverage

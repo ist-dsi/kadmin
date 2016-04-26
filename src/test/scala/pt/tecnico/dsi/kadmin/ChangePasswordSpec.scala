@@ -39,7 +39,7 @@ class ChangePasswordSpec extends WordSpec with TestUtils {
         changePassword(principal, newPassword = Some("abc1A2B3C")).rightValueShouldBeUnit()
         changePassword(principal, newPassword = Some(firstPassword)).leftValue shouldBe PasswordIsBeingReused
       }
-      "should succeed if the password is valid according to the policy" in {
+      "succeed if the password is valid according to the policy" in {
         val password = "yey DIDN'T I say we n33ded a new password"
         changePassword(principal, newPassword = Some(password)).rightValueShouldBeUnit()
 

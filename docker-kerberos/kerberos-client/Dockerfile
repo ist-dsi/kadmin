@@ -3,7 +3,10 @@ FROM debian:jessie-backports
 MAINTAINER Simão Martins "simao.martins@tecnico.ulisboa.pt"
 
 RUN apt-get -qq -y update && \
-  apt-get install -y apt-transport-https
+  apt-get install -y apt-transport-https locales
+
+#RUN echo "en_US.UTF-8 UTF-8" > /etc/locale.gen
+#RUN locale-gen
 
 # We need JDK and SBT because we are going to perform the tests inside this container
 RUN apt-key adv --keyserver hkp://keyserver.ubuntu.com:80 --recv 642AC823
@@ -16,7 +19,7 @@ RUN DEBIAN_FRONTEND=noninteractive apt-get install -y krb5-user openjdk-8-jdk sb
 # This ensures that sbt does its initial thing. Such as:
 # Getting org.scala-sbt sbt 0.13.11 ...
 # And downloading all of its dependencies
-RUN sbt -version
+RUN sbt about
 
 ENV REALM ${REALM:-EXAMPLE.COM}
 ENV KADMIN_PRINCIPAL ${KADMIN_PRINCIPAL:-kadmin/admin}

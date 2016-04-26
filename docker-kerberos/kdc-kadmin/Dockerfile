@@ -4,8 +4,11 @@ MAINTAINER Simão Martins "simao.martins@tecnico.ulisboa.pt"
 EXPOSE 749 88
 
 RUN apt-get -qq -y update && \
-  DEBIAN_FRONTEND=noninteractive apt-get install -y krb5-kdc krb5-admin-server && \
+  DEBIAN_FRONTEND=noninteractive apt-get install -y locales krb5-kdc krb5-admin-server && \
   apt-get clean
+
+#RUN echo "en_US.UTF-8 UTF-8" > /etc/locale.gen
+#RUN locale-gen
 
 ENV REALM ${REALM:-EXAMPLE.COM}
 ENV SUPPORTED_ENCRYPTION_TYPES ${SUPPORTED_ENCRYPTION_TYPES:-aes256-cts-hmac-sha1-96:normal}

@@ -12,6 +12,8 @@ services:
 
   kerberos-client:
     build: ./kerberos-client
+    environment:
+      - CODACY_PROJECT_TOKEN=$CODACY_PROJECT_TOKEN
     env_file: kerberos.env
     depends_on:
       - kdc-kadmin

@@ -3,7 +3,10 @@
 source `dirname $0`/configureKerberosClient.sh
 
 cd /tmp/kadmin
-sbt test
+sbt clean coverage test
+sbt coverageReport
+sbt coverageAggregate
+sbt codacyCoverage
 
 #echo "RunOnly"
 #sbt <<<"testOnly pt.tecnico.dsi.kadmin.PrincipalSpec"

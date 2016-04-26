@@ -44,6 +44,8 @@ scalacOptions ++= Seq(
   "-Ywarn-dead-code"                //Warn when dead code is identified.
 )
 
+coverageEnabled := true
+
 site.settings
 site.includeScaladoc()
 ghpages.settings

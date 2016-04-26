@@ -9,3 +9,7 @@ resolvers += "jgit-repo" at "http://download.eclipse.org/jgit/maven"
 
 addSbtPlugin("com.jsuereth" % "sbt-pgp" % "1.0.0")
 addSbtPlugin("org.xerial.sbt" % "sbt-sonatype" % "1.1")
+
+resolvers += "Typesafe Repository" at "https://repo.typesafe.com/typesafe/releases/"
+addSbtPlugin("org.scoverage" % "sbt-scoverage" % "1.3.3")
+addSbtPlugin("com.codacy" % "sbt-codacy-coverage" % "1.2.1")

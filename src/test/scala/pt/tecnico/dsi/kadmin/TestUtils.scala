@@ -1,5 +1,6 @@
 package pt.tecnico.dsi.kadmin
 
+import scala.concurrent.duration.DurationInt
 import com.typesafe.config.ConfigFactory
 import com.typesafe.scalalogging.LazyLogging
 import org.scalatest.{EitherValues, Matchers}
@@ -31,6 +32,8 @@ trait TestUtils extends ScalaFutures with Matchers with EitherValues with LazyLo
 
       authenticating-principal = "$principal"
       authenticating-principal-password = "MITiys4K5"
+
+      command-with-authentication = ["kadmin", "-p", "$$FULL_PRINCIPAL"]
     }""")
   val fullPermissionsKadmin = new Kadmin(createConfigFor("kadmin/admin"))
   val noPermissionsKadmin = new Kadmin(createConfigFor("noPermissions"))
@@ -71,9 +74,9 @@ trait TestUtils extends ScalaFutures with Matchers with EitherValues with LazyLo
 
     def idempotentRightValue(rightValue: T => Unit): Unit = idempotent(expect)(t => rightValue(t.right.value))
 
-    def value: Either[ErrorCase, T] = expect.run().futureValue(new PatienceConfig(
-      timeout = Span(expect.settings.timeout.toSeconds, Seconds),
-      interval = Span(500, Millis)
+    def value: Either[ErrorCase, T] = expect.run().futureValue(PatienceConfig(
+      timeout = scaled(expect.settings.timeout),
+      interval = scaled(500.millis)
     ))
   }
 

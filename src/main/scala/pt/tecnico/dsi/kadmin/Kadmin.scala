@@ -386,14 +386,14 @@ class Kadmin(val settings: Settings = new Settings()) extends LazyLogging {
     * @return an Expect that changes `principal` password.
     */
   def changePassword(principal: String, newPassword: Option[String] = None,
-                     randKey: Boolean = false, salt: Option[String] = None): Expect[Either[ErrorCase, Unit]] = {
-    require(newPassword.nonEmpty || randKey || salt.nonEmpty,
+                     randKey: Boolean = false, keysalt: Option[String] = None): Expect[Either[ErrorCase, Unit]] = {
+    require(newPassword.nonEmpty || randKey || keysalt.nonEmpty,
       "At least one of newPassword, randKey or salt must be defined " +
       "(be a Some, for newPassword and salt. Or set to true, for the randKey).")
 
     val newPasswordOption = newPassword.map(p => s"""-pw "$p"""").getOrElse("")
     val randKeyOption = if (randKey) "-randkey" else ""
-    val saltOption = salt.map(s => s"""-e "$s"""").getOrElse("")
+    val saltOption = keysalt.map(s => s"""-e "$s"""").getOrElse("")
     val options = Seq(newPasswordOption, randKeyOption, saltOption).mkString(" ")
 
     val fullPrincipal = getFullPrincipalName(principal)

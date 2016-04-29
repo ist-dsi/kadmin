@@ -563,7 +563,7 @@ class Kadmin(val settings: Settings = new Settings()) extends LazyLogging {
                       |Failed password attempts: (\d+)
                       |Number of keys: \d+
                       |(.*?)MKey: vno (\d+)
-                      |Attributes: ([^\n]*)
+                      |Attributes:([^\n]*)
                       |Policy: ([^\n]+)""".stripMargin.r(
             "expirationDateTime", "lastPasswordChangeDateTime", "passwordExpirationDateTime",
             "maximumTicketLife", "maximumRenewableLife",
@@ -590,7 +590,8 @@ class Kadmin(val settings: Settings = new Settings()) extends LazyLogging {
                   new Key(m.group(1).toInt, m.group(2))
                 }
               }.toSet, others("masterKey").toInt,
-              others("attributes").split(" ").toSet, Option(others("policy")).map(_.trim).filter(_ != "[none]")
+              others("attributes").split(" ").filter(_.nonEmpty).toSet,
+              Option(others("policy")).map(_.trim).filter(_ != "[none]")
             ))
         }
       }

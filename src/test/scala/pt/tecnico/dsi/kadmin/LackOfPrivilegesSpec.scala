@@ -43,6 +43,12 @@ class LackOfPrivilegesSpec extends WordSpec with TestUtils {
           }
         }
       }
+
+      "fail while listings principals" in {
+        testInsufficientPermission("list") {
+          listPrincipals("*")
+        }
+      }
     }
   }
 }

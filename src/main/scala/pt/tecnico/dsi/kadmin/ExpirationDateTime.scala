@@ -52,7 +52,7 @@ object Never extends ExpirationDateTime {
   override def equals(other: Any): Boolean = canEqual(other)
 }
 
-class RelativeDateTime(duration: FiniteDuration) extends ExpirationDateTime {
+case class RelativeDateTime(duration: FiniteDuration) extends ExpirationDateTime {
   protected val dateTime = new DateTime(DateTime.now().getMillis + duration.toMillis)
   val toAbsolute = new AbsoluteDateTime(dateTime)
 
@@ -60,7 +60,7 @@ class RelativeDateTime(duration: FiniteDuration) extends ExpirationDateTime {
   override def toString = s"RelativeDateTime($toKadminRepresentation)"
 }
 
-class AbsoluteDateTime(val dateTime: DateTime) extends ExpirationDateTime with LazyLogging {
+case class AbsoluteDateTime(dateTime: DateTime) extends ExpirationDateTime with LazyLogging {
   def canEqual(other: Any): Boolean = other.isInstanceOf[AbsoluteDateTime]
   override def toString = s"AbsoluteDateTime($toKadminRepresentation)"
 }

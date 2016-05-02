@@ -1,6 +1,6 @@
 organization := "pt.tecnico.dsi"
 name := "kadmin"
-version := "3.2.1"
+version := "4.0.0"
 
 initialize := {
   val required = "1.8"
@@ -48,8 +48,6 @@ libraryDependencies ++= Seq(
 
 autoAPIMappings := true
 scalacOptions in (Compile,doc) ++= Seq("-groups", "-implicits", "-diagrams")
-
-coverageEnabled := true
 
 site.settings
 site.includeScaladoc()

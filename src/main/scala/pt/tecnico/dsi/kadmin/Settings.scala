@@ -40,17 +40,17 @@ class Settings(config: Config = ConfigFactory.load()) {
 
   val realm = getString("realm")
 
-  val performAuthentication = getBoolean("perform-authentication")
+  val passwordAuthentication = getBoolean("password-authentication")
 
-  val authenticatingPrincipal = getString("authenticating-principal")
-  if (performAuthentication && authenticatingPrincipal.isEmpty)
-    throw new IllegalArgumentException("When performing authentication authenticating-principal cannot be empty.")
-  val authenticatingPrincipalPassword = getString("authenticating-principal-password")
-  if (performAuthentication && authenticatingPrincipalPassword.isEmpty)
-    throw new IllegalArgumentException("When performing authentication authenticating-principal-password cannot be empty.")
+  val authenticatingPrincipal = getString("principal")
+  if (passwordAuthentication && authenticatingPrincipal.isEmpty)
+    throw new IllegalArgumentException("When performing password authentication principal cannot be empty.")
+  val authenticatingPrincipalPassword = getString("password")
+  if (passwordAuthentication && authenticatingPrincipalPassword.isEmpty)
+    throw new IllegalArgumentException("When performing password authentication password cannot be empty.")
 
-  val commandWithAuthentication: Seq[String] = {
-    val configName = "command-with-authentication"
+  val command: Seq[String] = {
+    val configName = "command"
     val commandArray: Seq[String] = getValue(configName).valueType() match {
       case ConfigValueType.STRING => splitBySpaces(getString(configName))
       case ConfigValueType.LIST => getStringList(configName).asScala
@@ -58,17 +58,6 @@ class Settings(config: Config = ConfigFactory.load()) {
     }
     require(commandArray.nonEmpty, s"$configName cannot be empty.")
     commandArray.map(_.replaceAllLiterally("$FULL_PRINCIPAL", s"$authenticatingPrincipal@$realm"))
-  }
-
-  val commandWithoutAuthentication: Seq[String] = {
-    val configName = "command-without-authentication"
-    val commandArray: Seq[String] = getValue(configName).valueType() match {
-      case ConfigValueType.STRING => splitBySpaces(getString(configName))
-      case ConfigValueType.LIST => getStringList(configName).asScala
-      case _ => throw new IllegalArgumentException(s"$configName can only be String or Array of String")
-    }
-    require(commandArray.nonEmpty, s"$configName cannot be empty.")
-    commandArray
   }
 
   val keytabsLocation = getString("keytabs-location")

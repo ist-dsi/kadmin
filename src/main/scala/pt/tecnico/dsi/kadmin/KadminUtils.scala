@@ -3,15 +3,65 @@ package pt.tecnico.dsi.kadmin
 import java.util.Locale
 
 import com.typesafe.scalalogging.LazyLogging
-import org.joda.time.DateTimeZone
+import org.joda.time.{DateTime, DateTimeZone}
 import org.joda.time.format.DateTimeFormat
-import work.martins.simon.expect.fluent.{ExpectBlock, When}
+import work.martins.simon.expect.EndOfFile
+import work.martins.simon.expect.fluent.{Expect, ExpectBlock, When}
 
-import scala.concurrent.duration.{Duration, FiniteDuration, DurationInt}
+import scala.concurrent.duration.{Duration, DurationInt, FiniteDuration}
 import scala.util.matching.Regex.Match
 import scala.util.{Failure, Success, Try}
 
 object KadminUtils extends LazyLogging {
+
+  /**
+    * Obtains a ticket granting ticket for `principal` using `password`.
+    *
+    * @return Either an ErrorCase or a date time of when the obtained ticked must be renewed.
+    */
+  def obtainTicketGrantingTicket(options: String = "", principal: String, password: String): Expect[Either[ErrorCase, DateTime]] = {
+    require(principal.nonEmpty, "principal cannot be empty.")
+    require(password.nonEmpty, "password cannot be empty.")
+
+    val principalWithoutRealm = if (principal.contains("@")) {
+      principal.substring(0, principal.indexOf("@"))
+    } else {
+      principal
+    }
+
+    val defaultValue: Either[ErrorCase, DateTime] = Left(UnknownError())
+    val e = new Expect(s"kinit $options $principal", defaultValue)
+    e.expect
+      .when(s"Password for $principal")
+        .sendln(password)
+      .when(s"""Client '$principalWithoutRealm@[^']+' not found in Kerberos database""".r)
+        .returning(Left(NoSuchPrincipal))
+    e.expect
+      .addWhen(passwordIncorrect)
+      .addWhen(passwordExpired)
+      .when(EndOfFile)
+        .returningExpect {
+          val datetimeRegex = """\d\d/\d\d/\d\d \d\d:\d\d:\d\d"""
+          val e2 = new Expect("klist", defaultValue)
+          e2.expect(
+            s"""Ticket cache: FILE:[^\n]+
+                |Default principal: $principalWithoutRealm@[^\n]+
+                |
+                |Valid starting\\s+Expires\\s+Service principal
+                |$datetimeRegex\\s+($datetimeRegex)\\s+[^\n]+
+                |(\\s+renew until $datetimeRegex)?""".stripMargin.r)
+            .returning { m: Match =>
+              val dateTimeString = Option(m.group(2)).flatMap { renewString =>
+                datetimeRegex.r.findFirstMatchIn(renewString).map(_.group(0))
+              }.getOrElse(m.group(1))
+              val dateTimeFormat = DateTimeFormat.forPattern("dd/MM/yyyy HH:mm:ss")
+              Right(dateTimeFormat.parseDateTime(dateTimeString))
+            }
+          e2
+        }
+    e
+  }
+
   /**
     * Tries to parse a date time string returned by a kadmin `get_principal` operation.
     *
@@ -55,7 +105,7 @@ object KadminUtils extends LazyLogging {
             DateTimeZone.forID(timezone)
           } else {
             val default = DateTimeZone.getDefault
-            logger.warn(s"Unknown timezone: $timezone. Using the default one: $default.")
+            logger.info(s"Unknown timezone: $timezone. Using the default one: $default.")
             default
           }
 
@@ -75,11 +125,19 @@ object KadminUtils extends LazyLogging {
     }
   }
 
+  /**
+    * Parses `durationString` into a FiniteDuration.
+    *
+    * The expected format is "d days? HH:mm:ss".
+    *
+    * @param durationString the string to parse.
+    * @return the parsed FiniteDuration or Duration.Zero if an error occurred.
+    */
   def parseDuration(durationString: String): FiniteDuration = {
     """(\d+) days? (\d+):(\d+):(\d+)""".r
       .findFirstMatchIn(durationString)
       .map { m =>
-        m.group(1).toInt.days + m.group(2).toInt.days + m.group(3).toInt.days + m.group(4).toInt.days
+        m.group(1).toInt.days + m.group(2).toInt.hours + m.group(3).toInt.minutes + m.group(4).toInt.seconds
       }
       .getOrElse(Duration.Zero)
   }

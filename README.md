@@ -22,7 +22,7 @@ To simplify this process we use [scala-expect](https://github.com/Lasering/scala
 ## Install
 Add the following dependency to your `build.sbt`:
 ```sbt
-libraryDependencies += "pt.tecnico.dsi" %% "kadmin" % "3.2.1"
+libraryDependencies += "pt.tecnico.dsi" %% "kadmin" % "4.0.0"
 ```
 We use [semantic versioning](http://semver.org).
 

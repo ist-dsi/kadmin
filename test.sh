@@ -1,8 +1,6 @@
 #!/bin/bash
 START=$(date +%s)
 
-sbt test:compile
-
 cd docker-kerberos
 
 # Build the containers

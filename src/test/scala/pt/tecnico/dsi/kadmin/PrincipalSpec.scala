@@ -111,8 +111,6 @@ class PrincipalSpec extends FlatSpec with TestUtils {
     //Get it
     getPrincipal(principal) idempotentRightValue (_.policy shouldBe None)
   }
-
-
   it should "idempotently succeed" in {
     val principal = "get"
     //Ensure the principal exists
@@ -120,6 +118,10 @@ class PrincipalSpec extends FlatSpec with TestUtils {
 
     //Get it
     getPrincipal(principal) idempotentRightValue (_ shouldBe a [Principal])
+  }
+
+  "listPrincipals" should "idempotently succeed" in {
+    listPrincipals("") idempotentRightValue (_ should contain allOf ("noPermissions@EXAMPLE.COM", "kadmin/admin@EXAMPLE.COM"))
   }
 
   val expireDateTime = new DateTime(DateTimeZone.forID("UTC")).plusHours(2)

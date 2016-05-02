@@ -5,12 +5,8 @@ import java.nio.file.Files
 
 import com.typesafe.config.Config
 import com.typesafe.scalalogging.LazyLogging
-import org.joda.time.DateTime
-import org.joda.time.format.DateTimeFormat
-import work.martins.simon.expect.EndOfFile
 import work.martins.simon.expect.fluent.{Expect, ExpectBlock}
 
-import scala.concurrent.duration.{Duration, DurationInt, FiniteDuration}
 import scala.util.matching.Regex.Match
 import pt.tecnico.dsi.kadmin.KadminUtils._
 
@@ -20,8 +16,8 @@ import pt.tecnico.dsi.kadmin.KadminUtils._
   *  it will be successful in both invocations. This means that this operation can be repeated or retried as
   *  often as necessary without causing unintended effects.
   * @define startedWithDoOperation
-  *  Kadmin will be started with the `doOperation` method, that is, it will perform
-  *  authentication as specified in the configuration.
+  *  Kadmin will be started with the `doOperation` method, that is, a password authentication
+  *  will performed as specified in the configuration.
   */
 class Kadmin(val settings: Settings = new Settings()) extends LazyLogging {
   def this(config: Config) = this(new Settings(config))
@@ -35,141 +31,10 @@ class Kadmin(val settings: Settings = new Settings()) extends LazyLogging {
   }
 
   /**
-    * Obtains a ticket granting ticket for `authenticatingPrincipal` using
-    * `authenticatingPrincipalPassword` as the password.
-    *
-    * If the intended use case is to check whether the principal password is the correct one, then the function
-    * `checkPassword` is more suited to that effect.
-    *
-    * The ticket will be obtained in the machine that invokes this code.
-    *
-    * @return Either an ErrorCase or a date time of when the obtained ticked must be renewed.
-    */
-  def obtainTicketGrantingTicket(options: String = "", authenticatingPrincipal: String = authenticatingPrincipal,
-                                 authenticatingPrincipalPassword: String = authenticatingPrincipalPassword): Expect[Either[ErrorCase, DateTime]] = {
-    require(authenticatingPrincipal.isEmpty, "authenticatingPrincipal cannot be empty.")
-    require(authenticatingPrincipalPassword.isEmpty, "authenticatingPrincipalPassword cannot be empty.")
-
-    val fullPrincipal = getFullPrincipalName(authenticatingPrincipal)
-
-    val defaultValue: Either[ErrorCase, DateTime] = Left(UnknownError())
-    val e = new Expect(s"kinit $options $fullPrincipal", defaultValue)
-    e.expect
-      .when(s"Password for $fullPrincipal: ")
-        .sendln(authenticatingPrincipalPassword)
-      .when(s"""Client '$fullPrincipal' not found in Kerberos database""")
-        .returning(Left(NoSuchPrincipal))
-    e.expect
-      .addWhen(passwordIncorrect)
-      .addWhen(passwordExpired)
-      .addWhen(unknownError)
-      .when(EndOfFile)
-        .returningExpect {
-          val datetimeRegex = """\d\d-\d\d-\d\d\d\d \d\d:\d\d:\d\d"""
-          val e2 = new Expect("klist", defaultValue)
-          e2.expect(
-            s"""Ticket cache: FILE:[^\n]+
-                |Default principal: $authenticatingPrincipal
-                |
-                |Valid starting       Expires              Service principal
-                |$datetimeRegex  $datetimeRegex  krbtgt/$realm@$realm
-                |\trenew until ($datetimeRegex)""".stripMargin.r)
-            .returning { m: Match =>
-              val dateTimeString = m.group(1)
-              val dateTimeFormat = DateTimeFormat.forPattern("dd-MM-yyyy HH:mm:ss")
-              Right(dateTimeFormat.parseDateTime(dateTimeString))
-            }
-          e2
-        }
-    e
-  }
-
-  //region <Generic commands>
-  /**
-    * Creates an Expect that performs an authenticated kadmin operation `f` and then quits kadmin.
-    *
-    * Kadmin is started using `command-with-authentication` configuration value.
-    * The authentication is performed by sending `authenticatingPrincipalPassword` and waiting for either
-    * an error message saying the password was incorrect or the kadmin prompt. If the password was incorrect Expect
-    * will return a Left(IncorrectPassword).
-    *
-    * If no authentication is required use `withoutAuthentication` instead.
-    *
-    * @example {{{
-    *   withAuthentication { e =>
-    *     e.expect(KadminPrompt)
-    *       .sendln(s"getprinc fullPrincipal")
-    *   }
-    * }}}
-    * @param f the kerberos administration operation to perform.
-    * @tparam R the type for the Right of the Either returned by the Expect.
-    * @return an Expect that performs the authentication, the operation `f` and then quits kadmin.
-    */
-  def withAuthentication[R](f: Expect[Either[ErrorCase, R]] => Unit): Expect[Either[ErrorCase, R]] = {
-    val defaultValue: Either[ErrorCase, R] = Left(UnknownError())
-    val e = new Expect(commandWithAuthentication, defaultValue)
-    val fullPrincipal = getFullPrincipalName(authenticatingPrincipal)
-    e.expect(s"Password for $fullPrincipal: ")
-      .sendln(authenticatingPrincipalPassword)
-    e.expect
-      //Due to the fantastic consistency in kerberos commands we cannot use:
-      //  addWhen(passwordIncorrect)
-      //because in kadmin the error is "Incorrect password" and the `passwordIncorrect` function will add a when with:
-      //  when("Password incorrect")
-      //</sarcasm>
-      .when("Incorrect password")
-        .returning(Left(PasswordIncorrect))
-        .addActions(preemptiveExit)
-      .when(kadminPrompt)
-        //The password was correct we can continue. We need to send a newline in order for `f` to see the KadminPrompt
-        .sendln("")
-      .addWhen(unknownError)
-        .addActions(preemptiveExit)
-    e.addExpectBlock(f)
-    e.expect(kadminPrompt)
-      .sendln("quit")
-      .exit()
-    e
-  }
-
-  /**
     * Creates an Expect that performs a kadmin operation `f` and then quits kadmin.
-    *
-    * Kadmin is started using `command-without-authentication` configuration value. It is assumed that this command
-    * starts kadmin in a way that requires no authentication (such as using kadmin.local on the master KDC).
-    *
-    * If authentication is required use `withAuthentication` instead.
-    *
-    * @example {{{
-    *   withoutAuthentication { e =>
-    *     e.expect(KadminPrompt)
-    *       .sendln(s"getprinc fullPrincipal")
-    *   }
-    * }}}
-    * @param f the kerberos administration operation to perform.
-    * @tparam R the type for the Right of the Either returned by the Expect.
-    * @return an Expect that performs the operation `f` and then quits kadmin.
-    */
-  def withoutAuthentication[R](f: Expect[Either[ErrorCase, R]] => Unit): Expect[Either[ErrorCase, R]] = {
-    val defaultValue: Either[ErrorCase, R] = Left(UnknownError())
-    val e = new Expect(commandWithoutAuthentication, defaultValue)
-    e.expect
-      .when(kadminPrompt)
-        //All good. We can continue. We need to send a newline in order for `f` to see the KadminPrompt
-        .sendln("")
-      .addWhen(unknownError)
-        .addActions(preemptiveExit)
-    e.addExpectBlock(f)
-    e.expect(kadminPrompt)
-      .sendln("quit")
-      .exit()
-    e
-  }
-
-  /**
-    * Creates an Expect that performs a kadmin operation `f` and then quits kadmin.
-    * If the configuration `perform-authentication` is set to true then access to kadmin will be authenticated.
-    * Otherwise it will be unauthenticated.
+    * If the configuration `password-authentication` is set to true then the authentication is performed by
+    * sending `password` and waiting for either an error message saying the password was incorrect or the kadmin prompt.
+    * If the password was incorrect a Left(IncorrectPassword) will be returned.
     *
     * @example {{{
     *   doOperation { e =>
@@ -182,13 +47,37 @@ class Kadmin(val settings: Settings = new Settings()) extends LazyLogging {
     * @return an Expect that performs the operation `f` and then quits kadmin.
     */
   def doOperation[R](f: Expect[Either[ErrorCase, R]] => Unit): Expect[Either[ErrorCase, R]] = {
-    if (performAuthentication) {
-      withAuthentication(f)
-    } else {
-      withoutAuthentication(f)
+    val defaultValue: Either[ErrorCase, R] = Left(UnknownError())
+    val e = new Expect(command, defaultValue)
+    if (passwordAuthentication) {
+      e.expect(s"Password for ${getFullPrincipalName(authenticatingPrincipal)}: ")
+        .sendln(authenticatingPrincipalPassword)
     }
+
+    val expectBlock = e.expect
+    if (passwordAuthentication) {
+      expectBlock
+        //Due to the fantastic consistency in kerberos commands we cannot use:
+        //  addWhen(passwordIncorrect)
+        //because in kadmin the error is "Incorrect password" and the `passwordIncorrect` function will add a when with:
+        //  when("Password incorrect")
+        //</sarcasm>
+        .when("Incorrect password")
+          .returning(Left(PasswordIncorrect))
+          .addActions(preemptiveExit)
+    }
+    expectBlock
+      .when(kadminPrompt)
+        //All good. We can continue. We need to send a newline in order for `f` to see the KadminPrompt
+        .sendln("")
+      .addWhen(unknownError)
+        .addActions(preemptiveExit)
+    e.addExpectBlock(f)
+    e.expect(kadminPrompt)
+      .sendln("quit")
+      .exit()
+    e
   }
-  //endregion
 
   //region <Add/Modify commands>
   /**
@@ -216,15 +105,9 @@ class Kadmin(val settings: Settings = new Settings()) extends LazyLogging {
         .when(s"""Principal "$fullPrincipal" (created|added).""".r)
           .returning(Right(Unit): Either[ErrorCase, Unit])
         .when("Principal or policy already exists")
+          //TODO: If options contains any of (-pw, -e or -randkey) the modify will fail.
+          //maybe we could invoke changePassword for these options to solve the problem
           .returningExpect(modifyPrincipal(options, principal))
-          //Is modifying the existing principal the best approach?
-          //Would deleting the existing principal and create a new one be a better one?
-          //  · By deleting we will be losing the password history. Which would make the add idempotent when using the
-          //    change password option (-pw). But we would partially lose the restraint that prohibits
-          //    the reuse of the password.
-          //  · By modifying we run into troubles when using the change password options (-pw, -e or -randkey) since
-          //    these operations are not idempotent.
-          //TODO: would invoking changePassword for these options solve the problem?
         .addWhen(insufficientPermission)
         .addWhen(unknownError)
     }
@@ -232,11 +115,6 @@ class Kadmin(val settings: Settings = new Settings()) extends LazyLogging {
 
   /**
     * Modifies `principal` using `options`.
-    *
-    * $idempotentOperation Except if `options` contains any of:
-    *  - `-randkey`
-    *  - `-pw ''password''`
-    *  - `-e ''enc:salt''`
     *
     * $startedWithDoOperation
     *
@@ -451,7 +329,7 @@ class Kadmin(val settings: Settings = new Settings()) extends LazyLogging {
         .sendln(s"ktadd -keytab $keytabPath $fullPrincipal")
       e.expect
         .when("Entry for principal (.*?) added to keytab".r)
-          .returning(Right(Unit): Either[ErrorCase, Unit])
+          .returning(Right(()))
         .addWhen(insufficientPermission)
         .addWhen(unknownError)
     }
@@ -595,6 +473,28 @@ class Kadmin(val settings: Settings = new Settings()) extends LazyLogging {
             ))
         }
       }
+  }
+
+  /**
+    * List all principals matching the glob expression.
+    *
+    * If `expressionGlob` is the empty String all principals will be listed.
+    *
+    * @param expressionGlob the glob expression to pass to kadmin list_principals.
+    * @return an Expect that returns the list of principals.
+    */
+  def listPrincipals(expressionGlob: String): Expect[Either[ErrorCase, Seq[String]]] = {
+    doOperation { e =>
+      e.expect(kadminPrompt)
+        .sendln(s"list_principals $expressionGlob")
+      e.expect
+        .when(s"(?s)(([^@]+@$realm\n?)+)(?=\n$kadminPrompt)".r)
+          .returning { m =>
+            Right(m.group(1).split("\n").toSeq)
+          }
+        .addWhen(unknownError)
+        .addWhen(insufficientPermission)
+    }
   }
 
   /**

@@ -253,8 +253,8 @@
     </span>
       <p class="shortcomment cmt">Creates <code>policy</code> using <code>options</code>.</p><div class="fullcomment"><div class="comment cmt"><p>Creates <code>policy</code> using <code>options</code>.</p><p> This operation is idempotent, that is, if this method is invoked twice for the same principal
  it will be successful in both invocations. This means that this operation can be repeated or retried as
- often as necessary without causing unintended effects.</p><p> Kadmin will be started with the <code>doOperation</code> method, that is, it will perform
- authentication as specified in the configuration.
+ often as necessary without causing unintended effects.</p><p> Kadmin will be started with the <code>doOperation</code> method, that is, a password authentication
+ will performed as specified in the configuration.
 </p></div><dl class="paramcmts block"><dt class="param">options</dt><dd class="cmt"><p>the parameters to pass to the kadmin <code>add_policy</code> operation.
 See <a href="http://web.mit.edu/kerberos/krb5-devel/doc/admin/admin_commands/kadmin_local.html#add-policy" target="_blank">Add
 Policy (MIT Kerberos)</a> for a full list. The parameters are not checked for validity.</p></dd><dt class="param">policy</dt><dd class="cmt"><p>the policy to create.</p></dd><dt>returns</dt><dd class="cmt"><p>an Expect that creates <code>policy</code>.</p></dd></dl></div>
@@ -276,8 +276,8 @@ Policy (MIT Kerberos)</a> for a full list. The parameters are not checked for va
     </span>
       <p class="shortcomment cmt">Creates <code>principal</code> using <code>options</code>.</p><div class="fullcomment"><div class="comment cmt"><p>Creates <code>principal</code> using <code>options</code>.</p><p> This operation is idempotent, that is, if this method is invoked twice for the same principal
  it will be successful in both invocations. This means that this operation can be repeated or retried as
- often as necessary without causing unintended effects. Except if <code>options</code> contains any of:</p><ul><li><code>-randkey</code></li><li><code>-pw <i>password</i></code></li><li><code>-e <i>enc:salt</i></code></li></ul><p> Kadmin will be started with the <code>doOperation</code> method, that is, it will perform
- authentication as specified in the configuration.
+ often as necessary without causing unintended effects. Except if <code>options</code> contains any of:</p><ul><li><code>-randkey</code></li><li><code>-pw <i>password</i></code></li><li><code>-e <i>enc:salt</i></code></li></ul><p> Kadmin will be started with the <code>doOperation</code> method, that is, a password authentication
+ will performed as specified in the configuration.
 </p></div><dl class="paramcmts block"><dt class="param">options</dt><dd class="cmt"><p>the parameters to pass to the kadmin <code>add_principal</code> operation.
 See <a href="http://web.mit.edu/kerberos/krb5-devel/doc/admin/admin_commands/kadmin_local.html#add-principal" target="_blank">Add
 Principal (MIT Kerberos)</a> for a full list. The parameters are not checked for validity.</p></dd><dt class="param">principal</dt><dd class="cmt"><p>the principal to create.</p></dd><dt>returns</dt><dd class="cmt"><p>an Expect that creates <code>principal</code>.</p></dd></dl></div>
@@ -318,8 +318,8 @@ Principal (MIT Kerberos)</a> for a full list. The parameters are not checked for
 and/or sets its salt to <code>salt</code>.</p><div class="fullcomment"><div class="comment cmt"><p>Changes the <code>principal</code> password to <code>newPassword</code> and/or sets its key to a random value
 and/or sets its salt to <code>salt</code>.</p><p>In some cases this operation might not be idempotent. For example: if the policy assigned to <code>principal</code>
 does not allow the same password to be reused, the first time the password is changed it will be successful,
-however on the second time it will fail with an ErrorCase <code>PasswordIsBeingReused</code>.</p><p> Kadmin will be started with the <code>doOperation</code> method, that is, it will perform
- authentication as specified in the configuration.
+however on the second time it will fail with an ErrorCase <code>PasswordIsBeingReused</code>.</p><p> Kadmin will be started with the <code>doOperation</code> method, that is, a password authentication
+ will performed as specified in the configuration.
 </p></div><dl class="paramcmts block"><dt class="param">principal</dt><dd class="cmt"><p>the principal to change the password.</p></dd><dt class="param">newPassword</dt><dd class="cmt"><p>the new password</p></dd><dt>returns</dt><dd class="cmt"><p>an Expect that changes <code>principal</code> password.</p></dd></dl></div>
     </li><li name="pt.tecnico.dsi.kadmin.Kadmin#checkPassword" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="checkPassword(principal:String,password:String):work.martins.simon.expect.fluent.Expect[Either[pt.tecnico.dsi.kadmin.ErrorCase,Unit]]"></a>
@@ -399,8 +399,8 @@ with the same tickets but with different keys.
     </span>
       <p class="shortcomment cmt">Deletes <code>policy</code>.</p><div class="fullcomment"><div class="comment cmt"><p>Deletes <code>policy</code>.</p><p> This operation is idempotent, that is, if this method is invoked twice for the same principal
  it will be successful in both invocations. This means that this operation can be repeated or retried as
- often as necessary without causing unintended effects.</p><p> Kadmin will be started with the <code>doOperation</code> method, that is, it will perform
- authentication as specified in the configuration.
+ often as necessary without causing unintended effects.</p><p> Kadmin will be started with the <code>doOperation</code> method, that is, a password authentication
+ will performed as specified in the configuration.
 </p></div><dl class="paramcmts block"><dt class="param">policy</dt><dd class="cmt"><p>the policy to delete.</p></dd><dt>returns</dt><dd class="cmt"><p>an Expect that deletes <code>policy</code>.</p></dd></dl></div>
     </li><li name="pt.tecnico.dsi.kadmin.Kadmin#deletePrincipal" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="deletePrincipal(principal:String):work.martins.simon.expect.fluent.Expect[Either[pt.tecnico.dsi.kadmin.ErrorCase,Unit]]"></a>
@@ -420,8 +420,8 @@ with the same tickets but with different keys.
     </span>
       <p class="shortcomment cmt">Deletes <code>principal</code>.</p><div class="fullcomment"><div class="comment cmt"><p>Deletes <code>principal</code>.</p><p> This operation is idempotent, that is, if this method is invoked twice for the same principal
  it will be successful in both invocations. This means that this operation can be repeated or retried as
- often as necessary without causing unintended effects.</p><p> Kadmin will be started with the <code>doOperation</code> method, that is, it will perform
- authentication as specified in the configuration.
+ often as necessary without causing unintended effects.</p><p> Kadmin will be started with the <code>doOperation</code> method, that is, a password authentication
+ will performed as specified in the configuration.
 </p></div><dl class="paramcmts block"><dt class="param">principal</dt><dd class="cmt"><p>the principal to delete.</p></dd><dt>returns</dt><dd class="cmt"><p>an Expect that deletes <code>principal</code>.</p></dd></dl></div>
     </li><li name="pt.tecnico.dsi.kadmin.Kadmin#doOperation" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="doOperation[R](f:work.martins.simon.expect.fluent.Expect[Either[pt.tecnico.dsi.kadmin.ErrorCase,R]]=&gt;Unit):work.martins.simon.expect.fluent.Expect[Either[pt.tecnico.dsi.kadmin.ErrorCase,R]]"></a>
@@ -440,8 +440,9 @@ with the same tickets but with different keys.
       </a>
     </span>
       <p class="shortcomment cmt">Creates an Expect that performs a kadmin operation <code>f</code> and then quits kadmin.</p><div class="fullcomment"><div class="comment cmt"><p>Creates an Expect that performs a kadmin operation <code>f</code> and then quits kadmin.
-If the configuration <code>perform-authentication</code> is set to true then access to kadmin will be authenticated.
-Otherwise it will be unauthenticated.
+If the configuration <code>password-authentication</code> is set to true then the authentication is performed by
+sending <code>password</code> and waiting for either an error message saying the password was incorrect or the kadmin prompt.
+If the password was incorrect a Left(IncorrectPassword) will be returned.
 </p></div><dl class="paramcmts block"><dt class="tparam">R</dt><dd class="cmt"><p>the type for the Right of the Either returned by the Expect.</p></dd><dt class="param">f</dt><dd class="cmt"><p>the kerberos administration operation to perform.</p></dd><dt>returns</dt><dd class="cmt"><p>an Expect that performs the operation <code>f</code> and then quits kadmin.</p></dd></dl><dl class="attributes block"> <div class="block">Example:
                <ol><li class="cmt"><p></p><pre>doOperation { e <span class="kw">=&gt;</span>
   e.expect(KadminPrompt)
@@ -584,8 +585,8 @@ Otherwise it will be unauthenticated.
     </span>
       <p class="shortcomment cmt">Sets the <code>principal</code> expiration date time to <code>expirationDateTime</code>.</p><div class="fullcomment"><div class="comment cmt"><p>Sets the <code>principal</code> expiration date time to <code>expirationDateTime</code>.</p><p>To expire the principal immediately: </p><pre>expirePrincipal(principal)</pre><p>To expire the principal 2 days from now: </p><pre>expirePrincipal(principal, <span class="num">2.</span>days)</pre><p>To ensure a principal never expires: </p><pre>expirePrincipal(principal, Never)</pre><p> This operation is idempotent, that is, if this method is invoked twice for the same principal
  it will be successful in both invocations. This means that this operation can be repeated or retried as
- often as necessary without causing unintended effects.</p><p> Kadmin will be started with the <code>doOperation</code> method, that is, it will perform
- authentication as specified in the configuration.
+ often as necessary without causing unintended effects.</p><p> Kadmin will be started with the <code>doOperation</code> method, that is, a password authentication
+ will performed as specified in the configuration.
 </p></div><dl class="paramcmts block"><dt class="param">principal</dt><dd class="cmt"><p>the principal to expire.</p></dd><dt class="param">expirationDateTime</dt><dd class="cmt"><p>the datetime to set as the principal expiration date. The timezone will be ignored.</p></dd><dt>returns</dt><dd class="cmt"><p>an Expect that expires <code>principal</code>.</p></dd></dl></div>
     </li><li name="pt.tecnico.dsi.kadmin.Kadmin#expirePrincipalPassword" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="expirePrincipalPassword(principal:String,expirationDateTime:pt.tecnico.dsi.kadmin.ExpirationDateTime,force:Boolean):work.martins.simon.expect.fluent.Expect[Either[pt.tecnico.dsi.kadmin.ErrorCase,Unit]]"></a>
@@ -611,8 +612,8 @@ expiration date to revert back to the one defined by the policy.</p><p>WARNING w
 (due to the policy) <code>getPasswordExpirationDate</code> will return the original date (the one set by the policy).
 However if the policy is cleared and <code>getPasswordExpirationDate</code> is invoked again, the obtained datetime
 will be the one set by this method. This caveat comes from the kadmin utility and not from this library.</p><p>Due to its caveats this method SHOULD ONLY BE USED FOR DEBUGGING applications where the fact that the principal
-password is about to expire or has expired changes the behavior of the application.</p><p> Kadmin will be started with the <code>doOperation</code> method, that is, it will perform
- authentication as specified in the configuration.
+password is about to expire or has expired changes the behavior of the application.</p><p> Kadmin will be started with the <code>doOperation</code> method, that is, a password authentication
+ will performed as specified in the configuration.
 </p></div><dl class="paramcmts block"><dt class="param">principal</dt><dd class="cmt"><p>the principal to set the password expiration date.</p></dd><dt class="param">expirationDateTime</dt><dd class="cmt"><p>the datetime to set as the password expiration date. The timezone will be ignored.</p></dd><dt class="param">force</dt><dd class="cmt"><p>whether or not to clear the principal policy. By default this is set to false.</p></dd><dt>returns</dt><dd class="cmt"><p>an Expect that sets the password expiration date of <code>principal</code> to <code>date</code>.</p></dd></dl></div>
     </li><li name="scala.AnyRef#finalize" visbl="prt" data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="finalize():Unit"></a>
@@ -728,8 +729,8 @@ password is about to expire or has expired changes the behavior of the applicati
         <img src="../../../../lib/permalink.png" alt="Permalink" />
       </a>
     </span>
-      <p class="shortcomment cmt">Performs a &quot;get_policy $$policy&quot; and parses the output to the domain class <code>Policy</code>.</p><div class="fullcomment"><div class="comment cmt"><p>Performs a &quot;get_policy $$policy&quot; and parses the output to the domain class <code>Policy</code>.</p><p> Kadmin will be started with the <code>doOperation</code> method, that is, it will perform
- authentication as specified in the configuration.
+      <p class="shortcomment cmt">Performs a &quot;get_policy $$policy&quot; and parses the output to the domain class <code>Policy</code>.</p><div class="fullcomment"><div class="comment cmt"><p>Performs a &quot;get_policy $$policy&quot; and parses the output to the domain class <code>Policy</code>.</p><p> Kadmin will be started with the <code>doOperation</code> method, that is, a password authentication
+ will performed as specified in the configuration.
 </p></div><dl class="paramcmts block"><dt class="param">policy</dt><dd class="cmt"><p>the policy name.</p></dd><dt>returns</dt><dd class="cmt"><p>an Expect that returns the <code>Policy</code>.</p></dd></dl></div>
     </li><li name="pt.tecnico.dsi.kadmin.Kadmin#getPrincipal" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="getPrincipal(principal:String):work.martins.simon.expect.fluent.Expect[Either[pt.tecnico.dsi.kadmin.ErrorCase,pt.tecnico.dsi.kadmin.Principal]]"></a>
@@ -747,8 +748,8 @@ password is about to expire or has expired changes the behavior of the applicati
         <img src="../../../../lib/permalink.png" alt="Permalink" />
       </a>
     </span>
-      <p class="shortcomment cmt">Performs a &quot;get_principal principal&quot; and parses the output to the domain class <code>Principal</code>.</p><div class="fullcomment"><div class="comment cmt"><p>Performs a &quot;get_principal principal&quot; and parses the output to the domain class <code>Principal</code>.</p><p> Kadmin will be started with the <code>doOperation</code> method, that is, it will perform
- authentication as specified in the configuration.
+      <p class="shortcomment cmt">Performs a &quot;get_principal principal&quot; and parses the output to the domain class <code>Principal</code>.</p><div class="fullcomment"><div class="comment cmt"><p>Performs a &quot;get_principal principal&quot; and parses the output to the domain class <code>Principal</code>.</p><p> Kadmin will be started with the <code>doOperation</code> method, that is, a password authentication
+ will performed as specified in the configuration.
 </p></div><dl class="paramcmts block"><dt class="param">principal</dt><dd class="cmt"><p>the principal name.</p></dd><dt>returns</dt><dd class="cmt"><p>an Expect that returns the <code>Principal</code>.</p></dd></dl></div>
     </li><li name="scala.AnyRef#hashCode" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="hashCode():Int"></a>
@@ -784,6 +785,24 @@ password is about to expire or has expired changes the behavior of the applicati
       </a>
     </span>
       <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>Any</dd></dl></div>
+    </li><li name="pt.tecnico.dsi.kadmin.Kadmin#listPrincipals" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="listPrincipals(expressionGlob:String):work.martins.simon.expect.fluent.Expect[Either[pt.tecnico.dsi.kadmin.ErrorCase,Seq[String]]]"></a>
+      <a id="listPrincipals(String):Expect[Either[ErrorCase,Seq[String]]]"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">listPrincipals</span><span class="params">(<span name="expressionGlob">expressionGlob: <span class="extype" name="scala.Predef.String">String</span></span>)</span><span class="result">: <a href="https://oss.sonatype.org/service/local/repositories/releases/archive/work/martins/simon/scala-expect_2.11/1.10.2/scala-expect_2.11-1.10.2-javadoc.jar/!/index.html#work.martins.simon.expect.fluent.Expect" class="extype" target="_top">Expect</a>[<span class="extype" name="scala.Either">Either</span>[<a href="ErrorCase.html" class="extype" name="pt.tecnico.dsi.kadmin.ErrorCase">ErrorCase</a>, <span class="extype" name="scala.Seq">Seq</span>[<span class="extype" name="scala.Predef.String">String</span>]]]</span>
+      </span>
+      </h4><span class="permalink">
+      <a href="../../../../index.html#pt.tecnico.dsi.kadmin.Kadmin@listPrincipals(expressionGlob:String):work.martins.simon.expect.fluent.Expect[Either[pt.tecnico.dsi.kadmin.ErrorCase,Seq[String]]]" title="Permalink" target="_top">
+        <img src="../../../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
+      <p class="shortcomment cmt">List all principals matching the glob expression.</p><div class="fullcomment"><div class="comment cmt"><p>List all principals matching the glob expression.</p><p>If <code>expressionGlob</code> is the empty String all principals will be listed.
+</p></div><dl class="paramcmts block"><dt class="param">expressionGlob</dt><dd class="cmt"><p>the glob expression to pass to kadmin list_principals.</p></dd><dt>returns</dt><dd class="cmt"><p>an Expect that returns the list of principals.</p></dd></dl></div>
     </li><li name="com.typesafe.scalalogging.LazyLogging#logger" visbl="prt" data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="logger:com.typesafe.scalalogging.Logger"></a>
       <a id="logger:Logger"></a>
@@ -819,8 +838,8 @@ password is about to expire or has expired changes the behavior of the applicati
     </span>
       <p class="shortcomment cmt">Modifies <code>policy</code> using <code>options</code>.</p><div class="fullcomment"><div class="comment cmt"><p>Modifies <code>policy</code> using <code>options</code>.</p><p> This operation is idempotent, that is, if this method is invoked twice for the same principal
  it will be successful in both invocations. This means that this operation can be repeated or retried as
- often as necessary without causing unintended effects.</p><p> Kadmin will be started with the <code>doOperation</code> method, that is, it will perform
- authentication as specified in the configuration.
+ often as necessary without causing unintended effects.</p><p> Kadmin will be started with the <code>doOperation</code> method, that is, a password authentication
+ will performed as specified in the configuration.
 </p></div><dl class="paramcmts block"><dt class="param">options</dt><dd class="cmt"><p>the parameters to pass to the kadmin <code>modify_policy</code> operation.
 See <a href="http://web.mit.edu/kerberos/krb5-devel/doc/admin/admin_commands/kadmin_local.html#modify-policy" target="_blank">Modify
 policy (MIT Kerberos)</a> for a full list. The parameters are not checked for validity.</p></dd><dt class="param">policy</dt><dd class="cmt"><p>the principal to policy.</p></dd><dt>returns</dt><dd class="cmt"><p>an Expect that modifies <code>policy</code>.</p></dd></dl></div>
@@ -840,10 +859,8 @@ policy (MIT Kerberos)</a> for a full list. The parameters are not checked for va
         <img src="../../../../lib/permalink.png" alt="Permalink" />
       </a>
     </span>
-      <p class="shortcomment cmt">Modifies <code>principal</code> using <code>options</code>.</p><div class="fullcomment"><div class="comment cmt"><p>Modifies <code>principal</code> using <code>options</code>.</p><p> This operation is idempotent, that is, if this method is invoked twice for the same principal
- it will be successful in both invocations. This means that this operation can be repeated or retried as
- often as necessary without causing unintended effects. Except if <code>options</code> contains any of:</p><ul><li><code>-randkey</code></li><li><code>-pw <i>password</i></code></li><li><code>-e <i>enc:salt</i></code></li></ul><p> Kadmin will be started with the <code>doOperation</code> method, that is, it will perform
- authentication as specified in the configuration.
+      <p class="shortcomment cmt">Modifies <code>principal</code> using <code>options</code>.</p><div class="fullcomment"><div class="comment cmt"><p>Modifies <code>principal</code> using <code>options</code>.</p><p> Kadmin will be started with the <code>doOperation</code> method, that is, a password authentication
+ will performed as specified in the configuration.
 </p></div><dl class="paramcmts block"><dt class="param">options</dt><dd class="cmt"><p>the parameters to pass to the kadmin <code>modify_principal</code> operation.
 See <a href="http://web.mit.edu/kerberos/krb5-devel/doc/admin/admin_commands/kadmin_local.html#modify-principal" target="_blank">Modify
 Principal (MIT Kerberos)</a> for a full list. The parameters are not checked for validity.</p></dd><dt class="param">principal</dt><dd class="cmt"><p>the principal to modify.</p></dd><dt>returns</dt><dd class="cmt"><p>an Expect that modifies <code>principal</code>.</p></dd></dl></div>
@@ -918,27 +935,6 @@ Principal (MIT Kerberos)</a> for a full list. The parameters are not checked for
 If the principal does not have a keytab or the keytab exists but it isn't readable by the current user a None
 will be returned.
 </p></div><dl class="paramcmts block"><dt class="param">principal</dt><dd class="cmt"><p>the principal to obtain the keytab.</p></dd></dl></div>
-    </li><li name="pt.tecnico.dsi.kadmin.Kadmin#obtainTicketGrantingTicket" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
-      <a id="obtainTicketGrantingTicket(options:String,authenticatingPrincipal:String,authenticatingPrincipalPassword:String):work.martins.simon.expect.fluent.Expect[Either[pt.tecnico.dsi.kadmin.ErrorCase,org.joda.time.DateTime]]"></a>
-      <a id="obtainTicketGrantingTicket(String,String,String):Expect[Either[ErrorCase,DateTime]]"></a>
-      <h4 class="signature">
-      <span class="modifier_kind">
-        <span class="modifier"></span>
-        <span class="kind">def</span>
-      </span>
-      <span class="symbol">
-        <span class="name">obtainTicketGrantingTicket</span><span class="params">(<span name="options">options: <span class="extype" name="scala.Predef.String">String</span> = <span class="symbol">&quot;&quot;</span></span>, <span name="authenticatingPrincipal">authenticatingPrincipal: <span class="extype" name="scala.Predef.String">String</span> = <span class="symbol">authenticatingPrincipal</span></span>, <span name="authenticatingPrincipalPassword">authenticatingPrincipalPassword: <span class="extype" name="scala.Predef.String">String</span> = <span class="symbol">authenticatingPrincipalPassword</span></span>)</span><span class="result">: <a href="https://oss.sonatype.org/service/local/repositories/releases/archive/work/martins/simon/scala-expect_2.11/1.10.2/scala-expect_2.11-1.10.2-javadoc.jar/!/index.html#work.martins.simon.expect.fluent.Expect" class="extype" target="_top">Expect</a>[<span class="extype" name="scala.Either">Either</span>[<a href="ErrorCase.html" class="extype" name="pt.tecnico.dsi.kadmin.ErrorCase">ErrorCase</a>, <a href="https://oss.sonatype.org/service/local/repositories/releases/archive/joda-time/joda-time/2.9.3/joda-time-2.9.3-javadoc.jar/!/index.html#org.joda.time.DateTime" class="extype" target="_top">DateTime</a>]]</span>
-      </span>
-      </h4><span class="permalink">
-      <a href="../../../../index.html#pt.tecnico.dsi.kadmin.Kadmin@obtainTicketGrantingTicket(options:String,authenticatingPrincipal:String,authenticatingPrincipalPassword:String):work.martins.simon.expect.fluent.Expect[Either[pt.tecnico.dsi.kadmin.ErrorCase,org.joda.time.DateTime]]" title="Permalink" target="_top">
-        <img src="../../../../lib/permalink.png" alt="Permalink" />
-      </a>
-    </span>
-      <p class="shortcomment cmt">Obtains a ticket granting ticket for <code>authenticatingPrincipal</code> using
-<code>authenticatingPrincipalPassword</code> as the password.</p><div class="fullcomment"><div class="comment cmt"><p>Obtains a ticket granting ticket for <code>authenticatingPrincipal</code> using
-<code>authenticatingPrincipalPassword</code> as the password.</p><p>If the intended use case is to check whether the principal password is the correct one, then the function
-<code>checkPassword</code> is more suited to that effect.</p><p>The ticket will be obtained in the machine that invokes this code.
-</p></div><dl class="paramcmts block"><dt>returns</dt><dd class="cmt"><p>Either an ErrorCase or a date time of when the obtained ticked must be renewed.</p></dd></dl></div>
     </li><li name="pt.tecnico.dsi.kadmin.Kadmin#settings" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
       <a id="settings:pt.tecnico.dsi.kadmin.Settings"></a>
       <a id="settings:Settings"></a>
@@ -1076,32 +1072,6 @@ will be returned.
     </span>)</span>
               
         </dd></dl></div>
-    </li><li name="pt.tecnico.dsi.kadmin.Kadmin#withAuthentication" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
-      <a id="withAuthentication[R](f:work.martins.simon.expect.fluent.Expect[Either[pt.tecnico.dsi.kadmin.ErrorCase,R]]=&gt;Unit):work.martins.simon.expect.fluent.Expect[Either[pt.tecnico.dsi.kadmin.ErrorCase,R]]"></a>
-      <a id="withAuthentication[R]((Expect[Either[ErrorCase,R]])⇒Unit):Expect[Either[ErrorCase,R]]"></a>
-      <h4 class="signature">
-      <span class="modifier_kind">
-        <span class="modifier"></span>
-        <span class="kind">def</span>
-      </span>
-      <span class="symbol">
-        <span class="name">withAuthentication</span><span class="tparams">[<span name="R">R</span>]</span><span class="params">(<span name="f">f: (<a href="https://oss.sonatype.org/service/local/repositories/releases/archive/work/martins/simon/scala-expect_2.11/1.10.2/scala-expect_2.11-1.10.2-javadoc.jar/!/index.html#work.martins.simon.expect.fluent.Expect" class="extype" target="_top">Expect</a>[<span class="extype" name="scala.Either">Either</span>[<a href="ErrorCase.html" class="extype" name="pt.tecnico.dsi.kadmin.ErrorCase">ErrorCase</a>, <span class="extype" name="pt.tecnico.dsi.kadmin.Kadmin.withAuthentication.R">R</span>]]) ⇒ <a href="http://www.scala-lang.org/api/2.11.8/index.html#scala.Unit" class="extype" target="_top">Unit</a></span>)</span><span class="result">: <a href="https://oss.sonatype.org/service/local/repositories/releases/archive/work/martins/simon/scala-expect_2.11/1.10.2/scala-expect_2.11-1.10.2-javadoc.jar/!/index.html#work.martins.simon.expect.fluent.Expect" class="extype" target="_top">Expect</a>[<span class="extype" name="scala.Either">Either</span>[<a href="ErrorCase.html" class="extype" name="pt.tecnico.dsi.kadmin.ErrorCase">ErrorCase</a>, <span class="extype" name="pt.tecnico.dsi.kadmin.Kadmin.withAuthentication.R">R</span>]]</span>
-      </span>
-      </h4><span class="permalink">
-      <a href="../../../../index.html#pt.tecnico.dsi.kadmin.Kadmin@withAuthentication[R](f:work.martins.simon.expect.fluent.Expect[Either[pt.tecnico.dsi.kadmin.ErrorCase,R]]=&gt;Unit):work.martins.simon.expect.fluent.Expect[Either[pt.tecnico.dsi.kadmin.ErrorCase,R]]" title="Permalink" target="_top">
-        <img src="../../../../lib/permalink.png" alt="Permalink" />
-      </a>
-    </span>
-      <p class="shortcomment cmt">Creates an Expect that performs an authenticated kadmin operation <code>f</code> and then quits kadmin.</p><div class="fullcomment"><div class="comment cmt"><p>Creates an Expect that performs an authenticated kadmin operation <code>f</code> and then quits kadmin.</p><p>Kadmin is started using <code>command-with-authentication</code> configuration value.
-The authentication is performed by sending <code>authenticatingPrincipalPassword</code> and waiting for either
-an error message saying the password was incorrect or the kadmin prompt. If the password was incorrect Expect
-will return a Left(IncorrectPassword).</p><p>If no authentication is required use <code>withoutAuthentication</code> instead.
-</p></div><dl class="paramcmts block"><dt class="tparam">R</dt><dd class="cmt"><p>the type for the Right of the Either returned by the Expect.</p></dd><dt class="param">f</dt><dd class="cmt"><p>the kerberos administration operation to perform.</p></dd><dt>returns</dt><dd class="cmt"><p>an Expect that performs the authentication, the operation <code>f</code> and then quits kadmin.</p></dd></dl><dl class="attributes block"> <div class="block">Example:
-               <ol><li class="cmt"><p></p><pre>withAuthentication { e <span class="kw">=&gt;</span>
-  e.expect(KadminPrompt)
-    .sendln(s<span class="lit">"getprinc fullPrincipal"</span>)
-}</pre></li></ol>
-            </div></dl></div>
     </li><li name="pt.tecnico.dsi.kadmin.Kadmin#withPolicy" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="withPolicy[R](policy:String)(f:work.martins.simon.expect.fluent.ExpectBlock[Either[pt.tecnico.dsi.kadmin.ErrorCase,R]]=&gt;Unit):work.martins.simon.expect.fluent.Expect[Either[pt.tecnico.dsi.kadmin.ErrorCase,R]]"></a>
       <a id="withPolicy[R](String)((ExpectBlock[Either[ErrorCase,R]])⇒Unit):Expect[Either[ErrorCase,R]]"></a>
@@ -1119,8 +1089,8 @@ will return a Left(IncorrectPassword).</p><p>If no authentication is required us
       </a>
     </span>
       <p class="shortcomment cmt">Performs the operation <code>f</code> over the output returned by &quot;get_policy $$policy&quot;.</p><div class="fullcomment"><div class="comment cmt"><p>Performs the operation <code>f</code> over the output returned by &quot;get_policy $$policy&quot;.
-This is useful to read the policy attributes.</p><p> Kadmin will be started with the <code>doOperation</code> method, that is, it will perform
- authentication as specified in the configuration.
+This is useful to read the policy attributes.</p><p> Kadmin will be started with the <code>doOperation</code> method, that is, a password authentication
+ will performed as specified in the configuration.
 </p></div><dl class="paramcmts block"><dt class="tparam">R</dt><dd class="cmt"><p>the type for the Right of the Either returned by the Expect.</p></dd><dt class="param">policy</dt><dd class="cmt"><p>the policy to get the attributes.</p></dd><dt class="param">f</dt><dd class="cmt"><p>the operation to perform upon the policy attributes.</p></dd><dt>returns</dt><dd class="cmt"><p>an Expect that lists the <code>policy</code> attributes, performs the operation <code>f</code> and then quits kadmin.</p></dd></dl><dl class="attributes block"> <div class="block">Example:
                <ol><li class="cmt"><p></p><pre>withPolicy(policy){ expectBlock <span class="kw">=&gt;</span>
   expectBlock.when(<span class="lit">""</span><span class="lit">"Minimum password length: (\d+)\n"</span><span class="lit">""</span>.r)
@@ -1145,8 +1115,8 @@ This is useful to read the policy attributes.</p><p> Kadmin will be started with
       </a>
     </span>
       <p class="shortcomment cmt">Performs the operation <code>f</code> over the output returned by &quot;get_principal principal&quot;.</p><div class="fullcomment"><div class="comment cmt"><p>Performs the operation <code>f</code> over the output returned by &quot;get_principal principal&quot;.
-This is useful to read the principal attributes that are not included with <code>getPrincipal</code>.</p><p> Kadmin will be started with the <code>doOperation</code> method, that is, it will perform
- authentication as specified in the configuration.</p><p>Consider using the <code>parseDateTime</code> method if <code>f</code> is to parse a date time.
+This is useful to read the principal attributes that are not included with <code>getPrincipal</code>.</p><p> Kadmin will be started with the <code>doOperation</code> method, that is, a password authentication
+ will performed as specified in the configuration.</p><p>Consider using the <code>parseDateTime</code> method if <code>f</code> is to parse a date time.
 And <code>parseDuration</code> method if <code>f</code> is to parse a duration.
 </p></div><dl class="paramcmts block"><dt class="tparam">R</dt><dd class="cmt"><p>the type for the Right of the Either returned by the Expect.</p></dd><dt class="param">principal</dt><dd class="cmt"><p>the principal to get the attributes.</p></dd><dt class="param">f</dt><dd class="cmt"><p>the operation to perform upon the principal attributes.</p></dd><dt>returns</dt><dd class="cmt"><p>an Expect that lists the <code>principal</code> attributes, performs the operation <code>f</code> and then quits kadmin.</p></dd></dl><dl class="attributes block"> <div class="block">Example:
                <ol><li class="cmt"><p></p><pre>withPrincipal(principal){ expectBlock <span class="kw">=&gt;</span>
@@ -1154,30 +1124,6 @@ And <code>parseDuration</code> method if <code>f</code> is to parse a duration.
     .returning{ m: Match <span class="kw">=&gt;</span>
       <span class="kw">val</span> maximumTicketLife = parseDuration(m.group(<span class="num">1</span>))
     }</pre></li></ol>
-            </div></dl></div>
-    </li><li name="pt.tecnico.dsi.kadmin.Kadmin#withoutAuthentication" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
-      <a id="withoutAuthentication[R](f:work.martins.simon.expect.fluent.Expect[Either[pt.tecnico.dsi.kadmin.ErrorCase,R]]=&gt;Unit):work.martins.simon.expect.fluent.Expect[Either[pt.tecnico.dsi.kadmin.ErrorCase,R]]"></a>
-      <a id="withoutAuthentication[R]((Expect[Either[ErrorCase,R]])⇒Unit):Expect[Either[ErrorCase,R]]"></a>
-      <h4 class="signature">
-      <span class="modifier_kind">
-        <span class="modifier"></span>
-        <span class="kind">def</span>
-      </span>
-      <span class="symbol">
-        <span class="name">withoutAuthentication</span><span class="tparams">[<span name="R">R</span>]</span><span class="params">(<span name="f">f: (<a href="https://oss.sonatype.org/service/local/repositories/releases/archive/work/martins/simon/scala-expect_2.11/1.10.2/scala-expect_2.11-1.10.2-javadoc.jar/!/index.html#work.martins.simon.expect.fluent.Expect" class="extype" target="_top">Expect</a>[<span class="extype" name="scala.Either">Either</span>[<a href="ErrorCase.html" class="extype" name="pt.tecnico.dsi.kadmin.ErrorCase">ErrorCase</a>, <span class="extype" name="pt.tecnico.dsi.kadmin.Kadmin.withoutAuthentication.R">R</span>]]) ⇒ <a href="http://www.scala-lang.org/api/2.11.8/index.html#scala.Unit" class="extype" target="_top">Unit</a></span>)</span><span class="result">: <a href="https://oss.sonatype.org/service/local/repositories/releases/archive/work/martins/simon/scala-expect_2.11/1.10.2/scala-expect_2.11-1.10.2-javadoc.jar/!/index.html#work.martins.simon.expect.fluent.Expect" class="extype" target="_top">Expect</a>[<span class="extype" name="scala.Either">Either</span>[<a href="ErrorCase.html" class="extype" name="pt.tecnico.dsi.kadmin.ErrorCase">ErrorCase</a>, <span class="extype" name="pt.tecnico.dsi.kadmin.Kadmin.withoutAuthentication.R">R</span>]]</span>
-      </span>
-      </h4><span class="permalink">
-      <a href="../../../../index.html#pt.tecnico.dsi.kadmin.Kadmin@withoutAuthentication[R](f:work.martins.simon.expect.fluent.Expect[Either[pt.tecnico.dsi.kadmin.ErrorCase,R]]=&gt;Unit):work.martins.simon.expect.fluent.Expect[Either[pt.tecnico.dsi.kadmin.ErrorCase,R]]" title="Permalink" target="_top">
-        <img src="../../../../lib/permalink.png" alt="Permalink" />
-      </a>
-    </span>
-      <p class="shortcomment cmt">Creates an Expect that performs a kadmin operation <code>f</code> and then quits kadmin.</p><div class="fullcomment"><div class="comment cmt"><p>Creates an Expect that performs a kadmin operation <code>f</code> and then quits kadmin.</p><p>Kadmin is started using <code>command-without-authentication</code> configuration value. It is assumed that this command
-starts kadmin in a way that requires no authentication (such as using kadmin.local on the master KDC).</p><p>If authentication is required use <code>withAuthentication</code> instead.
-</p></div><dl class="paramcmts block"><dt class="tparam">R</dt><dd class="cmt"><p>the type for the Right of the Either returned by the Expect.</p></dd><dt class="param">f</dt><dd class="cmt"><p>the kerberos administration operation to perform.</p></dd><dt>returns</dt><dd class="cmt"><p>an Expect that performs the operation <code>f</code> and then quits kadmin.</p></dd></dl><dl class="attributes block"> <div class="block">Example:
-               <ol><li class="cmt"><p></p><pre>withoutAuthentication { e <span class="kw">=&gt;</span>
-  e.expect(KadminPrompt)
-    .sendln(s<span class="lit">"getprinc fullPrincipal"</span>)
-}</pre></li></ol>
             </div></dl></div>
     </li><li name="scala.Predef.ArrowAssoc#→" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="→[B](y:B):(A,B)"></a>

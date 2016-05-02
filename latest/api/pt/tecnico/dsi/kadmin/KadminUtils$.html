@@ -378,6 +378,24 @@
       </a>
     </span>
       <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>AnyRef</dd></dl></div>
+    </li><li name="pt.tecnico.dsi.kadmin.KadminUtils#obtainTicketGrantingTicket" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="obtainTicketGrantingTicket(options:String,principal:String,password:String):work.martins.simon.expect.fluent.Expect[Either[pt.tecnico.dsi.kadmin.ErrorCase,org.joda.time.DateTime]]"></a>
+      <a id="obtainTicketGrantingTicket(String,String,String):Expect[Either[ErrorCase,DateTime]]"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">obtainTicketGrantingTicket</span><span class="params">(<span name="options">options: <span class="extype" name="scala.Predef.String">String</span> = <span class="symbol">&quot;&quot;</span></span>, <span name="principal">principal: <span class="extype" name="scala.Predef.String">String</span></span>, <span name="password">password: <span class="extype" name="scala.Predef.String">String</span></span>)</span><span class="result">: <a href="https://oss.sonatype.org/service/local/repositories/releases/archive/work/martins/simon/scala-expect_2.11/1.10.2/scala-expect_2.11-1.10.2-javadoc.jar/!/index.html#work.martins.simon.expect.fluent.Expect" class="extype" target="_top">Expect</a>[<span class="extype" name="scala.Either">Either</span>[<a href="ErrorCase.html" class="extype" name="pt.tecnico.dsi.kadmin.ErrorCase">ErrorCase</a>, <a href="https://oss.sonatype.org/service/local/repositories/releases/archive/joda-time/joda-time/2.9.3/joda-time-2.9.3-javadoc.jar/!/index.html#org.joda.time.DateTime" class="extype" target="_top">DateTime</a>]]</span>
+      </span>
+      </h4><span class="permalink">
+      <a href="../../../../index.html#pt.tecnico.dsi.kadmin.KadminUtils$@obtainTicketGrantingTicket(options:String,principal:String,password:String):work.martins.simon.expect.fluent.Expect[Either[pt.tecnico.dsi.kadmin.ErrorCase,org.joda.time.DateTime]]" title="Permalink" target="_top">
+        <img src="../../../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
+      <p class="shortcomment cmt">Obtains a ticket granting ticket for <code>principal</code> using <code>password</code>.</p><div class="fullcomment"><div class="comment cmt"><p>Obtains a ticket granting ticket for <code>principal</code> using <code>password</code>.
+</p></div><dl class="paramcmts block"><dt>returns</dt><dd class="cmt"><p>Either an ErrorCase or a date time of when the obtained ticked must be renewed.</p></dd></dl></div>
     </li><li name="pt.tecnico.dsi.kadmin.KadminUtils#parseDateTime" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="parseDateTime(dateTimeString:=&gt;String):Either[pt.tecnico.dsi.kadmin.ErrorCase,pt.tecnico.dsi.kadmin.ExpirationDateTime]"></a>
       <a id="parseDateTime(⇒String):Either[ErrorCase,ExpirationDateTime]"></a>
@@ -404,7 +422,7 @@ Otherwise the string will be parsed in the following way:</p><ol class="decimal"
    computed timezone and the default locale.</li><li>The clean <code>dateString</code> (the result of step 1 and 2) will be parsed to a <code>DateTime</code> using the format
    constructed in step 4.
 </li></ol></div><dl class="paramcmts block"><dt class="param">dateTimeString</dt><dd class="cmt"><p>the string containing the date time.</p></dd><dt>returns</dt><dd class="cmt"><p><code>Never</code> or an <code>AbsoluteDateTime</code></p></dd></dl></div>
-    </li><li name="pt.tecnico.dsi.kadmin.KadminUtils#parseDuration" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
+    </li><li name="pt.tecnico.dsi.kadmin.KadminUtils#parseDuration" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="parseDuration(durationString:String):scala.concurrent.duration.FiniteDuration"></a>
       <a id="parseDuration(String):FiniteDuration"></a>
       <h4 class="signature">
@@ -420,7 +438,8 @@ Otherwise the string will be parsed in the following way:</p><ol class="decimal"
         <img src="../../../../lib/permalink.png" alt="Permalink" />
       </a>
     </span>
-      
+      <p class="shortcomment cmt">Parses <code>durationString</code> into a FiniteDuration.</p><div class="fullcomment"><div class="comment cmt"><p>Parses <code>durationString</code> into a FiniteDuration.</p><p>The expected format is &quot;d days? HH:mm:ss&quot;.
+</p></div><dl class="paramcmts block"><dt class="param">durationString</dt><dd class="cmt"><p>the string to parse.</p></dd><dt>returns</dt><dd class="cmt"><p>the parsed FiniteDuration or Duration.Zero if an error occurred.</p></dd></dl></div>
     </li><li name="pt.tecnico.dsi.kadmin.KadminUtils#passwordExpired" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
       <a id="passwordExpired[R](expectBlock:work.martins.simon.expect.fluent.ExpectBlock[Either[pt.tecnico.dsi.kadmin.ErrorCase,R]]):work.martins.simon.expect.fluent.StringWhen[Either[pt.tecnico.dsi.kadmin.ErrorCase,R]]"></a>
       <a id="passwordExpired[R](ExpectBlock[Either[ErrorCase,R]]):StringWhen[Either[ErrorCase,R]]"></a>

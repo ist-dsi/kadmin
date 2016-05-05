@@ -19,7 +19,8 @@ before_install:
   - sudo bash setupDocker.sh
 
 script:
-  - sudo bash test.sh
+  # We preserve the environment to ensure the CODACY_PROJECT_TOKEN is accessible inside the containers
+  - sudo --preserve-env bash test.sh
 
 notifications:
   slack:

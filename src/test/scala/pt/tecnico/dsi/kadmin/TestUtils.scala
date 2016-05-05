@@ -46,16 +46,18 @@ trait TestUtils extends ScalaFutures with Matchers with EitherValues with LazyLo
 
     //This code will only be executed if the previous test succeed.
     //And now we want to catch the exception because if `test` fails here it means it is not idempotent.
-    val results = (1 until repetitions).map(_ => expect.value)
+    val results: IndexedSeq[Either[ErrorCase, T]] = (1 until repetitions).map(_ => expect.value)
     try {
       results.foreach(test)
     } catch {
       case e: TestFailedException =>
+        val otherResultsString = (1 until repetitions).map { i =>
+          f"  $i%2d\t${results(i)}"
+        }.mkString("\n")
+
         throw new TestFailedException(s"""Operation is not idempotent. Results:
-                                          |  1st:
-                                          |    $firstResult
-                                          |  Rest:
-                                          |    ${results.mkString("\n    ")}
+                                          |  01:\t$firstResult
+                                          |$otherResultsString
                                           |${e.message}""".stripMargin,
           e, e.failedCodeStackDepth + 1)
     }

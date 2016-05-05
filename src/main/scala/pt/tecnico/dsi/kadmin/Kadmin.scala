@@ -79,7 +79,6 @@ class Kadmin(val settings: Settings = new Settings()) extends LazyLogging {
     e
   }
 
-  //region <Add/Modify commands>
   /**
     * Creates `principal` using `options`.
     *
@@ -103,16 +102,17 @@ class Kadmin(val settings: Settings = new Settings()) extends LazyLogging {
         .sendln(s"add_principal $options $fullPrincipal")
       e.expect
         .when(s"""Principal "$fullPrincipal" (created|added).""".r)
-          .returning(Right(Unit): Either[ErrorCase, Unit])
+        .returning(Right(Unit): Either[ErrorCase, Unit])
         .when("Principal or policy already exists")
-          //TODO: If options contains any of (-pw, -e or -randkey) the modify will fail.
-          //maybe we could invoke changePassword for these options to solve the problem
-          .returningExpect(modifyPrincipal(options, principal))
+        //TODO: If options contains any of (-pw, -e or -randkey) the modify will fail.
+        //maybe we could invoke changePassword for these options to solve the problem
+        .returningExpect(modifyPrincipal(options, principal))
         .addWhen(insufficientPermission)
         .addWhen(unknownError)
     }
   }
 
+  //region <Modify commands>
   /**
     * Modifies `principal` using `options`.
     *
@@ -294,71 +294,6 @@ class Kadmin(val settings: Settings = new Settings()) extends LazyLogging {
   }
   //endregion
 
-  //region <Keytab commands>
-  /**
-    * @return The File for the `principal` keytab.
-    */
-  protected def getKeytabFile(principal: String): File = {
-    val principalWithoutRealm = if (principal.contains("@")) {
-      principal.substring(0, principal.indexOf("@"))
-    } else {
-      principal
-    }
-    val cleanedPrincipal = if (principalWithoutRealm.contains("/")) {
-      principalWithoutRealm.replaceAll("/", ".")
-    } else {
-      principalWithoutRealm
-    }
-    new File(keytabsLocation, s"$cleanedPrincipal.keytab")
-  }
-
-  /**
-    * Creates a keytab for the given `principal`. The keytab can then be obtained with the `obtainKeytab` method.
-    *
-    * This operation is NOT idempotent, since multiple invocations lead to the keytab file being appended
-    * with the same tickets but with different keys.
-    *
-    * @param principal the principal for whom to create the keytab.
-    * @return an Expect that creates the keytab for `principal`.
-    */
-  def createKeytab(principal: String): Expect[Either[ErrorCase, Unit]] = {
-    val fullPrincipal = getFullPrincipalName(principal)
-    val keytabPath = getKeytabFile(principal).getAbsolutePath
-    doOperation{ e =>
-      e.expect(kadminPrompt)
-        .sendln(s"ktadd -keytab $keytabPath $fullPrincipal")
-      e.expect
-        .when("Entry for principal (.*?) added to keytab".r)
-          .returning(Right(()))
-        .addWhen(insufficientPermission)
-        .addWhen(unknownError)
-    }
-  }
-
-  /**
-    * Obtains a keytab for the given `principal`.
-    * If the principal does not have a keytab or the keytab exists but it isn't readable by the current user a None
-    * will be returned.
-    *
-    * @param principal the principal to obtain the keytab.
-    */
-  def obtainKeytab(principal: String): Option[Array[Byte]] = {
-    val f = getKeytabFile(principal)
-    if (f.canRead) {
-      Some(Files.readAllBytes(f.toPath))
-    } else {
-      if (f.exists() == false) {
-        logger.info(s"""Keytab file "${f.getAbsolutePath}" doesn't exist.""")
-      } else if (f.canRead == false) {
-        val currentUser = System.getProperty("user.name")
-        logger.info(s"""User "$currentUser" has insufficient permissions to read the keytab file "${f.getAbsolutePath}".""")
-        //Should we return an error (eg. inside an Either) if the file exists but we do not have permissions to read it?
-      }
-      None
-    }
-  }
-  //endregion
-
   /**
     * Deletes `principal`.
     *
@@ -463,11 +398,7 @@ class Kadmin(val settings: Settings = new Settings()) extends LazyLogging {
               parseDuration(others("maximumTicketLife")), parseDuration(others("maximumRenewableLife")),
               dates("lastModifiedDateTime"), m.group("lastModifiedBy"),
               dates("lastSuccessfulAuthenticationDateTime"), dates("lastFailedAuthenticationDateTime"), others("failedPasswordAttempts").toInt,
-              others("keys").split("\n").flatMap { keyString =>
-                """Key: vno (\d+), (.+)""".r.findFirstMatchIn(keyString).map { m =>
-                  new Key(m.group(1).toInt, m.group(2))
-                }
-              }.toSet, others("masterKey").toInt,
+              others("keys").split("\n").flatMap(Key.fromString).toSet, others("masterKey").toInt,
               others("attributes").split(" ").filter(_.nonEmpty).toSet,
               Option(others("policy")).map(_.trim).filter(_ != "[none]")
             ))
@@ -484,16 +415,23 @@ class Kadmin(val settings: Settings = new Settings()) extends LazyLogging {
     * @return an Expect that returns the list of principals.
     */
   def listPrincipals(expressionGlob: String): Expect[Either[ErrorCase, Seq[String]]] = {
+    val command = s"list_principals $expressionGlob"
     doOperation { e =>
       e.expect(kadminPrompt)
-        .sendln(s"list_principals $expressionGlob")
+        .sendln(command)
       e.expect
-        .when(s"(?s)(([^@]+@$realm\n?)+)(?=\n$kadminPrompt)".r)
-          .returning { m =>
-            Right(m.group(1).split("\n").toSeq)
-          }
-        .addWhen(unknownError)
         .addWhen(insufficientPermission)
+        .addWhen(unknownError)
+          .returning { m: Match =>
+            val splits = m.group(1).split("\n")
+            val isOutput = splits.headOption.exists(_.trim.contains(command)) && splits.exists(_.matches(s"[^@]+@$realm"))
+            if (isOutput) {
+              //The first element is the command, so we drop it
+              Right(splits.drop(1).toSeq)
+            } else {
+              Left(UnknownError(Some(new IllegalArgumentException(m.group(1)))))
+            }
+          }
     }
   }
 
@@ -534,6 +472,75 @@ class Kadmin(val settings: Settings = new Settings()) extends LazyLogging {
       .addWhen(passwordIncorrect)
       .addWhen(passwordExpired)
     e
+  }
+  //endregion
+
+  //region <Keytab commands>
+  /**
+    * @return The File for the `principal` keytab.
+    */
+  protected def getKeytabFile(principal: String): File = {
+    val principalWithoutRealm = if (principal.contains("@")) {
+      principal.substring(0, principal.indexOf("@"))
+    } else {
+      principal
+    }
+    val cleanedPrincipal = if (principalWithoutRealm.contains("/")) {
+      principalWithoutRealm.replaceAll("/", ".")
+    } else {
+      principalWithoutRealm
+    }
+    new File(keytabsLocation, s"$cleanedPrincipal.keytab")
+  }
+
+  /**
+    * Creates a keytab for the given `principal`. The keytab can then be obtained with the `obtainKeytab` method.
+    *
+    * This operation is NOT idempotent, since multiple invocations lead to the keytab file being appended
+    * with the same tickets but with different keys.
+    *
+    * @param principal the principal for whom to create the keytab.
+    * @param options the options to pass to the ktadd command. These are not check for validity.
+    * @return an Expect that creates the keytab for `principal`.
+    */
+  def createKeytab(options: String, principal: String): Expect[Either[ErrorCase, Unit]] = {
+    val fullPrincipal = getFullPrincipalName(principal)
+    val keytabPath = getKeytabFile(principal).getAbsolutePath
+    doOperation{ e =>
+      e.expect(kadminPrompt)
+        .sendln(s"ktadd -keytab $keytabPath $options $fullPrincipal")
+      e.expect
+        .when("Entry for principal (.*?) added to keytab".r)
+        .returning(Right(()))
+        .addWhen(insufficientPermission)
+        .addWhen(unknownError)
+    }
+  }
+
+  /**
+    * Obtains a keytab for the given `principal`.
+    * If the principal does not have a keytab or the keytab exists but it isn't readable by the current user a None
+    * will be returned.
+    *
+    * @param principal the principal to obtain the keytab.
+    */
+  def obtainKeytab(principal: String): Either[ErrorCase, Array[Byte]] = {
+    val f = getKeytabFile(principal)
+    if (f.canRead) {
+      Right(Files.readAllBytes(f.toPath))
+    } else {
+      if (f.exists() == false) {
+        logger.info(s"""Keytab file "${f.getAbsolutePath}" doesn't exist.""")
+        Left(KeytabDoesNotExist)
+      } else if (f.canRead == false) {
+        val currentUser = System.getProperty("user.name")
+        logger.info(s"""User "$currentUser" has insufficient permissions to read the keytab file "${f.getAbsolutePath}".""")
+        //Should we return an error (eg. inside an Either) if the file exists but we do not have permissions to read it?
+        Left(KeytabIsNotReadable)
+      } else {
+        Left(UnknownError())
+      }
+    }
   }
   //endregion
 
@@ -681,16 +688,25 @@ class Kadmin(val settings: Settings = new Settings()) extends LazyLogging {
                        |Number of old keys kept: (\d+)
                        |Maximum password failures before lockout: (\d+)
                        |Password failure count reset interval: ([^\n]+)
-                       |Password lockout duration: ([^\n]+)""".stripMargin.r(
+                       |Password lockout duration: ([^\n]+)(.*?)""".stripMargin.r(
       "maximumLife", "minimumLife",
       "minimumLength", "minimumCharacterClasses",
       "oldKeysKept", "maximumFailuresBeforeLockout",
-      "failureCountResetInterval", "lockoutDuration"))
+      "failureCountResetInterval", "lockoutDuration", "allowedKeySalts"))
       .returning { m: Match =>
-        Right(new Policy(policy, parseDuration(m.group("maximumLife")), parseDuration(m.group("minimumLife")),
+        val keysalts = Option(m.group("allowedKeySalts")).flatMap { s =>
+          "Allowed key/salt types: (.*)".r.findFirstMatchIn(s)
+        }.map { m =>
+          m.group(1).split(",").flatMap(KeySalt.fromString).toSet
+        }
+
+        Right(new Policy(
+          policy, parseDuration(m.group("maximumLife")), parseDuration(m.group("minimumLife")),
           m.group("minimumLength").toInt, m.group("minimumCharacterClasses").toInt,
           m.group("oldKeysKept").toInt, m.group("maximumFailuresBeforeLockout").toInt,
-          parseDuration(m.group("failureCountResetInterval")), parseDuration(m.group("lockoutDuration"))))
+          parseDuration(m.group("failureCountResetInterval")), parseDuration(m.group("lockoutDuration")),
+          keysalts
+        ))
       }
   }
   //endregion

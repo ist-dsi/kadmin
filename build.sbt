@@ -1,6 +1,6 @@
 organization := "pt.tecnico.dsi"
 name := "kadmin"
-version := "4.0.0"
+version := "4.1.0"
 
 initialize := {
   val required = "1.8"

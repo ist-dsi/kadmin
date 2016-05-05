@@ -10,5 +10,5 @@ sbt coverageAggregate
 sbt codacyCoverage
 
 #echo "RunOnly"
-#sbt <<<"testOnly pt.tecnico.dsi.kadmin.GetTGTSpec pt.tecnico.dsi.kadmin.KeytabSpec"
+#sbt <<<"testOnly pt.tecnico.dsi.kadmin.PrincipalSpec"
 #echo "After run"

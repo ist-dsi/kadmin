@@ -121,7 +121,7 @@ class PrincipalSpec extends FlatSpec with TestUtils {
   }
 
   "listPrincipals" should "idempotently succeed" in {
-    listPrincipals("") idempotentRightValue (_ should contain allOf ("noPermissions@EXAMPLE.COM", "kadmin/admin@EXAMPLE.COM"))
+    listPrincipals("*") idempotentRightValue (_ should contain allOf ("noPermissions@EXAMPLE.COM", "kadmin/admin@EXAMPLE.COM"))
   }
 
   val expireDateTime = new DateTime(DateTimeZone.forID("UTC")).plusHours(2)

@@ -363,24 +363,24 @@ however on the second time it will fail with an ErrorCase <code>PasswordIsBeingR
               
         </dd></dl></div>
     </li><li name="pt.tecnico.dsi.kadmin.Kadmin#createKeytab" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
-      <a id="createKeytab(principal:String):work.martins.simon.expect.fluent.Expect[Either[pt.tecnico.dsi.kadmin.ErrorCase,Unit]]"></a>
-      <a id="createKeytab(String):Expect[Either[ErrorCase,Unit]]"></a>
+      <a id="createKeytab(options:String,principal:String):work.martins.simon.expect.fluent.Expect[Either[pt.tecnico.dsi.kadmin.ErrorCase,Unit]]"></a>
+      <a id="createKeytab(String,String):Expect[Either[ErrorCase,Unit]]"></a>
       <h4 class="signature">
       <span class="modifier_kind">
         <span class="modifier"></span>
         <span class="kind">def</span>
       </span>
       <span class="symbol">
-        <span class="name">createKeytab</span><span class="params">(<span name="principal">principal: <span class="extype" name="scala.Predef.String">String</span></span>)</span><span class="result">: <a href="https://oss.sonatype.org/service/local/repositories/releases/archive/work/martins/simon/scala-expect_2.11/1.10.2/scala-expect_2.11-1.10.2-javadoc.jar/!/index.html#work.martins.simon.expect.fluent.Expect" class="extype" target="_top">Expect</a>[<span class="extype" name="scala.Either">Either</span>[<a href="ErrorCase.html" class="extype" name="pt.tecnico.dsi.kadmin.ErrorCase">ErrorCase</a>, <a href="http://www.scala-lang.org/api/2.11.8/index.html#scala.Unit" class="extype" target="_top">Unit</a>]]</span>
+        <span class="name">createKeytab</span><span class="params">(<span name="options">options: <span class="extype" name="scala.Predef.String">String</span></span>, <span name="principal">principal: <span class="extype" name="scala.Predef.String">String</span></span>)</span><span class="result">: <a href="https://oss.sonatype.org/service/local/repositories/releases/archive/work/martins/simon/scala-expect_2.11/1.10.2/scala-expect_2.11-1.10.2-javadoc.jar/!/index.html#work.martins.simon.expect.fluent.Expect" class="extype" target="_top">Expect</a>[<span class="extype" name="scala.Either">Either</span>[<a href="ErrorCase.html" class="extype" name="pt.tecnico.dsi.kadmin.ErrorCase">ErrorCase</a>, <a href="http://www.scala-lang.org/api/2.11.8/index.html#scala.Unit" class="extype" target="_top">Unit</a>]]</span>
       </span>
       </h4><span class="permalink">
-      <a href="../../../../index.html#pt.tecnico.dsi.kadmin.Kadmin@createKeytab(principal:String):work.martins.simon.expect.fluent.Expect[Either[pt.tecnico.dsi.kadmin.ErrorCase,Unit]]" title="Permalink" target="_top">
+      <a href="../../../../index.html#pt.tecnico.dsi.kadmin.Kadmin@createKeytab(options:String,principal:String):work.martins.simon.expect.fluent.Expect[Either[pt.tecnico.dsi.kadmin.ErrorCase,Unit]]" title="Permalink" target="_top">
         <img src="../../../../lib/permalink.png" alt="Permalink" />
       </a>
     </span>
       <p class="shortcomment cmt">Creates a keytab for the given <code>principal</code>.</p><div class="fullcomment"><div class="comment cmt"><p>Creates a keytab for the given <code>principal</code>. The keytab can then be obtained with the <code>obtainKeytab</code> method.</p><p>This operation is NOT idempotent, since multiple invocations lead to the keytab file being appended
 with the same tickets but with different keys.
-</p></div><dl class="paramcmts block"><dt class="param">principal</dt><dd class="cmt"><p>the principal for whom to create the keytab.</p></dd><dt>returns</dt><dd class="cmt"><p>an Expect that creates the keytab for <code>principal</code>.</p></dd></dl></div>
+</p></div><dl class="paramcmts block"><dt class="param">options</dt><dd class="cmt"><p>the options to pass to the ktadd command. These are not check for validity.</p></dd><dt class="param">principal</dt><dd class="cmt"><p>the principal for whom to create the keytab.</p></dd><dt>returns</dt><dd class="cmt"><p>an Expect that creates the keytab for <code>principal</code>.</p></dd></dl></div>
     </li><li name="pt.tecnico.dsi.kadmin.Kadmin#deletePolicy" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="deletePolicy(policy:String):work.martins.simon.expect.fluent.Expect[Either[pt.tecnico.dsi.kadmin.ErrorCase,Unit]]"></a>
       <a id="deletePolicy(String):Expect[Either[ErrorCase,Unit]]"></a>
@@ -916,18 +916,18 @@ Principal (MIT Kerberos)</a> for a full list. The parameters are not checked for
     </span>
       <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>AnyRef</dd></dl></div>
     </li><li name="pt.tecnico.dsi.kadmin.Kadmin#obtainKeytab" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
-      <a id="obtainKeytab(principal:String):Option[Array[Byte]]"></a>
-      <a id="obtainKeytab(String):Option[Array[Byte]]"></a>
+      <a id="obtainKeytab(principal:String):Either[pt.tecnico.dsi.kadmin.ErrorCase,Array[Byte]]"></a>
+      <a id="obtainKeytab(String):Either[ErrorCase,Array[Byte]]"></a>
       <h4 class="signature">
       <span class="modifier_kind">
         <span class="modifier"></span>
         <span class="kind">def</span>
       </span>
       <span class="symbol">
-        <span class="name">obtainKeytab</span><span class="params">(<span name="principal">principal: <span class="extype" name="scala.Predef.String">String</span></span>)</span><span class="result">: <a href="http://www.scala-lang.org/api/2.11.8/index.html#scala.Option" class="extype" target="_top">Option</a>[<a href="http://www.scala-lang.org/api/2.11.8/index.html#scala.Array" class="extype" target="_top">Array</a>[<a href="http://www.scala-lang.org/api/2.11.8/index.html#scala.Byte" class="extype" target="_top">Byte</a>]]</span>
+        <span class="name">obtainKeytab</span><span class="params">(<span name="principal">principal: <span class="extype" name="scala.Predef.String">String</span></span>)</span><span class="result">: <span class="extype" name="scala.Either">Either</span>[<a href="ErrorCase.html" class="extype" name="pt.tecnico.dsi.kadmin.ErrorCase">ErrorCase</a>, <a href="http://www.scala-lang.org/api/2.11.8/index.html#scala.Array" class="extype" target="_top">Array</a>[<a href="http://www.scala-lang.org/api/2.11.8/index.html#scala.Byte" class="extype" target="_top">Byte</a>]]</span>
       </span>
       </h4><span class="permalink">
-      <a href="../../../../index.html#pt.tecnico.dsi.kadmin.Kadmin@obtainKeytab(principal:String):Option[Array[Byte]]" title="Permalink" target="_top">
+      <a href="../../../../index.html#pt.tecnico.dsi.kadmin.Kadmin@obtainKeytab(principal:String):Either[pt.tecnico.dsi.kadmin.ErrorCase,Array[Byte]]" title="Permalink" target="_top">
         <img src="../../../../lib/permalink.png" alt="Permalink" />
       </a>
     </span>

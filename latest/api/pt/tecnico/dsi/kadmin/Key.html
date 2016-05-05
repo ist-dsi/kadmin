@@ -28,10 +28,12 @@
         </head>
         <body class="type">
       <div id="definition">
-        <img alt="Class" src="../../../../lib/class_big.png" />
+        <a href="Key$.html" title="See companion object"><img alt="Class/Object" src="../../../../lib/class_to_object_big.png" /></a>
         <p id="owner"><a href="../../../package.html" class="extype" name="pt">pt</a>.<a href="../../package.html" class="extype" name="pt.tecnico">tecnico</a>.<a href="../package.html" class="extype" name="pt.tecnico.dsi">dsi</a>.<a href="package.html" class="extype" name="pt.tecnico.dsi.kadmin">kadmin</a></p>
-        <h1>Key</h1><h3><span class="morelinks"><div>Related Doc:
-            <a href="package.html" class="extype" name="pt.tecnico.dsi.kadmin">package kadmin</a>
+        <h1><a href="Key$.html" title="See companion object">Key</a></h1><h3><span class="morelinks"><div>
+            Related Docs:
+            <a href="Key$.html" title="See companion object">object Key</a>
+            | <a href="package.html" class="extype" name="pt.tecnico.dsi.kadmin">package kadmin</a>
           </div></span></h3><span class="permalink">
       <a href="../../../../index.html#pt.tecnico.dsi.kadmin.Key" title="Permalink" target="_top">
         <img src="../../../../lib/permalink.png" alt="Permalink" />
@@ -45,7 +47,7 @@
         <span class="kind">case class</span>
       </span>
       <span class="symbol">
-        <span class="name">Key</span><span class="params">(<span name="versionNumber">versionNumber: <a href="http://www.scala-lang.org/api/2.11.8/index.html#scala.Int" class="extype" target="_top">Int</a></span>, <span name="encryptionType">encryptionType: <span class="extype" name="scala.Predef.String">String</span></span>)</span><span class="result"> extends <a href="http://www.scala-lang.org/api/2.11.8/index.html#scala.Product" class="extype" target="_top">Product</a> with <a href="http://www.scala-lang.org/api/2.11.8/index.html#scala.Serializable" class="extype" target="_top">Serializable</a></span>
+        <span class="name">Key</span><span class="params">(<span name="versionNumber">versionNumber: <a href="http://www.scala-lang.org/api/2.11.8/index.html#scala.Int" class="extype" target="_top">Int</a></span>, <span name="keySalt">keySalt: <a href="KeySalt.html" class="extype" name="pt.tecnico.dsi.kadmin.KeySalt">KeySalt</a></span>)</span><span class="result"> extends <a href="http://www.scala-lang.org/api/2.11.8/index.html#scala.Product" class="extype" target="_top">Product</a> with <a href="http://www.scala-lang.org/api/2.11.8/index.html#scala.Serializable" class="extype" target="_top">Serializable</a></span>
       </span>
       </h4>
       
@@ -97,7 +99,7 @@
         <div id="constructors" class="members">
               <h3>Instance Constructors</h3>
               <ol><li name="pt.tecnico.dsi.kadmin.Key#&lt;init&gt;" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
-      <a id="&lt;init&gt;(versionNumber:Int,encryptionType:String):pt.tecnico.dsi.kadmin.Key"></a>
+      <a id="&lt;init&gt;(versionNumber:Int,keySalt:pt.tecnico.dsi.kadmin.KeySalt):pt.tecnico.dsi.kadmin.Key"></a>
       <a id="&lt;init&gt;:Key"></a>
       <h4 class="signature">
       <span class="modifier_kind">
@@ -105,10 +107,10 @@
         <span class="kind">new</span>
       </span>
       <span class="symbol">
-        <span class="name">Key</span><span class="params">(<span name="versionNumber">versionNumber: <a href="http://www.scala-lang.org/api/2.11.8/index.html#scala.Int" class="extype" target="_top">Int</a></span>, <span name="encryptionType">encryptionType: <span class="extype" name="scala.Predef.String">String</span></span>)</span>
+        <span class="name">Key</span><span class="params">(<span name="versionNumber">versionNumber: <a href="http://www.scala-lang.org/api/2.11.8/index.html#scala.Int" class="extype" target="_top">Int</a></span>, <span name="keySalt">keySalt: <a href="KeySalt.html" class="extype" name="pt.tecnico.dsi.kadmin.KeySalt">KeySalt</a></span>)</span>
       </span>
       </h4><span class="permalink">
-      <a href="../../../../index.html#pt.tecnico.dsi.kadmin.Key@&lt;init&gt;(versionNumber:Int,encryptionType:String):pt.tecnico.dsi.kadmin.Key" title="Permalink" target="_top">
+      <a href="../../../../index.html#pt.tecnico.dsi.kadmin.Key@&lt;init&gt;(versionNumber:Int,keySalt:pt.tecnico.dsi.kadmin.KeySalt):pt.tecnico.dsi.kadmin.Key" title="Permalink" target="_top">
         <img src="../../../../lib/permalink.png" alt="Permalink" />
       </a>
     </span>
@@ -258,23 +260,6 @@
     </span>)</span>
               
         </dd></dl></div>
-    </li><li name="pt.tecnico.dsi.kadmin.Key#encryptionType" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
-      <a id="encryptionType:String"></a>
-      <a id="encryptionType:String"></a>
-      <h4 class="signature">
-      <span class="modifier_kind">
-        <span class="modifier"></span>
-        <span class="kind">val</span>
-      </span>
-      <span class="symbol">
-        <span class="name">encryptionType</span><span class="result">: <span class="extype" name="scala.Predef.String">String</span></span>
-      </span>
-      </h4><span class="permalink">
-      <a href="../../../../index.html#pt.tecnico.dsi.kadmin.Key@encryptionType:String" title="Permalink" target="_top">
-        <img src="../../../../lib/permalink.png" alt="Permalink" />
-      </a>
-    </span>
-      
     </li><li name="scala.Predef.Ensuring#ensuring" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="ensuring(cond:A=&gt;Boolean,msg:=&gt;Any):A"></a>
       <a id="ensuring((Key)⇒Boolean,⇒Any):Key"></a>
@@ -457,6 +442,23 @@
       </a>
     </span>
       <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>Any</dd></dl></div>
+    </li><li name="pt.tecnico.dsi.kadmin.Key#keySalt" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
+      <a id="keySalt:pt.tecnico.dsi.kadmin.KeySalt"></a>
+      <a id="keySalt:KeySalt"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">val</span>
+      </span>
+      <span class="symbol">
+        <span class="name">keySalt</span><span class="result">: <a href="KeySalt.html" class="extype" name="pt.tecnico.dsi.kadmin.KeySalt">KeySalt</a></span>
+      </span>
+      </h4><span class="permalink">
+      <a href="../../../../index.html#pt.tecnico.dsi.kadmin.Key@keySalt:pt.tecnico.dsi.kadmin.KeySalt" title="Permalink" target="_top">
+        <img src="../../../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
+      
     </li><li name="scala.AnyRef#ne" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="ne(x$1:AnyRef):Boolean"></a>
       <a id="ne(AnyRef):Boolean"></a>

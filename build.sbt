@@ -1,6 +1,6 @@
 organization := "pt.tecnico.dsi"
 name := "kadmin"
-version := "4.1.0"
+version := "4.2.0"
 
 initialize := {
   val required = "1.8"
@@ -43,7 +43,7 @@ libraryDependencies ++= Seq(
   //as to why this library must be included
   "org.joda" % "joda-convert" % "1.8.1",
 
-  "work.martins.simon" %% "scala-expect" % "1.10.2"
+  "work.martins.simon" %% "scala-expect" % "1.11.0"
 )
 
 autoAPIMappings := true

@@ -6,7 +6,6 @@ import com.typesafe.scalalogging.LazyLogging
 import org.scalatest.{EitherValues, Matchers}
 import org.scalatest.concurrent.ScalaFutures
 import org.scalatest.exceptions.TestFailedException
-import org.scalatest.time.{Millis, Seconds, Span}
 import work.martins.simon.expect.fluent.Expect
 
 import scala.concurrent.ExecutionContext.Implicits.global

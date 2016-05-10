@@ -78,7 +78,7 @@ releaseProcess := Seq[ReleaseStep](
   checkSnapshotDependencies,
   inquireVersions,
   runClean,
-  runTest,
+  //runTest, how to run ./test.sh??
   setReleaseVersion,
   commitReleaseVersion,
   tagRelease,

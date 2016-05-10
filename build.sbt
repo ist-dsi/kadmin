@@ -83,7 +83,7 @@ releaseProcess := Seq[ReleaseStep](
   commitReleaseVersion,
   tagRelease,
   ReleaseStep(action = Command.process("publishSigned", _)),
-  ReleaseStep(action = Command.process("ghpagePushSite", _)),
+  ReleaseStep(action = Command.process("ghpagesPushSite", _)),
   setNextVersion,
   commitNextVersion,
   ReleaseStep(action = Command.process("sonatypeReleaseAll", _)),

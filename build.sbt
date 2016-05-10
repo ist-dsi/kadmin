@@ -1,6 +1,6 @@
 organization := "pt.tecnico.dsi"
 name := "kadmin"
-version := "4.1.0"
+//version := "4.1.0"
 
 initialize := {
   val required = "1.8"
@@ -86,6 +86,6 @@ releaseProcess := Seq[ReleaseStep](
   ReleaseStep(action = Command.process("ghpagesPushSite", _)),
   setNextVersion,
   commitNextVersion,
-  ReleaseStep(action = Command.process("sonatypeReleaseAll", _)),
+  ReleaseStep(action = Command.process("sonatypeRelease", _)),
   pushChanges
 )

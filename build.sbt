@@ -1,6 +1,5 @@
 organization := "pt.tecnico.dsi"
 name := "kadmin"
-//version := "4.1.0"
 
 initialize := {
   val required = "1.8"
@@ -14,6 +13,7 @@ javacOptions ++= Seq(
   "-encoding", "UTF-8",
   "-Dfile.encoding=utf-8"
 )
+
 scalaVersion := "2.11.8"
 scalacOptions ++= Seq(
   "-target:jvm-1.8",
@@ -43,8 +43,10 @@ libraryDependencies ++= Seq(
   //as to why this library must be included
   "org.joda" % "joda-convert" % "1.8.1",
 
-  "work.martins.simon" %% "scala-expect" % "1.11.0"
+  "work.martins.simon" %% "scala-expect" % "1.11.1"
 )
+
+resolvers += Opts.resolver.sonatypeReleases
 
 autoAPIMappings := true
 scalacOptions in (Compile,doc) ++= Seq("-groups", "-implicits", "-diagrams")
@@ -73,7 +75,6 @@ pomExtra :=
   </developers>
 
 import ReleaseTransformations._
-
 releaseProcess := Seq[ReleaseStep](
   checkSnapshotDependencies,
   inquireVersions,

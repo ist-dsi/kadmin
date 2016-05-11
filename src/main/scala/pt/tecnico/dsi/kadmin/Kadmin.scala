@@ -50,8 +50,8 @@ class Kadmin(val settings: Settings = new Settings()) extends LazyLogging {
     val defaultValue: Either[ErrorCase, R] = Left(UnknownError())
     val e = new Expect(command, defaultValue)
     if (passwordAuthentication) {
-      e.expect(s"Password for ${getFullPrincipalName(authenticatingPrincipal)}: ")
-        .sendln(authenticatingPrincipalPassword)
+      e.expect(s"Password for ${getFullPrincipalName(principal)}: ")
+        .sendln(password)
     }
 
     val expectBlock = e.expect
@@ -67,6 +67,11 @@ class Kadmin(val settings: Settings = new Settings()) extends LazyLogging {
           .addActions(preemptiveExit)
     }
     expectBlock
+      .when("(.+) while initializing kadmin interface".r)
+        .returning { m =>
+          Left(UnknownError(Some(new Exception(m.group(1)))))
+        }
+        .exit()
       .when(kadminPrompt)
         //All good. We can continue. We need to send a newline in order for `f` to see the KadminPrompt
         .sendln("")

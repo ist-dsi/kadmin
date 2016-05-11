@@ -1,6 +1,6 @@
 # kadmin
 [![Maven Central](https://maven-badges.herokuapp.com/maven-central/pt.tecnico.dsi/kadmin_2.11/badge.svg?maxAge=604800)](https://maven-badges.herokuapp.com/maven-central/pt.tecnico.dsi/kadmin_2.11)
-[![Dependency Status](https://www.versioneye.com/java/pt.tecnico.dsi:kadmin_2.11/badge.svg?style=plastic&maxAge=604800)](https://www.versioneye.com/user/projects/5718ed91fcd19a00454417b5)
+[![Dependency Status](https://www.versioneye.com/java/pt.tecnico.dsi:kadmin_2.11/badge.svg?style=plastic&maxAge=604800)](https://www.versioneye.com/java/pt.tecnico.dsi:kadmin_2.11)
 [![Reference Status](https://www.versioneye.com/java/pt.tecnico.dsi:kadmin_2.11/reference_badge.svg?style=plastic&maxAge=604800)](https://www.versioneye.com/java/pt.tecnico.dsi:kadmin_2.11/references)
 [![Build Status](https://travis-ci.org/ist-dsi/kadmin.svg?branch=master&style=plastic&maxAge=604800)](https://travis-ci.org/ist-dsi/kadmin)
 [![Codacy Badge](https://api.codacy.com/project/badge/coverage/a5fead3a55db40cd96470ed7a8efe9c5)](https://www.codacy.com/app/IST-DSI/kadmin)
@@ -22,7 +22,7 @@ To simplify this process we use [scala-expect](https://github.com/Lasering/scala
 ## Install
 Add the following dependency to your `build.sbt`:
 ```sbt
-libraryDependencies += "pt.tecnico.dsi" %% "kadmin" % "4.2.0"
+libraryDependencies += "pt.tecnico.dsi" %% "kadmin" % "4.3.0"
 ```
 We use [semantic versioning](http://semver.org).
 

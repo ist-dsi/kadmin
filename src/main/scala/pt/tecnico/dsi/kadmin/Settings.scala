@@ -42,11 +42,11 @@ class Settings(config: Config = ConfigFactory.load()) {
 
   val passwordAuthentication = getBoolean("password-authentication")
 
-  val authenticatingPrincipal = getString("principal")
-  if (passwordAuthentication && authenticatingPrincipal.isEmpty)
+  val principal = getString("principal")
+  if (passwordAuthentication && principal.isEmpty)
     throw new IllegalArgumentException("When performing password authentication principal cannot be empty.")
-  val authenticatingPrincipalPassword = getString("password")
-  if (passwordAuthentication && authenticatingPrincipalPassword.isEmpty)
+  val password = getString("password")
+  if (passwordAuthentication && password.isEmpty)
     throw new IllegalArgumentException("When performing password authentication password cannot be empty.")
 
   val command: Seq[String] = {
@@ -57,7 +57,7 @@ class Settings(config: Config = ConfigFactory.load()) {
       case _ => throw new IllegalArgumentException(s"$configName can only be String or Array of String")
     }
     require(commandArray.nonEmpty, s"$configName cannot be empty.")
-    commandArray.map(_.replaceAllLiterally("$FULL_PRINCIPAL", s"$authenticatingPrincipal@$realm"))
+    commandArray.map(_.replaceAllLiterally("$FULL_PRINCIPAL", s"$principal@$realm"))
   }
 
   val keytabsLocation = getString("keytabs-location")

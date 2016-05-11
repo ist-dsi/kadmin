@@ -1,5 +1,6 @@
 package pt.tecnico.dsi.kadmin
 
+import java.io.File
 import java.util.Locale
 
 import com.typesafe.scalalogging.LazyLogging
@@ -13,54 +14,104 @@ import scala.util.matching.Regex.Match
 import scala.util.{Failure, Success, Try}
 
 object KadminUtils extends LazyLogging {
-
   /**
     * Obtains a ticket granting ticket for `principal` using `password`.
     *
-    * @return Either an ErrorCase or a date time of when the obtained ticked must be renewed.
+    * @param options options to pass to the `kinit` command.
+    * @return Either an ErrorCase or Unit if the operation was successful.
     */
-  def obtainTicketGrantingTicket(options: String = "", principal: String, password: String): Expect[Either[ErrorCase, DateTime]] = {
+  def obtainTGT(options: String = "", principal: String, password: String): Expect[Either[ErrorCase, Unit]] = {
     require(principal.nonEmpty, "principal cannot be empty.")
     require(password.nonEmpty, "password cannot be empty.")
 
-    val principalWithoutRealm = if (principal.contains("@")) {
-      principal.substring(0, principal.indexOf("@"))
-    } else {
-      principal
-    }
-
-    val defaultValue: Either[ErrorCase, DateTime] = Left(UnknownError())
+    val defaultValue: Either[ErrorCase, Unit] = Left(UnknownError())
     val e = new Expect(s"kinit $options $principal", defaultValue)
     e.expect
       .when(s"Password for $principal")
         .sendln(password)
-      .when(s"""Client '$principalWithoutRealm@[^']+' not found in Kerberos database""".r)
+      .when(s"""Client '[^']+' not found in Kerberos database""".r)
         .returning(Left(NoSuchPrincipal))
     e.expect
       .addWhen(passwordIncorrect)
       .addWhen(passwordExpired)
       .when(EndOfFile)
-        .returningExpect {
-          val datetimeRegex = """\d\d/\d\d/\d\d \d\d:\d\d:\d\d"""
-          val e2 = new Expect("klist", defaultValue)
-          e2.expect(
-            s"""Ticket cache: FILE:[^\n]+
-                |Default principal: $principalWithoutRealm@[^\n]+
-                |
-                |Valid starting\\s+Expires\\s+Service principal
-                |$datetimeRegex\\s+($datetimeRegex)\\s+[^\n]+
-                |(\\s+renew until $datetimeRegex)?""".stripMargin.r)
-            .returning { m: Match =>
-              val dateTimeString = Option(m.group(2)).flatMap { renewString =>
-                datetimeRegex.r.findFirstMatchIn(renewString).map(_.group(0))
-              }.getOrElse(m.group(1))
-              val dateTimeFormat = DateTimeFormat.forPattern("dd/MM/yyyy HH:mm:ss")
-              Right(dateTimeFormat.parseDateTime(dateTimeString))
-            }
-          e2
-        }
+        .returning(Right(()))
     e
   }
+
+  /**
+    * Obtains a ticket granting ticket using 'keytabFile'.
+    *
+    * @param options options to pass to the `kinit` command.
+    * @return Either an ErrorCase or Unit if the operation was successful.
+    */
+  def obtainTGTWithKeytab(options: String = "", keytabFile: File): Expect[Either[ErrorCase, Unit]] = {
+    val defaultValue: Either[ErrorCase, Unit] = Left(UnknownError())
+    val e = new Expect(s"kinit -kt ${keytabFile.getAbsolutePath} $options", defaultValue)
+    e.expect
+      .when(s"""Client '[^']+' not found in Kerberos database""".r)
+        .returning(Left(NoSuchPrincipal))
+    e.expect
+      .when(EndOfFile)
+        .returning(Right(()))
+    e
+  }
+
+  /**
+    * Lists cached Kerberos tickets
+    *
+    * @param options options to pass to the `klist` command.
+    * @return The default principal and the list of all the cached tickets
+    */
+  def listTickets(options: String = ""): Expect[Either[ErrorCase, (String, Seq[Ticket])]] = {
+    val defaultValue: Either[ErrorCase, (String, Seq[Ticket])] = Left(UnknownError())
+    val datetimeRegex = """\d\d/\d\d/\d\d \d\d:\d\d:\d\d"""
+    val ticketRegex = s"""(?s)($datetimeRegex)\\s+($datetimeRegex)\\s+([^\n]+)(\\s+renew until $datetimeRegex)?"""
+      .stripMargin.r("validStarting", "expires", "servicePrincipal", "renewUtil")
+    val dateTimeFormat = DateTimeFormat.forPattern("dd/MM/yyyy HH:mm:ss")
+
+    val e = new Expect(s"klist $options", defaultValue)
+    e.expect(
+      s"""Ticket cache: FILE:[^\n]+
+          |Default principal: ([^\n]+)
+          |
+          |Valid starting\\s+Expires\\s+Service principal
+          |(.+?)$$""".stripMargin.r)
+      .returning { m: Match =>
+        val principal = m.group(1)
+        val tickets = ticketRegex.findAllMatchIn(m.group(2)).map { m =>
+          Ticket(
+            dateTimeFormat.parseDateTime(m.group("validStarting")),
+            dateTimeFormat.parseDateTime(m.group("expires")),
+            m.group("servicePrincipal"),
+            Option(m.group("renewUtil")).map(dateTimeFormat.parseDateTime)
+          )
+        }.toSeq
+
+        Right((principal, tickets))
+      }
+    e
+  }
+
+  /**
+    * Destroys the default credencials cache.
+    *
+    * @param options options to pass to the `kdestroy` command.
+    * @return
+    */
+  def destroyTickets(options: String = ""): Expect[Either[ErrorCase, Unit]] = {
+    val defaultValue: Either[ErrorCase, Unit] = Left(UnknownError())
+    val e = new Expect(s"kdestroy", defaultValue)
+    e.expect
+      .when(EndOfFile)
+        .returning(Right(()))
+      /*.when("(?s)(.+?)".r)
+        .returning { m =>
+          Left(UnknownError(Some(new Exception(m.group(1)))))
+        }*/
+    e
+  }
+
 
   /**
     * Tries to parse a date time string returned by a kadmin `get_principal` operation.

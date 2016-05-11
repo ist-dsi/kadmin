@@ -1,9 +1,9 @@
 <!DOCTYPE html >
 <html>
         <head>
-          <title>Settings - pt.tecnico.dsi.kadmin.Settings</title>
-          <meta name="description" content="Settings - pt.tecnico.dsi.kadmin.Settings" />
-          <meta name="keywords" content="Settings pt.tecnico.dsi.kadmin.Settings" />
+          <title>Ticket - pt.tecnico.dsi.kadmin.Ticket</title>
+          <meta name="description" content="Ticket - pt.tecnico.dsi.kadmin.Ticket" />
+          <meta name="keywords" content="Ticket pt.tecnico.dsi.kadmin.Ticket" />
           <meta http-equiv="content-type" content="text/html; charset=UTF-8" />
           
       <link href="../../../../lib/template.css" media="screen" type="text/css" rel="stylesheet" />
@@ -16,7 +16,7 @@
       <script type="text/javascript">
          if(top === self) {
             var url = '../../../../index.html';
-            var hash = 'pt.tecnico.dsi.kadmin.Settings';
+            var hash = 'pt.tecnico.dsi.kadmin.Ticket';
             var anchor = window.location.hash;
             var anchor_opt = '';
             if (anchor.length >= 1)
@@ -30,10 +30,10 @@
       <div id="definition">
         <img alt="Class" src="../../../../lib/class_big.png" />
         <p id="owner"><a href="../../../package.html" class="extype" name="pt">pt</a>.<a href="../../package.html" class="extype" name="pt.tecnico">tecnico</a>.<a href="../package.html" class="extype" name="pt.tecnico.dsi">dsi</a>.<a href="package.html" class="extype" name="pt.tecnico.dsi.kadmin">kadmin</a></p>
-        <h1>Settings</h1><h3><span class="morelinks"><div>Related Doc:
+        <h1>Ticket</h1><h3><span class="morelinks"><div>Related Doc:
             <a href="package.html" class="extype" name="pt.tecnico.dsi.kadmin">package kadmin</a>
           </div></span></h3><span class="permalink">
-      <a href="../../../../index.html#pt.tecnico.dsi.kadmin.Settings" title="Permalink" target="_top">
+      <a href="../../../../index.html#pt.tecnico.dsi.kadmin.Ticket" title="Permalink" target="_top">
         <img src="../../../../lib/permalink.png" alt="Permalink" />
       </a>
     </span>
@@ -42,24 +42,19 @@
       <h4 id="signature" class="signature">
       <span class="modifier_kind">
         <span class="modifier"></span>
-        <span class="kind">class</span>
+        <span class="kind">case class</span>
       </span>
       <span class="symbol">
-        <span class="name">Settings</span><span class="result"> extends <span class="extype" name="scala.AnyRef">AnyRef</span></span>
+        <span class="name">Ticket</span><span class="params">(<span name="validStarting">validStarting: <a href="https://oss.sonatype.org/service/local/repositories/releases/archive/joda-time/joda-time/2.9.3/joda-time-2.9.3-javadoc.jar/!/index.html#org.joda.time.DateTime" class="extype" target="_top">DateTime</a></span>, <span name="expires">expires: <a href="https://oss.sonatype.org/service/local/repositories/releases/archive/joda-time/joda-time/2.9.3/joda-time-2.9.3-javadoc.jar/!/index.html#org.joda.time.DateTime" class="extype" target="_top">DateTime</a></span>, <span name="servicePrincipal">servicePrincipal: <span class="extype" name="scala.Predef.String">String</span></span>, <span name="renewUtil">renewUtil: <a href="http://www.scala-lang.org/api/2.11.8/index.html#scala.Option" class="extype" target="_top">Option</a>[<a href="https://oss.sonatype.org/service/local/repositories/releases/archive/joda-time/joda-time/2.9.3/joda-time-2.9.3-javadoc.jar/!/index.html#org.joda.time.DateTime" class="extype" target="_top">DateTime</a>]</span>)</span><span class="result"> extends <a href="http://www.scala-lang.org/api/2.11.8/index.html#scala.Product" class="extype" target="_top">Product</a> with <a href="http://www.scala-lang.org/api/2.11.8/index.html#scala.Serializable" class="extype" target="_top">Serializable</a></span>
       </span>
       </h4>
       
-          <div id="comment" class="fullcommenttop"><div class="comment cmt"><p>This class holds all the settings that parameterize kadmin.</p><p>By default these settings are read from the Config obtained with <code>ConfigFactory.load()</code>.</p><p>You can change the settings in multiple ways:</p><ul><li>Change them in the default configuration file (e.g. application.conf)</li><li>Pass a different config holding your configurations: </li></ul><pre><span class="kw">new</span> Settings(yourConfig)</pre><p>    However it will be more succinct to pass your config directly to Kadmin: </p><pre><span class="kw">new</span> Kadmin(yourConfig)</pre><ul><li>Extend this class overriding the settings you want to redefine </li></ul><pre><span class="kw">object</span> YourSettings <span class="kw">extends</span> Settings() {
-  <span class="kw">override</span> <span class="kw">val</span> realm: <span class="std">String</span> = <span class="lit">"YOUR.DOMAIN.TLD"</span>
-  <span class="kw">override</span> <span class="kw">val</span> keytabsLocation: <span class="std">String</span> = <span class="lit">"/var/local/keytabs"</span>
-  <span class="kw">override</span> <span class="kw">val</span> commandWithAuthentication: <span class="std">String</span> = s<span class="lit">""</span><span class="lit">"ssh user@server:port "</span>kadmin -p $authenticatingPrincipal<span class="lit">""</span><span class="lit">""</span>
-}
-<span class="kw">new</span> Kadmin(YourSettings)</pre></div><div class="toggleContainer block">
+          <div id="comment" class="fullcommenttop"><div class="toggleContainer block">
           <span class="toggle">Linear Supertypes</span>
-          <div class="superTypes hiddenContent"><span class="extype" name="scala.AnyRef">AnyRef</span>, <span class="extype" name="scala.Any">Any</span></div>
+          <div class="superTypes hiddenContent"><a href="http://www.scala-lang.org/api/2.11.8/index.html#scala.Serializable" class="extype" target="_top">Serializable</a>, <span class="extype" name="java.io.Serializable">Serializable</span>, <a href="http://www.scala-lang.org/api/2.11.8/index.html#scala.Product" class="extype" target="_top">Product</a>, <a href="http://www.scala-lang.org/api/2.11.8/index.html#scala.Equals" class="extype" target="_top">Equals</a>, <span class="extype" name="scala.AnyRef">AnyRef</span>, <span class="extype" name="scala.Any">Any</span></div>
         </div><div class="toggleContainer block diagram-container" id="inheritance-diagram-container">
                 <span class="toggle diagram-link">Type Hierarchy</span>
-                <div class="diagram" id="inheritance-diagram"><svg class="class-diagram" id="graph1" viewBox="0.00 0.00 138.00 118.00" height="118pt" width="138pt" xmlns:xlink="http://www.w3.org/1999/xlink" xmlns="http://www.w3.org/2000/svg"><g transform="scale(1 1) rotate(0) translate(4 114)" class="graph" id="graph0"><polygon points="-4,4 -4,-114 134,-114 134,4 -4,4" stroke="none" fill="white"></polygon><g class="cluster" id="clust1"></g><g class="cluster" id="clust2"></g><!-- node0 --><g class="node this class" id="graph1_0"><g id="a_this class|graph1_0"><a xlink:title="pt.tecnico.dsi.kadmin.Settings (this class)" xlink:href="#inheritance-diagram"><polygon points="105.5,-49 24.5,-49 24.5,-24 105.5,-24 105.5,-49" stroke="#115f3b" fill="#0a955b"></polygon><image xlink:href="../../../../lib/class_diagram.png" y="-43.5" x="35" preserveAspectRatio="xMinYMin meet" height="15px" width="15px"></image><text fill="#ffffff" font-size="10.00" font-family="Arial" y="-33.5" x="56" text-anchor="start">Settings</text></a></g></g><!-- node1 --><g class="node class" id="graph1_1"><g id="a_class|graph1_1"><a xlink:title="scala.AnyRef"><polygon points="103,-110 27,-110 27,-85 103,-85 103,-110" stroke="#115f3b" fill="#0a955b"></polygon><image xlink:href="../../../../lib/class_diagram.png" y="-104.5" x="37" preserveAspectRatio="xMinYMin meet" height="15px" width="15px"></image><text fill="#ffffff" font-size="10.00" font-family="Arial" y="-94.5" x="58" text-anchor="start">AnyRef</text></a></g></g><!-- node1&#45;&gt;node0 --><g class="edge inheritance" id="graph1_1_0"><g id="a_inheritance|graph1_1_0"><a xlink:title="Settings is a subtype of AnyRef"><path d="M65,-79.6874C65,-69.9173 65,-57.8534 65,-49.1323" stroke="#d4d4d4" fill="none"></path><polygon points="63.2501,-79.8435 65,-84.8435 66.7501,-79.8435 63.2501,-79.8435" stroke="#d4d4d4" fill="none"></polygon></a></g></g></g></svg></div>
+                <div class="diagram" id="inheritance-diagram"><svg class="class-diagram" id="graph1" viewBox="0.00 0.00 199.50 118.00" height="118pt" width="200pt" xmlns:xlink="http://www.w3.org/1999/xlink" xmlns="http://www.w3.org/2000/svg"><g transform="scale(1 1) rotate(0) translate(4 114)" class="graph" id="graph0"><polygon points="-4,4 -4,-114 195.5,-114 195.5,4 -4,4" stroke="none" fill="white"></polygon><g class="cluster" id="clust1"></g><g class="cluster" id="clust2"></g><!-- node0 --><g class="node this class" id="graph1_0"><g id="a_this class|graph1_0"><a xlink:title="pt.tecnico.dsi.kadmin.Ticket (this class)" xlink:href="#inheritance-diagram"><polygon points="126.5,-49 55.5,-49 55.5,-24 126.5,-24 126.5,-49" stroke="#115f3b" fill="#0a955b"></polygon><image xlink:href="../../../../lib/class_diagram.png" y="-43.5" x="66" preserveAspectRatio="xMinYMin meet" height="15px" width="15px"></image><text fill="#ffffff" font-size="10.00" font-family="Arial" y="-33.5" x="87" text-anchor="start">Ticket</text></a></g></g><!-- node1 --><g class="node trait" id="graph1_1"><g id="a_trait|graph1_1"><a xlink:title="scala.Product"><polygon points="78,-110 0,-110 0,-85 78,-85 78,-110" stroke="#37657d" fill="#498aad"></polygon><image xlink:href="../../../../lib/trait_diagram.png" y="-104.5" x="10" preserveAspectRatio="xMinYMin meet" height="15px" width="15px"></image><text fill="#ffffff" font-size="10.00" font-family="Arial" y="-94.5" x="31" text-anchor="start">Product</text></a></g></g><!-- node1&#45;&gt;node0 --><g class="edge inheritance" id="graph1_1_0"><g id="a_inheritance|graph1_1_0"><a xlink:title="Ticket is a subtype of Product"><path d="M52.6354,-81.0291C61.438,-71.0415 72.7055,-58.2572 80.7478,-49.1323" stroke="#d4d4d4" fill="none"></path><polygon points="51.2667,-79.9353 49.2735,-84.8435 53.8924,-82.2495 51.2667,-79.9353" stroke="#d4d4d4" fill="none"></polygon></a></g></g><!-- node2 --><g class="node trait" id="graph1_2"><g id="a_trait|graph1_2"><a xlink:title="scala.Serializable"><polygon points="191.5,-110 96.5,-110 96.5,-85 191.5,-85 191.5,-110" stroke="#37657d" fill="#498aad"></polygon><image xlink:href="../../../../lib/trait_diagram.png" y="-104.5" x="107" preserveAspectRatio="xMinYMin meet" height="15px" width="15px"></image><text fill="#ffffff" font-size="10.00" font-family="Arial" y="-94.5" x="128" text-anchor="start">Serializable</text></a></g></g><!-- node2&#45;&gt;node0 --><g class="edge inheritance" id="graph1_2_0"><g id="a_inheritance|graph1_2_0"><a xlink:title="Ticket is a subtype of Serializable"><path d="M130.102,-81.0291C121.13,-71.0415 109.646,-58.2572 101.449,-49.1323" stroke="#d4d4d4" fill="none"></path><polygon points="128.886,-82.2933 133.529,-84.8435 131.489,-79.9544 128.886,-82.2933" stroke="#d4d4d4" fill="none"></polygon></a></g></g></g></svg></div>
               </div></div>
         
 
@@ -77,7 +72,7 @@
                 <span class="filtertype">Inherited<br />
                 </span>
                 <ol id="linearization">
-                  <li class="in" name="pt.tecnico.dsi.kadmin.Settings"><span>Settings</span></li><li class="in" name="scala.AnyRef"><span>AnyRef</span></li><li class="in" name="scala.Any"><span>Any</span></li>
+                  <li class="in" name="pt.tecnico.dsi.kadmin.Ticket"><span>Ticket</span></li><li class="in" name="scala.Serializable"><span>Serializable</span></li><li class="in" name="java.io.Serializable"><span>Serializable</span></li><li class="in" name="scala.Product"><span>Product</span></li><li class="in" name="scala.Equals"><span>Equals</span></li><li class="in" name="scala.AnyRef"><span>AnyRef</span></li><li class="in" name="scala.Any"><span>Any</span></li>
                 </ol>
               </div><div id="ancestors">
                 <span class="filtertype">Implicitly<br />
@@ -101,19 +96,19 @@
         <div id="allMembers">
         <div id="constructors" class="members">
               <h3>Instance Constructors</h3>
-              <ol><li name="pt.tecnico.dsi.kadmin.Settings#&lt;init&gt;" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
-      <a id="&lt;init&gt;(config:com.typesafe.config.Config):pt.tecnico.dsi.kadmin.Settings"></a>
-      <a id="&lt;init&gt;:Settings"></a>
+              <ol><li name="pt.tecnico.dsi.kadmin.Ticket#&lt;init&gt;" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
+      <a id="&lt;init&gt;(validStarting:org.joda.time.DateTime,expires:org.joda.time.DateTime,servicePrincipal:String,renewUtil:Option[org.joda.time.DateTime]):pt.tecnico.dsi.kadmin.Ticket"></a>
+      <a id="&lt;init&gt;:Ticket"></a>
       <h4 class="signature">
       <span class="modifier_kind">
         <span class="modifier"></span>
         <span class="kind">new</span>
       </span>
       <span class="symbol">
-        <span class="name">Settings</span><span class="params">(<span name="config">config: <a href="https://oss.sonatype.org/service/local/repositories/releases/archive/com/typesafe/config/1.3.0/config-1.3.0-javadoc.jar/!/index.html#com.typesafe.config.Config" class="extype" target="_top">Config</a> = <span class="symbol">ConfigFactory.load()</span></span>)</span>
+        <span class="name">Ticket</span><span class="params">(<span name="validStarting">validStarting: <a href="https://oss.sonatype.org/service/local/repositories/releases/archive/joda-time/joda-time/2.9.3/joda-time-2.9.3-javadoc.jar/!/index.html#org.joda.time.DateTime" class="extype" target="_top">DateTime</a></span>, <span name="expires">expires: <a href="https://oss.sonatype.org/service/local/repositories/releases/archive/joda-time/joda-time/2.9.3/joda-time-2.9.3-javadoc.jar/!/index.html#org.joda.time.DateTime" class="extype" target="_top">DateTime</a></span>, <span name="servicePrincipal">servicePrincipal: <span class="extype" name="scala.Predef.String">String</span></span>, <span name="renewUtil">renewUtil: <a href="http://www.scala-lang.org/api/2.11.8/index.html#scala.Option" class="extype" target="_top">Option</a>[<a href="https://oss.sonatype.org/service/local/repositories/releases/archive/joda-time/joda-time/2.9.3/joda-time-2.9.3-javadoc.jar/!/index.html#org.joda.time.DateTime" class="extype" target="_top">DateTime</a>]</span>)</span>
       </span>
       </h4><span class="permalink">
-      <a href="../../../../index.html#pt.tecnico.dsi.kadmin.Settings@&lt;init&gt;(config:com.typesafe.config.Config):pt.tecnico.dsi.kadmin.Settings" title="Permalink" target="_top">
+      <a href="../../../../index.html#pt.tecnico.dsi.kadmin.Ticket@&lt;init&gt;(validStarting:org.joda.time.DateTime,expires:org.joda.time.DateTime,servicePrincipal:String,renewUtil:Option[org.joda.time.DateTime]):pt.tecnico.dsi.kadmin.Ticket" title="Permalink" target="_top">
         <img src="../../../../lib/permalink.png" alt="Permalink" />
       </a>
     </span>
@@ -139,7 +134,7 @@
         <span title="gt4s: $bang$eq" class="name">!=</span><span class="params">(<span name="arg0">arg0: <span class="extype" name="scala.Any">Any</span></span>)</span><span class="result">: <a href="http://www.scala-lang.org/api/2.11.8/index.html#scala.Boolean" class="extype" target="_top">Boolean</a></span>
       </span>
       </h4><span class="permalink">
-      <a href="../../../../index.html#pt.tecnico.dsi.kadmin.Settings@!=(x$1:Any):Boolean" title="Permalink" target="_top">
+      <a href="../../../../index.html#pt.tecnico.dsi.kadmin.Ticket@!=(x$1:Any):Boolean" title="Permalink" target="_top">
         <img src="../../../../lib/permalink.png" alt="Permalink" />
       </a>
     </span>
@@ -156,7 +151,7 @@
         <span title="gt4s: $hash$hash" class="name">##</span><span class="params">()</span><span class="result">: <a href="http://www.scala-lang.org/api/2.11.8/index.html#scala.Int" class="extype" target="_top">Int</a></span>
       </span>
       </h4><span class="permalink">
-      <a href="../../../../index.html#pt.tecnico.dsi.kadmin.Settings@##():Int" title="Permalink" target="_top">
+      <a href="../../../../index.html#pt.tecnico.dsi.kadmin.Ticket@##():Int" title="Permalink" target="_top">
         <img src="../../../../lib/permalink.png" alt="Permalink" />
       </a>
     </span>
@@ -173,34 +168,34 @@
         <span title="gt4s: $plus" class="implicit">+</span><span class="params">(<span name="other">other: <span class="extype" name="scala.Predef.String">String</span></span>)</span><span class="result">: <span class="extype" name="scala.Predef.String">String</span></span>
       </span>
       </h4><span class="permalink">
-      <a href="../../../../index.html#pt.tecnico.dsi.kadmin.Settings@+(other:String):String" title="Permalink" target="_top">
+      <a href="../../../../index.html#pt.tecnico.dsi.kadmin.Ticket@+(other:String):String" title="Permalink" target="_top">
         <img src="../../../../lib/permalink.png" alt="Permalink" />
       </a>
     </span>
       <div class="fullcomment"><dl class="attributes block"> <dt class="implicit">Implicit information</dt><dd>
-            This member is added by an implicit conversion from <a href="" class="extype" name="pt.tecnico.dsi.kadmin.Settings">Settings</a> to
-            <span class="extype" name="scala.Predef.any2stringadd">any2stringadd</span>[<a href="" class="extype" name="pt.tecnico.dsi.kadmin.Settings">Settings</a>] performed by method any2stringadd in scala.Predef.
+            This member is added by an implicit conversion from <a href="" class="extype" name="pt.tecnico.dsi.kadmin.Ticket">Ticket</a> to
+            <span class="extype" name="scala.Predef.any2stringadd">any2stringadd</span>[<a href="" class="extype" name="pt.tecnico.dsi.kadmin.Ticket">Ticket</a>] performed by method any2stringadd in scala.Predef.
             
           </dd><dt>Definition Classes</dt><dd>any2stringadd</dd></dl></div>
     </li><li name="scala.Predef.ArrowAssoc#-&gt;" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="-&gt;[B](y:B):(A,B)"></a>
-      <a id="-&gt;[B](B):(Settings,B)"></a>
+      <a id="-&gt;[B](B):(Ticket,B)"></a>
       <h4 class="signature">
       <span class="modifier_kind">
         <span class="modifier"></span>
         <span class="kind">def</span>
       </span>
       <span class="symbol">
-        <span title="gt4s: $minus$greater" class="implicit">-&gt;</span><span class="tparams">[<span name="B">B</span>]</span><span class="params">(<span name="y">y: <span class="extype" name="scala.Predef.ArrowAssoc.-&gt;.B">B</span></span>)</span><span class="result">: (<a href="" class="extype" name="pt.tecnico.dsi.kadmin.Settings">Settings</a>, <span class="extype" name="scala.Predef.ArrowAssoc.-&gt;.B">B</span>)</span>
+        <span title="gt4s: $minus$greater" class="implicit">-&gt;</span><span class="tparams">[<span name="B">B</span>]</span><span class="params">(<span name="y">y: <span class="extype" name="scala.Predef.ArrowAssoc.-&gt;.B">B</span></span>)</span><span class="result">: (<a href="" class="extype" name="pt.tecnico.dsi.kadmin.Ticket">Ticket</a>, <span class="extype" name="scala.Predef.ArrowAssoc.-&gt;.B">B</span>)</span>
       </span>
       </h4><span class="permalink">
-      <a href="../../../../index.html#pt.tecnico.dsi.kadmin.Settings@-&gt;[B](y:B):(A,B)" title="Permalink" target="_top">
+      <a href="../../../../index.html#pt.tecnico.dsi.kadmin.Ticket@-&gt;[B](y:B):(A,B)" title="Permalink" target="_top">
         <img src="../../../../lib/permalink.png" alt="Permalink" />
       </a>
     </span>
       <div class="fullcomment"><dl class="attributes block"> <dt class="implicit">Implicit information</dt><dd>
-            This member is added by an implicit conversion from <a href="" class="extype" name="pt.tecnico.dsi.kadmin.Settings">Settings</a> to
-            <span class="extype" name="scala.Predef.ArrowAssoc">ArrowAssoc</span>[<a href="" class="extype" name="pt.tecnico.dsi.kadmin.Settings">Settings</a>] performed by method ArrowAssoc in scala.Predef.
+            This member is added by an implicit conversion from <a href="" class="extype" name="pt.tecnico.dsi.kadmin.Ticket">Ticket</a> to
+            <span class="extype" name="scala.Predef.ArrowAssoc">ArrowAssoc</span>[<a href="" class="extype" name="pt.tecnico.dsi.kadmin.Ticket">Ticket</a>] performed by method ArrowAssoc in scala.Predef.
             
           </dd><dt>Definition Classes</dt><dd>ArrowAssoc</dd><dt>Annotations</dt><dd>
                 <span class="name">@inline</span><span class="args">()</span>
@@ -218,7 +213,7 @@
         <span title="gt4s: $eq$eq" class="name">==</span><span class="params">(<span name="arg0">arg0: <span class="extype" name="scala.Any">Any</span></span>)</span><span class="result">: <a href="http://www.scala-lang.org/api/2.11.8/index.html#scala.Boolean" class="extype" target="_top">Boolean</a></span>
       </span>
       </h4><span class="permalink">
-      <a href="../../../../index.html#pt.tecnico.dsi.kadmin.Settings@==(x$1:Any):Boolean" title="Permalink" target="_top">
+      <a href="../../../../index.html#pt.tecnico.dsi.kadmin.Ticket@==(x$1:Any):Boolean" title="Permalink" target="_top">
         <img src="../../../../lib/permalink.png" alt="Permalink" />
       </a>
     </span>
@@ -235,7 +230,7 @@
         <span class="name">asInstanceOf</span><span class="tparams">[<span name="T0">T0</span>]</span><span class="result">: <span class="extype" name="scala.Any.asInstanceOf.T0">T0</span></span>
       </span>
       </h4><span class="permalink">
-      <a href="../../../../index.html#pt.tecnico.dsi.kadmin.Settings@asInstanceOf[T0]:T0" title="Permalink" target="_top">
+      <a href="../../../../index.html#pt.tecnico.dsi.kadmin.Ticket@asInstanceOf[T0]:T0" title="Permalink" target="_top">
         <img src="../../../../lib/permalink.png" alt="Permalink" />
       </a>
     </span>
@@ -252,7 +247,7 @@
         <span class="name">clone</span><span class="params">()</span><span class="result">: <span class="extype" name="scala.AnyRef">AnyRef</span></span>
       </span>
       </h4><span class="permalink">
-      <a href="../../../../index.html#pt.tecnico.dsi.kadmin.Settings@clone():Object" title="Permalink" target="_top">
+      <a href="../../../../index.html#pt.tecnico.dsi.kadmin.Ticket@clone():Object" title="Permalink" target="_top">
         <img src="../../../../lib/permalink.png" alt="Permalink" />
       </a>
     </span>
@@ -263,105 +258,88 @@
     </span>)</span>
               
         </dd></dl></div>
-    </li><li name="pt.tecnico.dsi.kadmin.Settings#command" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
-      <a id="command:Seq[String]"></a>
-      <a id="command:Seq[String]"></a>
-      <h4 class="signature">
-      <span class="modifier_kind">
-        <span class="modifier"></span>
-        <span class="kind">val</span>
-      </span>
-      <span class="symbol">
-        <span class="name">command</span><span class="result">: <span class="extype" name="scala.Seq">Seq</span>[<span class="extype" name="scala.Predef.String">String</span>]</span>
-      </span>
-      </h4><span class="permalink">
-      <a href="../../../../index.html#pt.tecnico.dsi.kadmin.Settings@command:Seq[String]" title="Permalink" target="_top">
-        <img src="../../../../lib/permalink.png" alt="Permalink" />
-      </a>
-    </span>
-      
     </li><li name="scala.Predef.Ensuring#ensuring" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="ensuring(cond:A=&gt;Boolean,msg:=&gt;Any):A"></a>
-      <a id="ensuring((Settings)⇒Boolean,⇒Any):Settings"></a>
+      <a id="ensuring((Ticket)⇒Boolean,⇒Any):Ticket"></a>
       <h4 class="signature">
       <span class="modifier_kind">
         <span class="modifier"></span>
         <span class="kind">def</span>
       </span>
       <span class="symbol">
-        <span class="implicit">ensuring</span><span class="params">(<span name="cond">cond: (<a href="" class="extype" name="pt.tecnico.dsi.kadmin.Settings">Settings</a>) ⇒ <a href="http://www.scala-lang.org/api/2.11.8/index.html#scala.Boolean" class="extype" target="_top">Boolean</a></span>, <span name="msg">msg: ⇒ <span class="extype" name="scala.Any">Any</span></span>)</span><span class="result">: <a href="" class="extype" name="pt.tecnico.dsi.kadmin.Settings">Settings</a></span>
+        <span class="implicit">ensuring</span><span class="params">(<span name="cond">cond: (<a href="" class="extype" name="pt.tecnico.dsi.kadmin.Ticket">Ticket</a>) ⇒ <a href="http://www.scala-lang.org/api/2.11.8/index.html#scala.Boolean" class="extype" target="_top">Boolean</a></span>, <span name="msg">msg: ⇒ <span class="extype" name="scala.Any">Any</span></span>)</span><span class="result">: <a href="" class="extype" name="pt.tecnico.dsi.kadmin.Ticket">Ticket</a></span>
       </span>
       </h4><span class="permalink">
-      <a href="../../../../index.html#pt.tecnico.dsi.kadmin.Settings@ensuring(cond:A=&gt;Boolean,msg:=&gt;Any):A" title="Permalink" target="_top">
+      <a href="../../../../index.html#pt.tecnico.dsi.kadmin.Ticket@ensuring(cond:A=&gt;Boolean,msg:=&gt;Any):A" title="Permalink" target="_top">
         <img src="../../../../lib/permalink.png" alt="Permalink" />
       </a>
     </span>
       <div class="fullcomment"><dl class="attributes block"> <dt class="implicit">Implicit information</dt><dd>
-            This member is added by an implicit conversion from <a href="" class="extype" name="pt.tecnico.dsi.kadmin.Settings">Settings</a> to
-            <span class="extype" name="scala.Predef.Ensuring">Ensuring</span>[<a href="" class="extype" name="pt.tecnico.dsi.kadmin.Settings">Settings</a>] performed by method Ensuring in scala.Predef.
+            This member is added by an implicit conversion from <a href="" class="extype" name="pt.tecnico.dsi.kadmin.Ticket">Ticket</a> to
+            <span class="extype" name="scala.Predef.Ensuring">Ensuring</span>[<a href="" class="extype" name="pt.tecnico.dsi.kadmin.Ticket">Ticket</a>] performed by method Ensuring in scala.Predef.
             
           </dd><dt>Definition Classes</dt><dd>Ensuring</dd></dl></div>
     </li><li name="scala.Predef.Ensuring#ensuring" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="ensuring(cond:A=&gt;Boolean):A"></a>
-      <a id="ensuring((Settings)⇒Boolean):Settings"></a>
+      <a id="ensuring((Ticket)⇒Boolean):Ticket"></a>
       <h4 class="signature">
       <span class="modifier_kind">
         <span class="modifier"></span>
         <span class="kind">def</span>
       </span>
       <span class="symbol">
-        <span class="implicit">ensuring</span><span class="params">(<span name="cond">cond: (<a href="" class="extype" name="pt.tecnico.dsi.kadmin.Settings">Settings</a>) ⇒ <a href="http://www.scala-lang.org/api/2.11.8/index.html#scala.Boolean" class="extype" target="_top">Boolean</a></span>)</span><span class="result">: <a href="" class="extype" name="pt.tecnico.dsi.kadmin.Settings">Settings</a></span>
+        <span class="implicit">ensuring</span><span class="params">(<span name="cond">cond: (<a href="" class="extype" name="pt.tecnico.dsi.kadmin.Ticket">Ticket</a>) ⇒ <a href="http://www.scala-lang.org/api/2.11.8/index.html#scala.Boolean" class="extype" target="_top">Boolean</a></span>)</span><span class="result">: <a href="" class="extype" name="pt.tecnico.dsi.kadmin.Ticket">Ticket</a></span>
       </span>
       </h4><span class="permalink">
-      <a href="../../../../index.html#pt.tecnico.dsi.kadmin.Settings@ensuring(cond:A=&gt;Boolean):A" title="Permalink" target="_top">
+      <a href="../../../../index.html#pt.tecnico.dsi.kadmin.Ticket@ensuring(cond:A=&gt;Boolean):A" title="Permalink" target="_top">
         <img src="../../../../lib/permalink.png" alt="Permalink" />
       </a>
     </span>
       <div class="fullcomment"><dl class="attributes block"> <dt class="implicit">Implicit information</dt><dd>
-            This member is added by an implicit conversion from <a href="" class="extype" name="pt.tecnico.dsi.kadmin.Settings">Settings</a> to
-            <span class="extype" name="scala.Predef.Ensuring">Ensuring</span>[<a href="" class="extype" name="pt.tecnico.dsi.kadmin.Settings">Settings</a>] performed by method Ensuring in scala.Predef.
+            This member is added by an implicit conversion from <a href="" class="extype" name="pt.tecnico.dsi.kadmin.Ticket">Ticket</a> to
+            <span class="extype" name="scala.Predef.Ensuring">Ensuring</span>[<a href="" class="extype" name="pt.tecnico.dsi.kadmin.Ticket">Ticket</a>] performed by method Ensuring in scala.Predef.
             
           </dd><dt>Definition Classes</dt><dd>Ensuring</dd></dl></div>
     </li><li name="scala.Predef.Ensuring#ensuring" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="ensuring(cond:Boolean,msg:=&gt;Any):A"></a>
-      <a id="ensuring(Boolean,⇒Any):Settings"></a>
+      <a id="ensuring(Boolean,⇒Any):Ticket"></a>
       <h4 class="signature">
       <span class="modifier_kind">
         <span class="modifier"></span>
         <span class="kind">def</span>
       </span>
       <span class="symbol">
-        <span class="implicit">ensuring</span><span class="params">(<span name="cond">cond: <a href="http://www.scala-lang.org/api/2.11.8/index.html#scala.Boolean" class="extype" target="_top">Boolean</a></span>, <span name="msg">msg: ⇒ <span class="extype" name="scala.Any">Any</span></span>)</span><span class="result">: <a href="" class="extype" name="pt.tecnico.dsi.kadmin.Settings">Settings</a></span>
+        <span class="implicit">ensuring</span><span class="params">(<span name="cond">cond: <a href="http://www.scala-lang.org/api/2.11.8/index.html#scala.Boolean" class="extype" target="_top">Boolean</a></span>, <span name="msg">msg: ⇒ <span class="extype" name="scala.Any">Any</span></span>)</span><span class="result">: <a href="" class="extype" name="pt.tecnico.dsi.kadmin.Ticket">Ticket</a></span>
       </span>
       </h4><span class="permalink">
-      <a href="../../../../index.html#pt.tecnico.dsi.kadmin.Settings@ensuring(cond:Boolean,msg:=&gt;Any):A" title="Permalink" target="_top">
+      <a href="../../../../index.html#pt.tecnico.dsi.kadmin.Ticket@ensuring(cond:Boolean,msg:=&gt;Any):A" title="Permalink" target="_top">
         <img src="../../../../lib/permalink.png" alt="Permalink" />
       </a>
     </span>
       <div class="fullcomment"><dl class="attributes block"> <dt class="implicit">Implicit information</dt><dd>
-            This member is added by an implicit conversion from <a href="" class="extype" name="pt.tecnico.dsi.kadmin.Settings">Settings</a> to
-            <span class="extype" name="scala.Predef.Ensuring">Ensuring</span>[<a href="" class="extype" name="pt.tecnico.dsi.kadmin.Settings">Settings</a>] performed by method Ensuring in scala.Predef.
+            This member is added by an implicit conversion from <a href="" class="extype" name="pt.tecnico.dsi.kadmin.Ticket">Ticket</a> to
+            <span class="extype" name="scala.Predef.Ensuring">Ensuring</span>[<a href="" class="extype" name="pt.tecnico.dsi.kadmin.Ticket">Ticket</a>] performed by method Ensuring in scala.Predef.
             
           </dd><dt>Definition Classes</dt><dd>Ensuring</dd></dl></div>
     </li><li name="scala.Predef.Ensuring#ensuring" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="ensuring(cond:Boolean):A"></a>
-      <a id="ensuring(Boolean):Settings"></a>
+      <a id="ensuring(Boolean):Ticket"></a>
       <h4 class="signature">
       <span class="modifier_kind">
         <span class="modifier"></span>
         <span class="kind">def</span>
       </span>
       <span class="symbol">
-        <span class="implicit">ensuring</span><span class="params">(<span name="cond">cond: <a href="http://www.scala-lang.org/api/2.11.8/index.html#scala.Boolean" class="extype" target="_top">Boolean</a></span>)</span><span class="result">: <a href="" class="extype" name="pt.tecnico.dsi.kadmin.Settings">Settings</a></span>
+        <span class="implicit">ensuring</span><span class="params">(<span name="cond">cond: <a href="http://www.scala-lang.org/api/2.11.8/index.html#scala.Boolean" class="extype" target="_top">Boolean</a></span>)</span><span class="result">: <a href="" class="extype" name="pt.tecnico.dsi.kadmin.Ticket">Ticket</a></span>
       </span>
       </h4><span class="permalink">
-      <a href="../../../../index.html#pt.tecnico.dsi.kadmin.Settings@ensuring(cond:Boolean):A" title="Permalink" target="_top">
+      <a href="../../../../index.html#pt.tecnico.dsi.kadmin.Ticket@ensuring(cond:Boolean):A" title="Permalink" target="_top">
         <img src="../../../../lib/permalink.png" alt="Permalink" />
       </a>
     </span>
       <div class="fullcomment"><dl class="attributes block"> <dt class="implicit">Implicit information</dt><dd>
-            This member is added by an implicit conversion from <a href="" class="extype" name="pt.tecnico.dsi.kadmin.Settings">Settings</a> to
-            <span class="extype" name="scala.Predef.Ensuring">Ensuring</span>[<a href="" class="extype" name="pt.tecnico.dsi.kadmin.Settings">Settings</a>] performed by method Ensuring in scala.Predef.
+            This member is added by an implicit conversion from <a href="" class="extype" name="pt.tecnico.dsi.kadmin.Ticket">Ticket</a> to
+            <span class="extype" name="scala.Predef.Ensuring">Ensuring</span>[<a href="" class="extype" name="pt.tecnico.dsi.kadmin.Ticket">Ticket</a>] performed by method Ensuring in scala.Predef.
             
           </dd><dt>Definition Classes</dt><dd>Ensuring</dd></dl></div>
     </li><li name="scala.AnyRef#eq" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
@@ -376,28 +354,28 @@
         <span class="name">eq</span><span class="params">(<span name="arg0">arg0: <span class="extype" name="scala.AnyRef">AnyRef</span></span>)</span><span class="result">: <a href="http://www.scala-lang.org/api/2.11.8/index.html#scala.Boolean" class="extype" target="_top">Boolean</a></span>
       </span>
       </h4><span class="permalink">
-      <a href="../../../../index.html#pt.tecnico.dsi.kadmin.Settings@eq(x$1:AnyRef):Boolean" title="Permalink" target="_top">
+      <a href="../../../../index.html#pt.tecnico.dsi.kadmin.Ticket@eq(x$1:AnyRef):Boolean" title="Permalink" target="_top">
         <img src="../../../../lib/permalink.png" alt="Permalink" />
       </a>
     </span>
       <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>AnyRef</dd></dl></div>
-    </li><li name="scala.AnyRef#equals" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
-      <a id="equals(x$1:Any):Boolean"></a>
-      <a id="equals(Any):Boolean"></a>
+    </li><li name="pt.tecnico.dsi.kadmin.Ticket#expires" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
+      <a id="expires:org.joda.time.DateTime"></a>
+      <a id="expires:DateTime"></a>
       <h4 class="signature">
       <span class="modifier_kind">
         <span class="modifier"></span>
-        <span class="kind">def</span>
+        <span class="kind">val</span>
       </span>
       <span class="symbol">
-        <span class="name">equals</span><span class="params">(<span name="arg0">arg0: <span class="extype" name="scala.Any">Any</span></span>)</span><span class="result">: <a href="http://www.scala-lang.org/api/2.11.8/index.html#scala.Boolean" class="extype" target="_top">Boolean</a></span>
+        <span class="name">expires</span><span class="result">: <a href="https://oss.sonatype.org/service/local/repositories/releases/archive/joda-time/joda-time/2.9.3/joda-time-2.9.3-javadoc.jar/!/index.html#org.joda.time.DateTime" class="extype" target="_top">DateTime</a></span>
       </span>
       </h4><span class="permalink">
-      <a href="../../../../index.html#pt.tecnico.dsi.kadmin.Settings@equals(x$1:Any):Boolean" title="Permalink" target="_top">
+      <a href="../../../../index.html#pt.tecnico.dsi.kadmin.Ticket@expires:org.joda.time.DateTime" title="Permalink" target="_top">
         <img src="../../../../lib/permalink.png" alt="Permalink" />
       </a>
     </span>
-      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>AnyRef → Any</dd></dl></div>
+      
     </li><li name="scala.AnyRef#finalize" visbl="prt" data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="finalize():Unit"></a>
       <a id="finalize():Unit"></a>
@@ -410,7 +388,7 @@
         <span class="name">finalize</span><span class="params">()</span><span class="result">: <a href="http://www.scala-lang.org/api/2.11.8/index.html#scala.Unit" class="extype" target="_top">Unit</a></span>
       </span>
       </h4><span class="permalink">
-      <a href="../../../../index.html#pt.tecnico.dsi.kadmin.Settings@finalize():Unit" title="Permalink" target="_top">
+      <a href="../../../../index.html#pt.tecnico.dsi.kadmin.Ticket@finalize():Unit" title="Permalink" target="_top">
         <img src="../../../../lib/permalink.png" alt="Permalink" />
       </a>
     </span>
@@ -433,13 +411,13 @@
         <span class="implicit">formatted</span><span class="params">(<span name="fmtstr">fmtstr: <span class="extype" name="scala.Predef.String">String</span></span>)</span><span class="result">: <span class="extype" name="scala.Predef.String">String</span></span>
       </span>
       </h4><span class="permalink">
-      <a href="../../../../index.html#pt.tecnico.dsi.kadmin.Settings@formatted(fmtstr:String):String" title="Permalink" target="_top">
+      <a href="../../../../index.html#pt.tecnico.dsi.kadmin.Ticket@formatted(fmtstr:String):String" title="Permalink" target="_top">
         <img src="../../../../lib/permalink.png" alt="Permalink" />
       </a>
     </span>
       <div class="fullcomment"><dl class="attributes block"> <dt class="implicit">Implicit information</dt><dd>
-            This member is added by an implicit conversion from <a href="" class="extype" name="pt.tecnico.dsi.kadmin.Settings">Settings</a> to
-            <span class="extype" name="scala.Predef.StringFormat">StringFormat</span>[<a href="" class="extype" name="pt.tecnico.dsi.kadmin.Settings">Settings</a>] performed by method StringFormat in scala.Predef.
+            This member is added by an implicit conversion from <a href="" class="extype" name="pt.tecnico.dsi.kadmin.Ticket">Ticket</a> to
+            <span class="extype" name="scala.Predef.StringFormat">StringFormat</span>[<a href="" class="extype" name="pt.tecnico.dsi.kadmin.Ticket">Ticket</a>] performed by method StringFormat in scala.Predef.
             
           </dd><dt>Definition Classes</dt><dd>StringFormat</dd><dt>Annotations</dt><dd>
                 <span class="name">@inline</span><span class="args">()</span>
@@ -457,24 +435,7 @@
         <span class="name">getClass</span><span class="params">()</span><span class="result">: <span class="extype" name="java.lang.Class">Class</span>[_]</span>
       </span>
       </h4><span class="permalink">
-      <a href="../../../../index.html#pt.tecnico.dsi.kadmin.Settings@getClass():Class[_]" title="Permalink" target="_top">
-        <img src="../../../../lib/permalink.png" alt="Permalink" />
-      </a>
-    </span>
-      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>AnyRef → Any</dd></dl></div>
-    </li><li name="scala.AnyRef#hashCode" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
-      <a id="hashCode():Int"></a>
-      <a id="hashCode():Int"></a>
-      <h4 class="signature">
-      <span class="modifier_kind">
-        <span class="modifier"></span>
-        <span class="kind">def</span>
-      </span>
-      <span class="symbol">
-        <span class="name">hashCode</span><span class="params">()</span><span class="result">: <a href="http://www.scala-lang.org/api/2.11.8/index.html#scala.Int" class="extype" target="_top">Int</a></span>
-      </span>
-      </h4><span class="permalink">
-      <a href="../../../../index.html#pt.tecnico.dsi.kadmin.Settings@hashCode():Int" title="Permalink" target="_top">
+      <a href="../../../../index.html#pt.tecnico.dsi.kadmin.Ticket@getClass():Class[_]" title="Permalink" target="_top">
         <img src="../../../../lib/permalink.png" alt="Permalink" />
       </a>
     </span>
@@ -491,62 +452,11 @@
         <span class="name">isInstanceOf</span><span class="tparams">[<span name="T0">T0</span>]</span><span class="result">: <a href="http://www.scala-lang.org/api/2.11.8/index.html#scala.Boolean" class="extype" target="_top">Boolean</a></span>
       </span>
       </h4><span class="permalink">
-      <a href="../../../../index.html#pt.tecnico.dsi.kadmin.Settings@isInstanceOf[T0]:Boolean" title="Permalink" target="_top">
+      <a href="../../../../index.html#pt.tecnico.dsi.kadmin.Ticket@isInstanceOf[T0]:Boolean" title="Permalink" target="_top">
         <img src="../../../../lib/permalink.png" alt="Permalink" />
       </a>
     </span>
       <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>Any</dd></dl></div>
-    </li><li name="pt.tecnico.dsi.kadmin.Settings#kadminConfig" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
-      <a id="kadminConfig:com.typesafe.config.Config"></a>
-      <a id="kadminConfig:Config"></a>
-      <h4 class="signature">
-      <span class="modifier_kind">
-        <span class="modifier"></span>
-        <span class="kind">val</span>
-      </span>
-      <span class="symbol">
-        <span class="name">kadminConfig</span><span class="result">: <a href="https://oss.sonatype.org/service/local/repositories/releases/archive/com/typesafe/config/1.3.0/config-1.3.0-javadoc.jar/!/index.html#com.typesafe.config.Config" class="extype" target="_top">Config</a></span>
-      </span>
-      </h4><span class="permalink">
-      <a href="../../../../index.html#pt.tecnico.dsi.kadmin.Settings@kadminConfig:com.typesafe.config.Config" title="Permalink" target="_top">
-        <img src="../../../../lib/permalink.png" alt="Permalink" />
-      </a>
-    </span>
-      
-    </li><li name="pt.tecnico.dsi.kadmin.Settings#kadminPrompt" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
-      <a id="kadminPrompt:scala.util.matching.Regex"></a>
-      <a id="kadminPrompt:Regex"></a>
-      <h4 class="signature">
-      <span class="modifier_kind">
-        <span class="modifier"></span>
-        <span class="kind">val</span>
-      </span>
-      <span class="symbol">
-        <span class="name">kadminPrompt</span><span class="result">: <span class="extype" name="scala.util.matching.Regex">Regex</span></span>
-      </span>
-      </h4><span class="permalink">
-      <a href="../../../../index.html#pt.tecnico.dsi.kadmin.Settings@kadminPrompt:scala.util.matching.Regex" title="Permalink" target="_top">
-        <img src="../../../../lib/permalink.png" alt="Permalink" />
-      </a>
-    </span>
-      
-    </li><li name="pt.tecnico.dsi.kadmin.Settings#keytabsLocation" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
-      <a id="keytabsLocation:String"></a>
-      <a id="keytabsLocation:String"></a>
-      <h4 class="signature">
-      <span class="modifier_kind">
-        <span class="modifier"></span>
-        <span class="kind">val</span>
-      </span>
-      <span class="symbol">
-        <span class="name">keytabsLocation</span><span class="result">: <span class="extype" name="java.lang.String">String</span></span>
-      </span>
-      </h4><span class="permalink">
-      <a href="../../../../index.html#pt.tecnico.dsi.kadmin.Settings@keytabsLocation:String" title="Permalink" target="_top">
-        <img src="../../../../lib/permalink.png" alt="Permalink" />
-      </a>
-    </span>
-      
     </li><li name="scala.AnyRef#ne" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="ne(x$1:AnyRef):Boolean"></a>
       <a id="ne(AnyRef):Boolean"></a>
@@ -559,7 +469,7 @@
         <span class="name">ne</span><span class="params">(<span name="arg0">arg0: <span class="extype" name="scala.AnyRef">AnyRef</span></span>)</span><span class="result">: <a href="http://www.scala-lang.org/api/2.11.8/index.html#scala.Boolean" class="extype" target="_top">Boolean</a></span>
       </span>
       </h4><span class="permalink">
-      <a href="../../../../index.html#pt.tecnico.dsi.kadmin.Settings@ne(x$1:AnyRef):Boolean" title="Permalink" target="_top">
+      <a href="../../../../index.html#pt.tecnico.dsi.kadmin.Ticket@ne(x$1:AnyRef):Boolean" title="Permalink" target="_top">
         <img src="../../../../lib/permalink.png" alt="Permalink" />
       </a>
     </span>
@@ -576,7 +486,7 @@
         <span class="name">notify</span><span class="params">()</span><span class="result">: <a href="http://www.scala-lang.org/api/2.11.8/index.html#scala.Unit" class="extype" target="_top">Unit</a></span>
       </span>
       </h4><span class="permalink">
-      <a href="../../../../index.html#pt.tecnico.dsi.kadmin.Settings@notify():Unit" title="Permalink" target="_top">
+      <a href="../../../../index.html#pt.tecnico.dsi.kadmin.Ticket@notify():Unit" title="Permalink" target="_top">
         <img src="../../../../lib/permalink.png" alt="Permalink" />
       </a>
     </span>
@@ -593,75 +503,41 @@
         <span class="name">notifyAll</span><span class="params">()</span><span class="result">: <a href="http://www.scala-lang.org/api/2.11.8/index.html#scala.Unit" class="extype" target="_top">Unit</a></span>
       </span>
       </h4><span class="permalink">
-      <a href="../../../../index.html#pt.tecnico.dsi.kadmin.Settings@notifyAll():Unit" title="Permalink" target="_top">
+      <a href="../../../../index.html#pt.tecnico.dsi.kadmin.Ticket@notifyAll():Unit" title="Permalink" target="_top">
         <img src="../../../../lib/permalink.png" alt="Permalink" />
       </a>
     </span>
       <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>AnyRef</dd></dl></div>
-    </li><li name="pt.tecnico.dsi.kadmin.Settings#password" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
-      <a id="password:String"></a>
-      <a id="password:String"></a>
+    </li><li name="pt.tecnico.dsi.kadmin.Ticket#renewUtil" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
+      <a id="renewUtil:Option[org.joda.time.DateTime]"></a>
+      <a id="renewUtil:Option[DateTime]"></a>
       <h4 class="signature">
       <span class="modifier_kind">
         <span class="modifier"></span>
         <span class="kind">val</span>
       </span>
       <span class="symbol">
-        <span class="name">password</span><span class="result">: <span class="extype" name="java.lang.String">String</span></span>
+        <span class="name">renewUtil</span><span class="result">: <a href="http://www.scala-lang.org/api/2.11.8/index.html#scala.Option" class="extype" target="_top">Option</a>[<a href="https://oss.sonatype.org/service/local/repositories/releases/archive/joda-time/joda-time/2.9.3/joda-time-2.9.3-javadoc.jar/!/index.html#org.joda.time.DateTime" class="extype" target="_top">DateTime</a>]</span>
       </span>
       </h4><span class="permalink">
-      <a href="../../../../index.html#pt.tecnico.dsi.kadmin.Settings@password:String" title="Permalink" target="_top">
+      <a href="../../../../index.html#pt.tecnico.dsi.kadmin.Ticket@renewUtil:Option[org.joda.time.DateTime]" title="Permalink" target="_top">
         <img src="../../../../lib/permalink.png" alt="Permalink" />
       </a>
     </span>
       
-    </li><li name="pt.tecnico.dsi.kadmin.Settings#passwordAuthentication" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
-      <a id="passwordAuthentication:Boolean"></a>
-      <a id="passwordAuthentication:Boolean"></a>
+    </li><li name="pt.tecnico.dsi.kadmin.Ticket#servicePrincipal" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
+      <a id="servicePrincipal:String"></a>
+      <a id="servicePrincipal:String"></a>
       <h4 class="signature">
       <span class="modifier_kind">
         <span class="modifier"></span>
         <span class="kind">val</span>
       </span>
       <span class="symbol">
-        <span class="name">passwordAuthentication</span><span class="result">: <a href="http://www.scala-lang.org/api/2.11.8/index.html#scala.Boolean" class="extype" target="_top">Boolean</a></span>
+        <span class="name">servicePrincipal</span><span class="result">: <span class="extype" name="scala.Predef.String">String</span></span>
       </span>
       </h4><span class="permalink">
-      <a href="../../../../index.html#pt.tecnico.dsi.kadmin.Settings@passwordAuthentication:Boolean" title="Permalink" target="_top">
-        <img src="../../../../lib/permalink.png" alt="Permalink" />
-      </a>
-    </span>
-      
-    </li><li name="pt.tecnico.dsi.kadmin.Settings#principal" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
-      <a id="principal:String"></a>
-      <a id="principal:String"></a>
-      <h4 class="signature">
-      <span class="modifier_kind">
-        <span class="modifier"></span>
-        <span class="kind">val</span>
-      </span>
-      <span class="symbol">
-        <span class="name">principal</span><span class="result">: <span class="extype" name="java.lang.String">String</span></span>
-      </span>
-      </h4><span class="permalink">
-      <a href="../../../../index.html#pt.tecnico.dsi.kadmin.Settings@principal:String" title="Permalink" target="_top">
-        <img src="../../../../lib/permalink.png" alt="Permalink" />
-      </a>
-    </span>
-      
-    </li><li name="pt.tecnico.dsi.kadmin.Settings#realm" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
-      <a id="realm:String"></a>
-      <a id="realm:String"></a>
-      <h4 class="signature">
-      <span class="modifier_kind">
-        <span class="modifier"></span>
-        <span class="kind">val</span>
-      </span>
-      <span class="symbol">
-        <span class="name">realm</span><span class="result">: <span class="extype" name="java.lang.String">String</span></span>
-      </span>
-      </h4><span class="permalink">
-      <a href="../../../../index.html#pt.tecnico.dsi.kadmin.Settings@realm:String" title="Permalink" target="_top">
+      <a href="../../../../index.html#pt.tecnico.dsi.kadmin.Ticket@servicePrincipal:String" title="Permalink" target="_top">
         <img src="../../../../lib/permalink.png" alt="Permalink" />
       </a>
     </span>
@@ -678,28 +554,28 @@
         <span class="name">synchronized</span><span class="tparams">[<span name="T0">T0</span>]</span><span class="params">(<span name="arg0">arg0: ⇒ <span class="extype" name="java.lang.AnyRef.synchronized.T0">T0</span></span>)</span><span class="result">: <span class="extype" name="java.lang.AnyRef.synchronized.T0">T0</span></span>
       </span>
       </h4><span class="permalink">
-      <a href="../../../../index.html#pt.tecnico.dsi.kadmin.Settings@synchronized[T0](x$1:=&gt;T0):T0" title="Permalink" target="_top">
+      <a href="../../../../index.html#pt.tecnico.dsi.kadmin.Ticket@synchronized[T0](x$1:=&gt;T0):T0" title="Permalink" target="_top">
         <img src="../../../../lib/permalink.png" alt="Permalink" />
       </a>
     </span>
       <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>AnyRef</dd></dl></div>
-    </li><li name="pt.tecnico.dsi.kadmin.Settings#toString" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
-      <a id="toString():String"></a>
-      <a id="toString():String"></a>
+    </li><li name="pt.tecnico.dsi.kadmin.Ticket#validStarting" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
+      <a id="validStarting:org.joda.time.DateTime"></a>
+      <a id="validStarting:DateTime"></a>
       <h4 class="signature">
       <span class="modifier_kind">
         <span class="modifier"></span>
-        <span class="kind">def</span>
+        <span class="kind">val</span>
       </span>
       <span class="symbol">
-        <span class="name">toString</span><span class="params">()</span><span class="result">: <span class="extype" name="scala.Predef.String">String</span></span>
+        <span class="name">validStarting</span><span class="result">: <a href="https://oss.sonatype.org/service/local/repositories/releases/archive/joda-time/joda-time/2.9.3/joda-time-2.9.3-javadoc.jar/!/index.html#org.joda.time.DateTime" class="extype" target="_top">DateTime</a></span>
       </span>
       </h4><span class="permalink">
-      <a href="../../../../index.html#pt.tecnico.dsi.kadmin.Settings@toString():String" title="Permalink" target="_top">
+      <a href="../../../../index.html#pt.tecnico.dsi.kadmin.Ticket@validStarting:org.joda.time.DateTime" title="Permalink" target="_top">
         <img src="../../../../lib/permalink.png" alt="Permalink" />
       </a>
     </span>
-      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="" class="extype" name="pt.tecnico.dsi.kadmin.Settings">Settings</a> → AnyRef → Any</dd></dl></div>
+      
     </li><li name="scala.AnyRef#wait" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="wait():Unit"></a>
       <a id="wait():Unit"></a>
@@ -712,7 +588,7 @@
         <span class="name">wait</span><span class="params">()</span><span class="result">: <a href="http://www.scala-lang.org/api/2.11.8/index.html#scala.Unit" class="extype" target="_top">Unit</a></span>
       </span>
       </h4><span class="permalink">
-      <a href="../../../../index.html#pt.tecnico.dsi.kadmin.Settings@wait():Unit" title="Permalink" target="_top">
+      <a href="../../../../index.html#pt.tecnico.dsi.kadmin.Ticket@wait():Unit" title="Permalink" target="_top">
         <img src="../../../../lib/permalink.png" alt="Permalink" />
       </a>
     </span>
@@ -735,7 +611,7 @@
         <span class="name">wait</span><span class="params">(<span name="arg0">arg0: <a href="http://www.scala-lang.org/api/2.11.8/index.html#scala.Long" class="extype" target="_top">Long</a></span>, <span name="arg1">arg1: <a href="http://www.scala-lang.org/api/2.11.8/index.html#scala.Int" class="extype" target="_top">Int</a></span>)</span><span class="result">: <a href="http://www.scala-lang.org/api/2.11.8/index.html#scala.Unit" class="extype" target="_top">Unit</a></span>
       </span>
       </h4><span class="permalink">
-      <a href="../../../../index.html#pt.tecnico.dsi.kadmin.Settings@wait(x$1:Long,x$2:Int):Unit" title="Permalink" target="_top">
+      <a href="../../../../index.html#pt.tecnico.dsi.kadmin.Ticket@wait(x$1:Long,x$2:Int):Unit" title="Permalink" target="_top">
         <img src="../../../../lib/permalink.png" alt="Permalink" />
       </a>
     </span>
@@ -758,7 +634,7 @@
         <span class="name">wait</span><span class="params">(<span name="arg0">arg0: <a href="http://www.scala-lang.org/api/2.11.8/index.html#scala.Long" class="extype" target="_top">Long</a></span>)</span><span class="result">: <a href="http://www.scala-lang.org/api/2.11.8/index.html#scala.Unit" class="extype" target="_top">Unit</a></span>
       </span>
       </h4><span class="permalink">
-      <a href="../../../../index.html#pt.tecnico.dsi.kadmin.Settings@wait(x$1:Long):Unit" title="Permalink" target="_top">
+      <a href="../../../../index.html#pt.tecnico.dsi.kadmin.Ticket@wait(x$1:Long):Unit" title="Permalink" target="_top">
         <img src="../../../../lib/permalink.png" alt="Permalink" />
       </a>
     </span>
@@ -771,23 +647,23 @@
         </dd></dl></div>
     </li><li name="scala.Predef.ArrowAssoc#→" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="→[B](y:B):(A,B)"></a>
-      <a id="→[B](B):(Settings,B)"></a>
+      <a id="→[B](B):(Ticket,B)"></a>
       <h4 class="signature">
       <span class="modifier_kind">
         <span class="modifier"></span>
         <span class="kind">def</span>
       </span>
       <span class="symbol">
-        <span title="gt4s: $u2192" class="implicit">→</span><span class="tparams">[<span name="B">B</span>]</span><span class="params">(<span name="y">y: <span class="extype" name="scala.Predef.ArrowAssoc.→.B">B</span></span>)</span><span class="result">: (<a href="" class="extype" name="pt.tecnico.dsi.kadmin.Settings">Settings</a>, <span class="extype" name="scala.Predef.ArrowAssoc.→.B">B</span>)</span>
+        <span title="gt4s: $u2192" class="implicit">→</span><span class="tparams">[<span name="B">B</span>]</span><span class="params">(<span name="y">y: <span class="extype" name="scala.Predef.ArrowAssoc.→.B">B</span></span>)</span><span class="result">: (<a href="" class="extype" name="pt.tecnico.dsi.kadmin.Ticket">Ticket</a>, <span class="extype" name="scala.Predef.ArrowAssoc.→.B">B</span>)</span>
       </span>
       </h4><span class="permalink">
-      <a href="../../../../index.html#pt.tecnico.dsi.kadmin.Settings@→[B](y:B):(A,B)" title="Permalink" target="_top">
+      <a href="../../../../index.html#pt.tecnico.dsi.kadmin.Ticket@→[B](y:B):(A,B)" title="Permalink" target="_top">
         <img src="../../../../lib/permalink.png" alt="Permalink" />
       </a>
     </span>
       <div class="fullcomment"><dl class="attributes block"> <dt class="implicit">Implicit information</dt><dd>
-            This member is added by an implicit conversion from <a href="" class="extype" name="pt.tecnico.dsi.kadmin.Settings">Settings</a> to
-            <span class="extype" name="scala.Predef.ArrowAssoc">ArrowAssoc</span>[<a href="" class="extype" name="pt.tecnico.dsi.kadmin.Settings">Settings</a>] performed by method ArrowAssoc in scala.Predef.
+            This member is added by an implicit conversion from <a href="" class="extype" name="pt.tecnico.dsi.kadmin.Ticket">Ticket</a> to
+            <span class="extype" name="scala.Predef.ArrowAssoc">ArrowAssoc</span>[<a href="" class="extype" name="pt.tecnico.dsi.kadmin.Ticket">Ticket</a>] performed by method ArrowAssoc in scala.Predef.
             
           </dd><dt>Definition Classes</dt><dd>ArrowAssoc</dd></dl></div>
     </li></ol>
@@ -799,26 +675,34 @@
         </div>
 
         <div id="inheritedMembers">
-        <div class="parent" name="scala.AnyRef">
+        <div class="parent" name="scala.Serializable">
+              <h3>Inherited from <a href="http://www.scala-lang.org/api/2.11.8/index.html#scala.Serializable" class="extype" target="_top">Serializable</a></h3>
+            </div><div class="parent" name="java.io.Serializable">
+              <h3>Inherited from <span class="extype" name="java.io.Serializable">Serializable</span></h3>
+            </div><div class="parent" name="scala.Product">
+              <h3>Inherited from <a href="http://www.scala-lang.org/api/2.11.8/index.html#scala.Product" class="extype" target="_top">Product</a></h3>
+            </div><div class="parent" name="scala.Equals">
+              <h3>Inherited from <a href="http://www.scala-lang.org/api/2.11.8/index.html#scala.Equals" class="extype" target="_top">Equals</a></h3>
+            </div><div class="parent" name="scala.AnyRef">
               <h3>Inherited from <span class="extype" name="scala.AnyRef">AnyRef</span></h3>
             </div><div class="parent" name="scala.Any">
               <h3>Inherited from <span class="extype" name="scala.Any">Any</span></h3>
             </div>
         <div class="conversion" name="scala.Predef.any2stringadd">
               <h3>Inherited by implicit conversion any2stringadd from
-                <a href="" class="extype" name="pt.tecnico.dsi.kadmin.Settings">Settings</a> to <span class="extype" name="scala.Predef.any2stringadd">any2stringadd</span>[<a href="" class="extype" name="pt.tecnico.dsi.kadmin.Settings">Settings</a>]
+                <a href="" class="extype" name="pt.tecnico.dsi.kadmin.Ticket">Ticket</a> to <span class="extype" name="scala.Predef.any2stringadd">any2stringadd</span>[<a href="" class="extype" name="pt.tecnico.dsi.kadmin.Ticket">Ticket</a>]
               </h3>
             </div><div class="conversion" name="scala.Predef.StringFormat">
               <h3>Inherited by implicit conversion StringFormat from
-                <a href="" class="extype" name="pt.tecnico.dsi.kadmin.Settings">Settings</a> to <span class="extype" name="scala.Predef.StringFormat">StringFormat</span>[<a href="" class="extype" name="pt.tecnico.dsi.kadmin.Settings">Settings</a>]
+                <a href="" class="extype" name="pt.tecnico.dsi.kadmin.Ticket">Ticket</a> to <span class="extype" name="scala.Predef.StringFormat">StringFormat</span>[<a href="" class="extype" name="pt.tecnico.dsi.kadmin.Ticket">Ticket</a>]
               </h3>
             </div><div class="conversion" name="scala.Predef.Ensuring">
               <h3>Inherited by implicit conversion Ensuring from
-                <a href="" class="extype" name="pt.tecnico.dsi.kadmin.Settings">Settings</a> to <span class="extype" name="scala.Predef.Ensuring">Ensuring</span>[<a href="" class="extype" name="pt.tecnico.dsi.kadmin.Settings">Settings</a>]
+                <a href="" class="extype" name="pt.tecnico.dsi.kadmin.Ticket">Ticket</a> to <span class="extype" name="scala.Predef.Ensuring">Ensuring</span>[<a href="" class="extype" name="pt.tecnico.dsi.kadmin.Ticket">Ticket</a>]
               </h3>
             </div><div class="conversion" name="scala.Predef.ArrowAssoc">
               <h3>Inherited by implicit conversion ArrowAssoc from
-                <a href="" class="extype" name="pt.tecnico.dsi.kadmin.Settings">Settings</a> to <span class="extype" name="scala.Predef.ArrowAssoc">ArrowAssoc</span>[<a href="" class="extype" name="pt.tecnico.dsi.kadmin.Settings">Settings</a>]
+                <a href="" class="extype" name="pt.tecnico.dsi.kadmin.Ticket">Ticket</a> to <span class="extype" name="scala.Predef.ArrowAssoc">ArrowAssoc</span>[<a href="" class="extype" name="pt.tecnico.dsi.kadmin.Ticket">Ticket</a>]
               </h3>
             </div>
         </div>

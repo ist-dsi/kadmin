@@ -22,7 +22,7 @@ To simplify this process we use [scala-expect](https://github.com/Lasering/scala
 ## Install
 Add the following dependency to your `build.sbt`:
 ```sbt
-libraryDependencies += "pt.tecnico.dsi" %% "kadmin" % "4.3.0"
+libraryDependencies += "pt.tecnico.dsi" %% "kadmin" % "4.4.0"
 ```
 We use [semantic versioning](http://semver.org).
 
@@ -40,21 +40,17 @@ We use [semantic versioning](http://semver.org).
  - [Deleting a policy](https://ist-dsi.github.io/kadmin/latest/api/index.html#pt.tecnico.dsi.kadmin.Kadmin@deletePolicy(policy:String):work.martins.simon.expect.fluent.Expect[Either[pt.tecnico.dsi.kadmin.ErrorCase,Boolean]])
  - [Getting a policy](https://ist-dsi.github.io/kadmin/latest/api/index.html#pt.tecnico.dsi.kadmin.Kadmin@getPolicy(policy:String):work.martins.simon.expect.fluent.Expect[Either[pt.tecnico.dsi.kadmin.ErrorCase,pt.tecnico.dsi.kadmin.Policy]])
 
-All of these commands can be made with authentication, i.e. using the **kadmin** command or without authentication
-using the **kadmin.local** command. Whether or not to perform authentication can be defined in the configuration.
-
 Every command is idempotent except when changing either a password, a salt or a key.
 
 Besides these kadmin commands the following functions are also available:
 
  - [`getFullPrincipalName`](https://ist-dsi.github.io/kadmin/latest/api/index.html#pt.tecnico.dsi.kadmin.Kadmin@getFullPrincipalName(principal:String):String) - returns the principal name with the realm, eg: kadmin/admin@EXAMPLE.COM.
- - [`obtainTicketGrantingTicket`](https://ist-dsi.github.io/kadmin/latest/api/index.html#pt.tecnico.dsi.kadmin.Kadmin@getFullPrincipalName(principal:String):String) - invokes `kinit` to obtain a ticket and returns the DateTime in which the ticket must be renewed.
- - [`withAuthentication`](https://ist-dsi.github.io/kadmin/latest/api/index.html#pt.tecnico.dsi.kadmin.Kadmin@withAuthentication[R](f:work.martins.simon.expect.fluent.Expect[Either[pt.tecnico.dsi.kadmin.ErrorCase,R]]=>Unit):work.martins.simon.expect.fluent.Expect[Either[pt.tecnico.dsi.kadmin.ErrorCase,R]]) - performs a kadmin command, but the details of handling the authentication
-   and unknown errors in the initialization (such as the KDC not being available) have already been dealt with.
- - [`withoutAuthentication`](https://ist-dsi.github.io/kadmin/latest/api/index.html#pt.tecnico.dsi.kadmin.Kadmin@withoutAuthentication[R](f:work.martins.simon.expect.fluent.Expect[Either[pt.tecnico.dsi.kadmin.ErrorCase,R]]=>Unit):work.martins.simon.expect.fluent.Expect[Either[pt.tecnico.dsi.kadmin.ErrorCase,R]]) - performs a kadmin command, but the details of handling unknown errors
-   in the initialization have already been dealt with.
- - [`doOperation`](https://ist-dsi.github.io/kadmin/latest/api/index.html#pt.tecnico.dsi.kadmin.Kadmin@doOperation[R](f:work.martins.simon.expect.fluent.Expect[Either[pt.tecnico.dsi.kadmin.ErrorCase,R]]=>Unit):work.martins.simon.expect.fluent.Expect[Either[pt.tecnico.dsi.kadmin.ErrorCase,R]]) - performs a kadmin command which will be performed with authentication or not
-   according to the configuration `perform-authentication`.
+ - [`doOperation`](https://ist-dsi.github.io/kadmin/latest/api/index.html#pt.tecnico.dsi.kadmin.Kadmin@doOperation[R](f:work.martins.simon.expect.fluent.Expect[Either[pt.tecnico.dsi.kadmin.ErrorCase,R]]=>Unit):work.martins.simon.expect.fluent.Expect[Either[pt.tecnico.dsi.kadmin.ErrorCase,R]]) - performs a kadmin command which will use password authentication or not
+    according to the configuration `password-authentication`.
+ - [`obtainTGT`](https://ist-dsi.github.io/kadmin/latest/api/index.html#pt.tecnico.dsi.kadmin.KadminUtils$@obtainTGT(options:String,principal:String,password:String):work.martins.simon.expect.fluent.Expect[Either[pt.tecnico.dsi.kadmin.ErrorCase,Unit]]) - invokes `kinit` to obtain a ticket for a given principal. Authentication is performed using a password.
+ - [`obtainTGTWithKeytab`](https://ist-dsi.github.io/kadmin/latest/api/index.html#pt.tecnico.dsi.kadmin.KadminUtils$@obtainTGTWithKeytab(options:String,keytabFile:java.io.File):work.martins.simon.expect.fluent.Expect[Either[pt.tecnico.dsi.kadmin.ErrorCase,Unit]]) - invokes `kinit` to obtain a ticket using a keytab.
+ - [`listTickets`](https://ist-dsi.github.io/kadmin/latest/api/index.html#pt.tecnico.dsi.kadmin.KadminUtils$@listTickets(options:String):work.martins.simon.expect.fluent.Expect[Either[pt.tecnico.dsi.kadmin.ErrorCase,(String,Seq[pt.tecnico.dsi.kadmin.Ticket])]]) - invokes `klist` to obtain the available tickets.
+ - [`destroyTickets`](https://ist-dsi.github.io/kadmin/latest/api/index.html#pt.tecnico.dsi.kadmin.KadminUtils$@destroyTickets(options:String):work.martins.simon.expect.fluent.Expect[Either[pt.tecnico.dsi.kadmin.ErrorCase,Unit]]) - invokes `kdestroy` to destroy the ticket cache.
 
 ## Configurations
 Kadmin uses [typesafe-config](https://github.com/typesafehub/config).

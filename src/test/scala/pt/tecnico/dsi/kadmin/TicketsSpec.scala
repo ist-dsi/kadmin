@@ -12,13 +12,12 @@ class TicketsSpec extends FlatSpec with TestUtils {
     kadmin {
       realm = "EXAMPLE.COM"
       password-authentication = false
-      principal = "$principal"
-      command = "kadmin -c /tmp/krb5cc_0 -p $$FULL_PRINCIPAL"
+      command = "kadmin -c /tmp/krb5cc_0"
     }"""))
 
   "obtainTicketGrantingTicket with password" should "succeed" in {
     //obtain a TGT. We pass the -S flag so we can later use kadmin with the obtained ticket
-    KadminUtils.obtainTGT("-S kadmin/admin", principal, password).rightValueShouldBeUnit()
+    KadminUtils.obtainTGT(s"-S $principal", principal, password).rightValueShouldBeUnit()
 
     //Try to access kadmin using the credencial cache created when obtaining the TGT
     kadmin.getPrincipal(principal).rightValue.name should startWith (principal)
@@ -26,12 +25,26 @@ class TicketsSpec extends FlatSpec with TestUtils {
 
   "obtainTicketGrantingTicket with keytab" should "succeed" in {
     //Create the keytab
+    val principalWithKeytab = "test/admin"
+    fullPermissionsKadmin.addPrincipal("-randkey", principalWithKeytab).rightValueShouldBeUnit()
+    fullPermissionsKadmin.createKeytab("", principalWithKeytab).rightValueShouldBeUnit()
+
+    val keytabFile = fullPermissionsKadmin.getKeytabFile(principalWithKeytab)
 
     //Obtain a TGT. We pass the -S flag so we can later use kadmin with the obtained ticket
-    KadminUtils.obtainTGT("-S kadmin/admin", principal, password).rightValueShouldBeUnit()
+    KadminUtils.obtainTGTWithKeytab(s"-S $principal", keytabFile, principalWithKeytab).rightValueShouldBeUnit()
+
+
+    val kadminWithKeytab = new Kadmin(ConfigFactory.parseString(s"""
+    kadmin {
+      realm = "EXAMPLE.COM"
+      password-authentication = false
+      principal = "$principalWithKeytab"
+      command = "kadmin -kt ${keytabFile.getAbsolutePath} -p $$FULL_PRINCIPAL"
+    }"""))
 
     //Then we try to access kadmin using the credencial cache created when obtaining the TGT
-    kadmin.getPrincipal(principal).rightValue.name should startWith (principal)
+    kadminWithKeytab.getPrincipal(principalWithKeytab).rightValue.name should startWith (principalWithKeytab)
   }
 
   "listTickets" should "succeed" in {
@@ -45,7 +58,7 @@ class TicketsSpec extends FlatSpec with TestUtils {
 
   "destroyTickets" should "succeed" in {
     //Ensure we have the ticket and it is working
-    KadminUtils.obtainTGT("-S kadmin/admin", principal, password).rightValueShouldBeUnit()
+    KadminUtils.obtainTGT(s"-S $principal", principal, password).rightValueShouldBeUnit()
     kadmin.getPrincipal(principal).rightValue.name should startWith (principal)
 
     KadminUtils.destroyTickets().rightValueShouldBeUnit()

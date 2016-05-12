@@ -389,24 +389,23 @@ class Kadmin(val settings: Settings = new Settings()) extends LazyLogging {
             "lastSuccessfulAuthenticationDateTime", "lastFailedAuthenticationDateTime", "failedPasswordAttempts",
             "keys", "masterKey", "attributes", "policy"))
       .returning { m: Match =>
-        val groups = for (n <- m.groupNames) yield (n, m.group(n))
-        val (datesString, others) = groups.toMap.partition(_._1.contains("DateTime"))
+        val groups = m.groupNames.map(name => (name, m.group(name))).toMap
+        val (datesString, others) = groups.partition { case (name, _) => name.contains("DateTime") }
         val datesStream = datesString.toStream.map { case (key, value) => (key, parseDateTime(value)) }
-        datesStream.find(_._2.isLeft) match {
-          case Some((_, Left(errorCase))) => Left(errorCase)
-          case Some(_) => Left(UnknownError(None))
-          case None =>
-            //We know that every value must be a Right
-            val dates = datesStream.collect { case (key, Right(date)) => (key, date) }.toMap
-            Right(new Principal(getFullPrincipalName(principal), dates("expirationDateTime"),
-              dates("lastPasswordChangeDateTime"), dates("passwordExpirationDateTime"),
-              parseDuration(others("maximumTicketLife")), parseDuration(others("maximumRenewableLife")),
-              dates("lastModifiedDateTime"), m.group("lastModifiedBy"),
-              dates("lastSuccessfulAuthenticationDateTime"), dates("lastFailedAuthenticationDateTime"), others("failedPasswordAttempts").toInt,
-              others("keys").split("\n").flatMap(Key.fromString).toSet, others("masterKey").toInt,
-              others("attributes").split(" ").filter(_.nonEmpty).toSet,
-              Option(others("policy")).map(_.trim).filter(_ != "[none]")
-            ))
+
+        datesStream.collectFirst {
+          case (_, Left(errorCase)) => Left(errorCase)
+        } getOrElse {
+          val dates = datesStream.collect { case (name, Right(date)) => (name, date) }.toMap
+          Right(new Principal(getFullPrincipalName(principal), dates("expirationDateTime"),
+            dates("lastPasswordChangeDateTime"), dates("passwordExpirationDateTime"),
+            parseDuration(others("maximumTicketLife")), parseDuration(others("maximumRenewableLife")),
+            dates("lastModifiedDateTime"), m.group("lastModifiedBy"),
+            dates("lastSuccessfulAuthenticationDateTime"), dates("lastFailedAuthenticationDateTime"), others("failedPasswordAttempts").toInt,
+            others("keys").split("\n").flatMap(Key.fromString).toSet, others("masterKey").toInt,
+            others("attributes").split(" ").filter(_.nonEmpty).toSet,
+            Option(others("policy")).map(_.trim).filter(_ != "[none]")
+          ))
         }
       }
   }
@@ -484,7 +483,7 @@ class Kadmin(val settings: Settings = new Settings()) extends LazyLogging {
   /**
     * @return The File for the `principal` keytab.
     */
-  protected def getKeytabFile(principal: String): File = {
+  def getKeytabFile(principal: String): File = {
     val principalWithoutRealm = if (principal.contains("@")) {
       principal.substring(0, principal.indexOf("@"))
     } else {
@@ -516,7 +515,7 @@ class Kadmin(val settings: Settings = new Settings()) extends LazyLogging {
         .sendln(s"ktadd -keytab $keytabPath $options $fullPrincipal")
       e.expect
         .when("Entry for principal (.*?) added to keytab".r)
-        .returning(Right(()))
+          .returning(Right(()))
         .addWhen(insufficientPermission)
         .addWhen(unknownError)
     }
@@ -530,21 +529,18 @@ class Kadmin(val settings: Settings = new Settings()) extends LazyLogging {
     * @param principal the principal to obtain the keytab.
     */
   def obtainKeytab(principal: String): Either[ErrorCase, Array[Byte]] = {
-    val f = getKeytabFile(principal)
-    if (f.canRead) {
-      Right(Files.readAllBytes(f.toPath))
-    } else {
-      if (f.exists() == false) {
+    getKeytabFile(principal) match {
+      case f if f.canRead =>
+        Right(Files.readAllBytes(f.toPath))
+      case f if !f.exists() =>
         logger.info(s"""Keytab file "${f.getAbsolutePath}" doesn't exist.""")
         Left(KeytabDoesNotExist)
-      } else if (f.canRead == false) {
+      case f if !f.canRead =>
         val currentUser = System.getProperty("user.name")
         logger.info(s"""User "$currentUser" has insufficient permissions to read the keytab file "${f.getAbsolutePath}".""")
-        //Should we return an error (eg. inside an Either) if the file exists but we do not have permissions to read it?
         Left(KeytabIsNotReadable)
-      } else {
+      case _ =>
         Left(UnknownError())
-      }
     }
   }
   //endregion

@@ -43,15 +43,16 @@ object KadminUtils extends LazyLogging {
     * Obtains a ticket granting ticket using 'keytabFile'.
     *
     * @param options options to pass to the `kinit` command.
+    * @param keytabFile the keytab to use
+    * @param principal the principal for which to obtain the TGT. If empty a host ticket for the local host will be requested.
     * @return Either an ErrorCase or Unit if the operation was successful.
     */
-  def obtainTGTWithKeytab(options: String = "", keytabFile: File): Expect[Either[ErrorCase, Unit]] = {
+  def obtainTGTWithKeytab(options: String = "", keytabFile: File, principal: String = ""): Expect[Either[ErrorCase, Unit]] = {
     val defaultValue: Either[ErrorCase, Unit] = Left(UnknownError())
-    val e = new Expect(s"kinit -kt ${keytabFile.getAbsolutePath} $options", defaultValue)
+    val e = new Expect(s"kinit $options -kt ${keytabFile.getAbsolutePath} $principal", defaultValue)
     e.expect
       .when(s"""Client '[^']+' not found in Kerberos database""".r)
         .returning(Left(NoSuchPrincipal))
-    e.expect
       .when(EndOfFile)
         .returning(Right(()))
     e
@@ -68,7 +69,16 @@ object KadminUtils extends LazyLogging {
     val datetimeRegex = """\d\d/\d\d/\d\d \d\d:\d\d:\d\d"""
     val ticketRegex = s"""(?s)($datetimeRegex)\\s+($datetimeRegex)\\s+([^\n]+)(\\s+renew until $datetimeRegex)?"""
       .stripMargin.r("validStarting", "expires", "servicePrincipal", "renewUtil")
-    val dateTimeFormat = DateTimeFormat.forPattern("dd/MM/yyyy HH:mm:ss")
+
+    def parseDateTime(input: String): DateTime = {
+      val dateFormat = DateTimeFormat.shortDate().withLocale(Locale.getDefault)
+      val timeFormat = DateTimeFormat.forPattern("HH:mm:ss")
+
+      val Array(dateString, timeString) = input.split(" ")
+      val date = dateFormat.parseLocalDate(dateString)
+      val time = timeFormat.parseLocalTime(timeString)
+      date.toDateTime(time)
+    }
 
     val e = new Expect(s"klist $options", defaultValue)
     e.expect(
@@ -81,10 +91,10 @@ object KadminUtils extends LazyLogging {
         val principal = m.group(1)
         val tickets = ticketRegex.findAllMatchIn(m.group(2)).map { m =>
           Ticket(
-            dateTimeFormat.parseDateTime(m.group("validStarting")),
-            dateTimeFormat.parseDateTime(m.group("expires")),
+            parseDateTime(m.group("validStarting")),
+            parseDateTime(m.group("expires")),
             m.group("servicePrincipal"),
-            Option(m.group("renewUtil")).map(dateTimeFormat.parseDateTime)
+            Option(m.group("renewUtil")).map(parseDateTime)
           )
         }.toSeq
 

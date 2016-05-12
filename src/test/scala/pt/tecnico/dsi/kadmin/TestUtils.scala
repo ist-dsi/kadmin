@@ -65,11 +65,11 @@ trait TestUtils extends ScalaFutures with Matchers with EitherValues with LazyLo
   implicit class RichExpect[T](expect: Expect[Either[ErrorCase, T]]) {
     def leftValue: ErrorCase = value.left.value
     def rightValue: T = value.right.value
-    def rightValueShouldBeUnit(): Unit = rightValue.shouldBe(())
+    def rightValueShouldBeUnit()(implicit ev: T =:= Unit): Unit = rightValue.shouldBe(())
 
     def leftValueShouldIdempotentlyBe(leftValue: ErrorCase): Unit = idempotent(expect)(_.left.value shouldBe leftValue)
     def rightValueShouldIdempotentlyBe(rightValue: T): Unit = idempotent(expect)(_.right.value shouldBe rightValue)
-    def rightValueShouldIdempotentlyBeUnit(): Unit = idempotent(expect)(_.right.value.shouldBe(()))
+    def rightValueShouldIdempotentlyBeUnit()(implicit ev: T =:= Unit): Unit = idempotent(expect)(_.right.value.shouldBe(()))
 
     def idempotentRightValue(rightValue: T => Unit): Unit = idempotent(expect)(t => rightValue(t.right.value))
 

@@ -83,9 +83,6 @@ kadmin {
 }
 ```
 
-You will need to define at least the `realm` and the `authenticating-principal-password` in your `application.conf`.
-If you don't require authentication you can simply set `perform-authentication` to false and define the `realm`.
-
 Alternatively you can pass your Config object to the kadmin constructor, or subclass the
 [Settings](https://ist-dsi.github.io/kadmin/latest/api/#pt.tecnico.dsi.kadmin.Settings) class for a mixed approach.
 The scaladoc of the Settings class has examples explaining the different options.

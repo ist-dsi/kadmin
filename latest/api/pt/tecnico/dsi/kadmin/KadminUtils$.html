@@ -185,24 +185,40 @@
     </span>)</span>
               
         </dd></dl></div>
-    </li><li name="pt.tecnico.dsi.kadmin.KadminUtils#destroyTickets" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
-      <a id="destroyTickets(options:String):work.martins.simon.expect.fluent.Expect[Either[pt.tecnico.dsi.kadmin.ErrorCase,Unit]]"></a>
-      <a id="destroyTickets(String):Expect[Either[ErrorCase,Unit]]"></a>
+    </li><li name="pt.tecnico.dsi.kadmin.KadminUtils#defaultUnknownError" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
+      <a id="defaultUnknownError[R]:Either[pt.tecnico.dsi.kadmin.ErrorCase,R]"></a>
+      <a id="defaultUnknownError[R]:Either[ErrorCase,R]"></a>
       <h4 class="signature">
       <span class="modifier_kind">
         <span class="modifier"></span>
         <span class="kind">def</span>
       </span>
       <span class="symbol">
-        <span class="name">destroyTickets</span><span class="params">(<span name="options">options: <span class="extype" name="scala.Predef.String">String</span> = <span class="symbol">&quot;&quot;</span></span>)</span><span class="result">: <a href="https://oss.sonatype.org/service/local/repositories/releases/archive/work/martins/simon/scala-expect_2.11/1.11.1/scala-expect_2.11-1.11.1-javadoc.jar/!/index.html#work.martins.simon.expect.fluent.Expect" class="extype" target="_top">Expect</a>[<span class="extype" name="scala.Either">Either</span>[<a href="ErrorCase.html" class="extype" name="pt.tecnico.dsi.kadmin.ErrorCase">ErrorCase</a>, <a href="http://www.scala-lang.org/api/2.11.8/index.html#scala.Unit" class="extype" target="_top">Unit</a>]]</span>
+        <span class="name">defaultUnknownError</span><span class="tparams">[<span name="R">R</span>]</span><span class="result">: <span class="extype" name="scala.Either">Either</span>[<a href="ErrorCase.html" class="extype" name="pt.tecnico.dsi.kadmin.ErrorCase">ErrorCase</a>, <span class="extype" name="pt.tecnico.dsi.kadmin.KadminUtils.defaultUnknownError.R">R</span>]</span>
       </span>
       </h4><span class="permalink">
-      <a href="../../../../index.html#pt.tecnico.dsi.kadmin.KadminUtils$@destroyTickets(options:String):work.martins.simon.expect.fluent.Expect[Either[pt.tecnico.dsi.kadmin.ErrorCase,Unit]]" title="Permalink" target="_top">
+      <a href="../../../../index.html#pt.tecnico.dsi.kadmin.KadminUtils$@defaultUnknownError[R]:Either[pt.tecnico.dsi.kadmin.ErrorCase,R]" title="Permalink" target="_top">
         <img src="../../../../lib/permalink.png" alt="Permalink" />
       </a>
     </span>
-      <p class="shortcomment cmt">Destroys the default credencials cache.</p><div class="fullcomment"><div class="comment cmt"><p>Destroys the default credencials cache.
-</p></div><dl class="paramcmts block"><dt class="param">options</dt><dd class="cmt"><p>options to pass to the <code>kdestroy</code> command.</p></dd></dl></div>
+      
+    </li><li name="pt.tecnico.dsi.kadmin.KadminUtils#destroyTickets" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
+      <a id="destroyTickets():work.martins.simon.expect.fluent.Expect[Unit]"></a>
+      <a id="destroyTickets():Expect[Unit]"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">destroyTickets</span><span class="params">()</span><span class="result">: <a href="https://oss.sonatype.org/service/local/repositories/releases/archive/work/martins/simon/scala-expect_2.11/1.11.1/scala-expect_2.11-1.11.1-javadoc.jar/!/index.html#work.martins.simon.expect.fluent.Expect" class="extype" target="_top">Expect</a>[<a href="http://www.scala-lang.org/api/2.11.8/index.html#scala.Unit" class="extype" target="_top">Unit</a>]</span>
+      </span>
+      </h4><span class="permalink">
+      <a href="../../../../index.html#pt.tecnico.dsi.kadmin.KadminUtils$@destroyTickets():work.martins.simon.expect.fluent.Expect[Unit]" title="Permalink" target="_top">
+        <img src="../../../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
+      <p class="shortcomment cmt">Destroys the user's tickets.</p>
     </li><li name="scala.AnyRef#eq" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="eq(x$1:AnyRef):Boolean"></a>
       <a id="eq(AnyRef):Boolean"></a>
@@ -329,24 +345,23 @@
     </span>
       <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>Any</dd></dl></div>
     </li><li name="pt.tecnico.dsi.kadmin.KadminUtils#listTickets" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
-      <a id="listTickets(options:String):work.martins.simon.expect.fluent.Expect[Either[pt.tecnico.dsi.kadmin.ErrorCase,(String,Seq[pt.tecnico.dsi.kadmin.Ticket])]]"></a>
-      <a id="listTickets(String):Expect[Either[ErrorCase,(String,Seq[Ticket])]]"></a>
+      <a id="listTickets(options:String):work.martins.simon.expect.fluent.Expect[Seq[pt.tecnico.dsi.kadmin.Ticket]]"></a>
+      <a id="listTickets(String):Expect[Seq[Ticket]]"></a>
       <h4 class="signature">
       <span class="modifier_kind">
         <span class="modifier"></span>
         <span class="kind">def</span>
       </span>
       <span class="symbol">
-        <span class="name">listTickets</span><span class="params">(<span name="options">options: <span class="extype" name="scala.Predef.String">String</span> = <span class="symbol">&quot;&quot;</span></span>)</span><span class="result">: <a href="https://oss.sonatype.org/service/local/repositories/releases/archive/work/martins/simon/scala-expect_2.11/1.11.1/scala-expect_2.11-1.11.1-javadoc.jar/!/index.html#work.martins.simon.expect.fluent.Expect" class="extype" target="_top">Expect</a>[<span class="extype" name="scala.Either">Either</span>[<a href="ErrorCase.html" class="extype" name="pt.tecnico.dsi.kadmin.ErrorCase">ErrorCase</a>, (<span class="extype" name="scala.Predef.String">String</span>, <span class="extype" name="scala.Seq">Seq</span>[<a href="Ticket.html" class="extype" name="pt.tecnico.dsi.kadmin.Ticket">Ticket</a>])]]</span>
+        <span class="name">listTickets</span><span class="params">(<span name="options">options: <span class="extype" name="scala.Predef.String">String</span> = <span class="symbol">&quot;&quot;</span></span>)</span><span class="result">: <a href="https://oss.sonatype.org/service/local/repositories/releases/archive/work/martins/simon/scala-expect_2.11/1.11.1/scala-expect_2.11-1.11.1-javadoc.jar/!/index.html#work.martins.simon.expect.fluent.Expect" class="extype" target="_top">Expect</a>[<span class="extype" name="scala.Seq">Seq</span>[<a href="Ticket.html" class="extype" name="pt.tecnico.dsi.kadmin.Ticket">Ticket</a>]]</span>
       </span>
       </h4><span class="permalink">
-      <a href="../../../../index.html#pt.tecnico.dsi.kadmin.KadminUtils$@listTickets(options:String):work.martins.simon.expect.fluent.Expect[Either[pt.tecnico.dsi.kadmin.ErrorCase,(String,Seq[pt.tecnico.dsi.kadmin.Ticket])]]" title="Permalink" target="_top">
+      <a href="../../../../index.html#pt.tecnico.dsi.kadmin.KadminUtils$@listTickets(options:String):work.martins.simon.expect.fluent.Expect[Seq[pt.tecnico.dsi.kadmin.Ticket]]" title="Permalink" target="_top">
         <img src="../../../../lib/permalink.png" alt="Permalink" />
       </a>
     </span>
-      <p class="shortcomment cmt">Lists cached Kerberos tickets
-</p><div class="fullcomment"><div class="comment cmt"><p>Lists cached Kerberos tickets
-</p></div><dl class="paramcmts block"><dt class="param">options</dt><dd class="cmt"><p>options to pass to the <code>klist</code> command.</p></dd><dt>returns</dt><dd class="cmt"><p>The default principal and the list of all the cached tickets</p></dd></dl></div>
+      <p class="shortcomment cmt">Lists cached tickets.</p><div class="fullcomment"><div class="comment cmt"><p>Lists cached tickets.
+</p></div><dl class="paramcmts block"><dt class="param">options</dt><dd class="cmt"><p>options to pass to the <code>klist</code> command.</p></dd><dt>returns</dt><dd class="cmt"><p>an Expect that returns the list of all the cached tickets.</p></dd></dl></div>
     </li><li name="com.typesafe.scalalogging.LazyLogging#logger" visbl="prt" data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="logger:com.typesafe.scalalogging.Logger"></a>
       <a id="logger:Logger"></a>
@@ -416,41 +431,23 @@
     </span>
       <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>AnyRef</dd></dl></div>
     </li><li name="pt.tecnico.dsi.kadmin.KadminUtils#obtainTGT" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
-      <a id="obtainTGT(options:String,principal:String,password:String):work.martins.simon.expect.fluent.Expect[Either[pt.tecnico.dsi.kadmin.ErrorCase,Unit]]"></a>
-      <a id="obtainTGT(String,String,String):Expect[Either[ErrorCase,Unit]]"></a>
+      <a id="obtainTGT(options:String,principal:String,password:Option[String],keytab:Option[java.io.File]):work.martins.simon.expect.fluent.Expect[Either[pt.tecnico.dsi.kadmin.ErrorCase,Unit]]"></a>
+      <a id="obtainTGT(String,String,Option[String],Option[File]):Expect[Either[ErrorCase,Unit]]"></a>
       <h4 class="signature">
       <span class="modifier_kind">
         <span class="modifier"></span>
         <span class="kind">def</span>
       </span>
       <span class="symbol">
-        <span class="name">obtainTGT</span><span class="params">(<span name="options">options: <span class="extype" name="scala.Predef.String">String</span> = <span class="symbol">&quot;&quot;</span></span>, <span name="principal">principal: <span class="extype" name="scala.Predef.String">String</span></span>, <span name="password">password: <span class="extype" name="scala.Predef.String">String</span></span>)</span><span class="result">: <a href="https://oss.sonatype.org/service/local/repositories/releases/archive/work/martins/simon/scala-expect_2.11/1.11.1/scala-expect_2.11-1.11.1-javadoc.jar/!/index.html#work.martins.simon.expect.fluent.Expect" class="extype" target="_top">Expect</a>[<span class="extype" name="scala.Either">Either</span>[<a href="ErrorCase.html" class="extype" name="pt.tecnico.dsi.kadmin.ErrorCase">ErrorCase</a>, <a href="http://www.scala-lang.org/api/2.11.8/index.html#scala.Unit" class="extype" target="_top">Unit</a>]]</span>
+        <span class="name">obtainTGT</span><span class="params">(<span name="options">options: <span class="extype" name="scala.Predef.String">String</span> = <span class="symbol">&quot;&quot;</span></span>, <span name="principal">principal: <span class="extype" name="scala.Predef.String">String</span></span>, <span name="password">password: <a href="http://www.scala-lang.org/api/2.11.8/index.html#scala.Option" class="extype" target="_top">Option</a>[<span class="extype" name="scala.Predef.String">String</span>] = <span class="symbol">None</span></span>, <span name="keytab">keytab: <a href="http://www.scala-lang.org/api/2.11.8/index.html#scala.Option" class="extype" target="_top">Option</a>[<span class="extype" name="java.io.File">File</span>] = <span class="symbol">None</span></span>)</span><span class="result">: <a href="https://oss.sonatype.org/service/local/repositories/releases/archive/work/martins/simon/scala-expect_2.11/1.11.1/scala-expect_2.11-1.11.1-javadoc.jar/!/index.html#work.martins.simon.expect.fluent.Expect" class="extype" target="_top">Expect</a>[<span class="extype" name="scala.Either">Either</span>[<a href="ErrorCase.html" class="extype" name="pt.tecnico.dsi.kadmin.ErrorCase">ErrorCase</a>, <a href="http://www.scala-lang.org/api/2.11.8/index.html#scala.Unit" class="extype" target="_top">Unit</a>]]</span>
       </span>
       </h4><span class="permalink">
-      <a href="../../../../index.html#pt.tecnico.dsi.kadmin.KadminUtils$@obtainTGT(options:String,principal:String,password:String):work.martins.simon.expect.fluent.Expect[Either[pt.tecnico.dsi.kadmin.ErrorCase,Unit]]" title="Permalink" target="_top">
+      <a href="../../../../index.html#pt.tecnico.dsi.kadmin.KadminUtils$@obtainTGT(options:String,principal:String,password:Option[String],keytab:Option[java.io.File]):work.martins.simon.expect.fluent.Expect[Either[pt.tecnico.dsi.kadmin.ErrorCase,Unit]]" title="Permalink" target="_top">
         <img src="../../../../lib/permalink.png" alt="Permalink" />
       </a>
     </span>
-      <p class="shortcomment cmt">Obtains a ticket granting ticket for <code>principal</code> using <code>password</code>.</p><div class="fullcomment"><div class="comment cmt"><p>Obtains a ticket granting ticket for <code>principal</code> using <code>password</code>.
+      <p class="shortcomment cmt">Obtains a ticket granting ticket for <code>principal</code> either using <code>password</code> or <code>keytab</code>.</p><div class="fullcomment"><div class="comment cmt"><p>Obtains a ticket granting ticket for <code>principal</code> either using <code>password</code> or <code>keytab</code>.
 </p></div><dl class="paramcmts block"><dt class="param">options</dt><dd class="cmt"><p>options to pass to the <code>kinit</code> command.</p></dd><dt>returns</dt><dd class="cmt"><p>Either an ErrorCase or Unit if the operation was successful.</p></dd></dl></div>
-    </li><li name="pt.tecnico.dsi.kadmin.KadminUtils#obtainTGTWithKeytab" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
-      <a id="obtainTGTWithKeytab(options:String,keytabFile:java.io.File,principal:String):work.martins.simon.expect.fluent.Expect[Either[pt.tecnico.dsi.kadmin.ErrorCase,Unit]]"></a>
-      <a id="obtainTGTWithKeytab(String,File,String):Expect[Either[ErrorCase,Unit]]"></a>
-      <h4 class="signature">
-      <span class="modifier_kind">
-        <span class="modifier"></span>
-        <span class="kind">def</span>
-      </span>
-      <span class="symbol">
-        <span class="name">obtainTGTWithKeytab</span><span class="params">(<span name="options">options: <span class="extype" name="scala.Predef.String">String</span> = <span class="symbol">&quot;&quot;</span></span>, <span name="keytabFile">keytabFile: <span class="extype" name="java.io.File">File</span></span>, <span name="principal">principal: <span class="extype" name="scala.Predef.String">String</span> = <span class="symbol">&quot;&quot;</span></span>)</span><span class="result">: <a href="https://oss.sonatype.org/service/local/repositories/releases/archive/work/martins/simon/scala-expect_2.11/1.11.1/scala-expect_2.11-1.11.1-javadoc.jar/!/index.html#work.martins.simon.expect.fluent.Expect" class="extype" target="_top">Expect</a>[<span class="extype" name="scala.Either">Either</span>[<a href="ErrorCase.html" class="extype" name="pt.tecnico.dsi.kadmin.ErrorCase">ErrorCase</a>, <a href="http://www.scala-lang.org/api/2.11.8/index.html#scala.Unit" class="extype" target="_top">Unit</a>]]</span>
-      </span>
-      </h4><span class="permalink">
-      <a href="../../../../index.html#pt.tecnico.dsi.kadmin.KadminUtils$@obtainTGTWithKeytab(options:String,keytabFile:java.io.File,principal:String):work.martins.simon.expect.fluent.Expect[Either[pt.tecnico.dsi.kadmin.ErrorCase,Unit]]" title="Permalink" target="_top">
-        <img src="../../../../lib/permalink.png" alt="Permalink" />
-      </a>
-    </span>
-      <p class="shortcomment cmt">Obtains a ticket granting ticket using 'keytabFile'.</p><div class="fullcomment"><div class="comment cmt"><p>Obtains a ticket granting ticket using 'keytabFile'.
-</p></div><dl class="paramcmts block"><dt class="param">options</dt><dd class="cmt"><p>options to pass to the <code>kinit</code> command.</p></dd><dt class="param">keytabFile</dt><dd class="cmt"><p>the keytab to use</p></dd><dt class="param">principal</dt><dd class="cmt"><p>the principal for which to obtain the TGT. If empty a host ticket for the local host will be requested.</p></dd><dt>returns</dt><dd class="cmt"><p>Either an ErrorCase or Unit if the operation was successful.</p></dd></dl></div>
     </li><li name="pt.tecnico.dsi.kadmin.KadminUtils#parseDateTime" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="parseDateTime(dateTimeString:=&gt;String):Either[pt.tecnico.dsi.kadmin.ErrorCase,pt.tecnico.dsi.kadmin.ExpirationDateTime]"></a>
       <a id="parseDateTime(⇒String):Either[ErrorCase,ExpirationDateTime]"></a>

@@ -54,7 +54,7 @@ Besides these kadmin commands the following functions are also available:
 ## Configurations
 Kadmin uses [typesafe-config](https://github.com/typesafehub/config).
 
-The [reference.conf](src/main/resources/reference.conf) file was the following keys:
+The [reference.conf](src/main/resources/reference.conf) file has the following keys:
 ```scala
 kadmin {
   realm = "EXAMPLE.COM"
@@ -81,9 +81,6 @@ kadmin {
   prompt = "kadmin(.local)?: "
 }
 ```
-
-You will need to define at least the `realm` and the `authenticating-principal-password` in your `application.conf`.
-If you don't require authentication you can simply set `perform-authentication` to false and define the `realm`.
 
 Alternatively you can pass your Config object to the kadmin constructor, or subclass the
 [Settings](https://ist-dsi.github.io/kadmin/latest/api/#pt.tecnico.dsi.kadmin.Settings) class for a mixed approach.

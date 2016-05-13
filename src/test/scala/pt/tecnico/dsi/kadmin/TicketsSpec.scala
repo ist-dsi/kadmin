@@ -1,13 +1,24 @@
 package pt.tecnico.dsi.kadmin
 
 import com.typesafe.config.ConfigFactory
-import org.scalatest.FlatSpec
+import org.scalatest.{BeforeAndAfterEach, FlatSpec}
 
 /**
   * $assumptions
   */
-class TicketsSpec extends FlatSpec with TestUtils {
+class TicketsSpec extends FlatSpec with TestUtils with BeforeAndAfterEach {
   import fullPermissionsKadmin.settings.{principal, password, realm}
+
+  override protected def beforeEach(): Unit = {
+    super.beforeEach()
+    KadminUtils.destroyTickets().value
+  }
+
+  override protected def afterEach(): Unit = {
+    super.afterEach()
+    KadminUtils.destroyTickets().value
+  }
+
   val kadmin = new Kadmin(ConfigFactory.parseString(s"""
     kadmin {
       realm = "EXAMPLE.COM"
@@ -17,7 +28,7 @@ class TicketsSpec extends FlatSpec with TestUtils {
 
   "obtainTicketGrantingTicket with password" should "succeed" in {
     //obtain a TGT. We pass the -S flag so we can later use kadmin with the obtained ticket
-    KadminUtils.obtainTGT(s"-S $principal", principal, password).rightValueShouldBeUnit()
+    KadminUtils.obtainTGT(s"-S $principal", principal, password = Some(password)).rightValueShouldBeUnit()
 
     //Try to access kadmin using the credencial cache created when obtaining the TGT
     kadmin.getPrincipal(principal).rightValue.name should startWith (principal)
@@ -31,8 +42,8 @@ class TicketsSpec extends FlatSpec with TestUtils {
 
     val keytabFile = fullPermissionsKadmin.getKeytabFile(principalWithKeytab)
 
-    //Obtain a TGT. We pass the -S flag so we can later use kadmin with the obtained ticket
-    KadminUtils.obtainTGTWithKeytab(s"-S $principal", keytabFile, principalWithKeytab).rightValueShouldBeUnit()
+    //Obtain a TGT using the keytab. We pass the -S flag so we can later use kadmin with the obtained ticket.
+    KadminUtils.obtainTGT(s"-S $principal", principalWithKeytab, keytab = Some(keytabFile)).rightValueShouldBeUnit()
 
 
     val kadminWithKeytab = new Kadmin(ConfigFactory.parseString(s"""
@@ -43,25 +54,24 @@ class TicketsSpec extends FlatSpec with TestUtils {
       command = "kadmin -kt ${keytabFile.getAbsolutePath} -p $$FULL_PRINCIPAL"
     }"""))
 
-    //Then we try to access kadmin using the credencial cache created when obtaining the TGT
+    //Then we try to access kadmin using the keytab
     kadminWithKeytab.getPrincipal(principalWithKeytab).rightValue.name should startWith (principalWithKeytab)
   }
 
   "listTickets" should "succeed" in {
     //Obtain a TGT
-    KadminUtils.obtainTGT(principal = principal, password = password).rightValueShouldBeUnit()
+    KadminUtils.obtainTGT(principal = principal, password = Some(password)).rightValueShouldBeUnit()
 
-    val (p, tickets) = KadminUtils.listTickets().rightValue
-    p shouldBe s"$principal@$realm"
+    val tickets = KadminUtils.listTickets().value
     tickets.exists(_.servicePrincipal == s"krbtgt/$realm@$realm") shouldBe true
   }
 
   "destroyTickets" should "succeed" in {
     //Ensure we have the ticket and it is working
-    KadminUtils.obtainTGT(s"-S $principal", principal, password).rightValueShouldBeUnit()
+    KadminUtils.obtainTGT(s"-S $principal", principal, password = Some(password)).rightValueShouldBeUnit()
     kadmin.getPrincipal(principal).rightValue.name should startWith (principal)
 
-    KadminUtils.destroyTickets().rightValueShouldBeUnit()
+    KadminUtils.destroyTickets().value.shouldBe(())
     kadmin.getPrincipal(principal).leftValue shouldBe a [UnknownError]
   }
 }

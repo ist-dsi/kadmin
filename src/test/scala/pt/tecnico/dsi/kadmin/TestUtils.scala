@@ -10,6 +10,16 @@ import work.martins.simon.expect.fluent.Expect
 
 import scala.concurrent.ExecutionContext.Implicits.global
 
+trait LowPriorityImplicits extends ScalaFutures {
+  implicit class SimpleRichExpect[T](expect: Expect[T]) {
+    def value: T = expect.run().futureValue(PatienceConfig(
+      timeout = scaled(expect.settings.timeout),
+      interval = scaled(500.millis)
+    ))
+  }
+}
+
+
 /**
   * @define assumptions These tests make the following assumptions:
   *  - The realm EXAMPLE.COM exists.
@@ -24,7 +34,7 @@ import scala.concurrent.ExecutionContext.Implicits.global
   *  - Running the tests locally with docker-compose (look at the folder kerberos-docker).
   *  - Running the tests in the Travis CI (look at .travis.yml, which makes use of the kerberos-docker).
   */
-trait TestUtils extends ScalaFutures with Matchers with EitherValues with LazyLogging {
+trait TestUtils extends ScalaFutures with Matchers with EitherValues with LazyLogging with LowPriorityImplicits {
   def createConfigFor(principal: String) = ConfigFactory.parseString(s"""
     kadmin {
       realm = "EXAMPLE.COM"
@@ -62,7 +72,7 @@ trait TestUtils extends ScalaFutures with Matchers with EitherValues with LazyLo
     }
   }
 
-  implicit class RichExpect[T](expect: Expect[Either[ErrorCase, T]]) {
+  implicit class RichExpect[T](expect: Expect[Either[ErrorCase, T]]) extends SimpleRichExpect(expect) {
     def leftValue: ErrorCase = value.left.value
     def rightValue: T = value.right.value
     def rightValueShouldBeUnit()(implicit ev: T =:= Unit): Unit = rightValue.shouldBe(())
@@ -72,11 +82,6 @@ trait TestUtils extends ScalaFutures with Matchers with EitherValues with LazyLo
     def rightValueShouldIdempotentlyBeUnit()(implicit ev: T =:= Unit): Unit = idempotent(expect)(_.right.value.shouldBe(()))
 
     def idempotentRightValue(rightValue: T => Unit): Unit = idempotent(expect)(t => rightValue(t.right.value))
-
-    def value: Either[ErrorCase, T] = expect.run().futureValue(PatienceConfig(
-      timeout = scaled(expect.settings.timeout),
-      interval = scaled(500.millis)
-    ))
   }
 
   def testNoSuchPrincipal[R](e: Expect[Either[ErrorCase, R]]): Unit = e leftValueShouldIdempotentlyBe NoSuchPrincipal

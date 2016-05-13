@@ -47,8 +47,7 @@ class Kadmin(val settings: Settings = new Settings()) extends LazyLogging {
     * @return an Expect that performs the operation `f` and then quits kadmin.
     */
   def doOperation[R](f: Expect[Either[ErrorCase, R]] => Unit): Expect[Either[ErrorCase, R]] = {
-    val defaultValue: Either[ErrorCase, R] = Left(UnknownError())
-    val e = new Expect(command, defaultValue)
+    val e = new Expect(command, defaultUnknownError[R])
     if (passwordAuthentication) {
       e.expect(s"Password for ${getFullPrincipalName(principal)}: ")
         .sendln(password)
@@ -69,7 +68,7 @@ class Kadmin(val settings: Settings = new Settings()) extends LazyLogging {
     expectBlock
       .when("(.+) while initializing kadmin interface".r)
         .returning { m =>
-          Left(UnknownError(Some(new Exception(m.group(1)))))
+          Left(UnknownError(m.group(1)))
         }
         .exit()
       .when(kadminPrompt)
@@ -107,11 +106,11 @@ class Kadmin(val settings: Settings = new Settings()) extends LazyLogging {
         .sendln(s"add_principal $options $fullPrincipal")
       e.expect
         .when(s"""Principal "$fullPrincipal" (created|added).""".r)
-        .returning(Right(Unit): Either[ErrorCase, Unit])
+          .returning(Right(Unit): Either[ErrorCase, Unit])
         .when("Principal or policy already exists")
-        //TODO: If options contains any of (-pw, -e or -randkey) the modify will fail.
-        //maybe we could invoke changePassword for these options to solve the problem
-        .returningExpect(modifyPrincipal(options, principal))
+          //TODO: If options contains any of (-pw, -e or -randkey) the modify will fail.
+          //maybe we could invoke changePassword for these options to solve the problem
+          .returningExpect(modifyPrincipal(options, principal))
         .addWhen(insufficientPermission)
         .addWhen(unknownError)
     }
@@ -433,7 +432,7 @@ class Kadmin(val settings: Settings = new Settings()) extends LazyLogging {
               //The first element is the command, so we drop it
               Right(splits.drop(1).toSeq)
             } else {
-              Left(UnknownError(Some(new IllegalArgumentException(m.group(1)))))
+              Left(UnknownError(m.group(1)))
             }
           }
     }
@@ -454,12 +453,11 @@ class Kadmin(val settings: Settings = new Settings()) extends LazyLogging {
     */
   def checkPassword(principal: String, password: String): Expect[Either[ErrorCase, Unit]] = {
     val fullPrincipal = getFullPrincipalName(principal)
-    val defaultValue: Either[ErrorCase, Unit] = Left(UnknownError())
     //-l sets the lifetime of the obtained ticket to 1 second
     //val e = new Expect(s"""kinit -V -l 0:00:01 $fullPrincipal""", defaultValue)
 
     //-c sets the credential cache to /dev/null. This ensures no ticket is ever created.
-    val e = new Expect(s"""kinit -V -c /dev/null $fullPrincipal""", defaultValue)
+    val e = new Expect(s"""kinit -V -c /dev/null $fullPrincipal""", defaultUnknownError[Unit])
 
     e.expect
       .when(s"Password for $fullPrincipal:")
@@ -574,7 +572,7 @@ class Kadmin(val settings: Settings = new Settings()) extends LazyLogging {
             if (error.trim == command) {
               Right(Unit)
             } else {
-              Left(UnknownError(Some(new IllegalArgumentException(error))))
+              Left(UnknownError(error))
             }
           }
     }
@@ -606,7 +604,7 @@ class Kadmin(val settings: Settings = new Settings()) extends LazyLogging {
             if (error.trim == command) {
               Right(Unit)
             } else {
-              Left(UnknownError(Some(new IllegalArgumentException(error))))
+              Left(UnknownError(error))
             }
           }
     }
@@ -640,7 +638,7 @@ class Kadmin(val settings: Settings = new Settings()) extends LazyLogging {
             if (error.trim == command) {
               Right(Unit)
             } else {
-              Left(UnknownError(Some(new IllegalArgumentException(error))))
+              Left(UnknownError(error))
             }
           }
     }
@@ -716,7 +714,7 @@ class Kadmin(val settings: Settings = new Settings()) extends LazyLogging {
     //(?s) inline regex flag for dotall mode. In this mode '.' matches any character, including a line terminator.
     expectBlock.when(s"(?s)(.+?)(?=\n$kadminPrompt)".r)
       .returning { m: Match =>
-        Left(UnknownError(Some(new IllegalArgumentException(m.group(1)))))
+        Left(UnknownError(m.group(1)))
       }
   }
 }

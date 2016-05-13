@@ -13,4 +13,8 @@ case object KeytabDoesNotExist extends ErrorCase
 case object KeytabIsNotReadable extends ErrorCase
 
 case class InsufficientPermissions(missingPrivilege: String) extends ErrorCase
+
+object UnknownError {
+  def apply(message: String): UnknownError = new UnknownError(Some(new Exception(message)))
+}
 case class UnknownError(cause: Option[Throwable] = None) extends ErrorCase

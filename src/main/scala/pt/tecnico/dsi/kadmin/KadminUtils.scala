@@ -15,57 +15,46 @@ import scala.util.{Failure, Success, Try}
 
 object KadminUtils extends LazyLogging {
   /**
-    * Obtains a ticket granting ticket for `principal` using `password`.
+    * Obtains a ticket granting ticket for `principal` either using `password` or `keytab`.
     *
     * @param options options to pass to the `kinit` command.
     * @return Either an ErrorCase or Unit if the operation was successful.
     */
-  def obtainTGT(options: String = "", principal: String, password: String): Expect[Either[ErrorCase, Unit]] = {
+  def obtainTGT(options: String = "", principal: String,
+                password: Option[String] = None, keytab: Option[File] = None): Expect[Either[ErrorCase, Unit]] = {
     require(principal.nonEmpty, "principal cannot be empty.")
-    require(password.nonEmpty, "password cannot be empty.")
+    require(password.isDefined ^ keytab.isDefined, "cannot perform authentication with a password AND a keytab.")
 
-    val defaultValue: Either[ErrorCase, Unit] = Left(UnknownError())
-    val e = new Expect(s"kinit $options $principal", defaultValue)
-    e.expect
-      .when(s"Password for $principal")
-        .sendln(password)
-      .when(s"""Client '[^']+' not found in Kerberos database""".r)
-        .returning(Left(NoSuchPrincipal))
-    e.expect
-      .addWhen(passwordIncorrect)
-      .addWhen(passwordExpired)
-      .when(EndOfFile)
-        .returning(Right(()))
+    val keytabOption = keytab.map(file => s"-kt ${file.getAbsolutePath}").getOrElse("")
+    val e = new Expect(s"kinit $options $keytabOption $principal", defaultUnknownError[Unit])
+    val block = e.expect
+    password.foreach { pass =>
+      block.when(s"Password for $principal")
+        .sendln(pass)
+    }
+    block.when(s"""Client '[^']+' not found in Kerberos database""".r)
+      .returning(Left(NoSuchPrincipal))
+    block.when(EndOfFile)
+      .returning(Right(()))
+      .exit()
+
+    password.foreach { _ =>
+      e.expect
+        .addWhen(passwordIncorrect)
+        .addWhen(passwordExpired)
+        .when(EndOfFile)
+          .returning(Right(()))
+    }
+
     e
   }
-
   /**
-    * Obtains a ticket granting ticket using 'keytabFile'.
-    *
-    * @param options options to pass to the `kinit` command.
-    * @param keytabFile the keytab to use
-    * @param principal the principal for which to obtain the TGT. If empty a host ticket for the local host will be requested.
-    * @return Either an ErrorCase or Unit if the operation was successful.
-    */
-  def obtainTGTWithKeytab(options: String = "", keytabFile: File, principal: String = ""): Expect[Either[ErrorCase, Unit]] = {
-    val defaultValue: Either[ErrorCase, Unit] = Left(UnknownError())
-    val e = new Expect(s"kinit $options -kt ${keytabFile.getAbsolutePath} $principal", defaultValue)
-    e.expect
-      .when(s"""Client '[^']+' not found in Kerberos database""".r)
-        .returning(Left(NoSuchPrincipal))
-      .when(EndOfFile)
-        .returning(Right(()))
-    e
-  }
-
-  /**
-    * Lists cached Kerberos tickets
+    * Lists cached tickets.
     *
     * @param options options to pass to the `klist` command.
-    * @return The default principal and the list of all the cached tickets
+    * @return an Expect that returns the list of all the cached tickets.
     */
-  def listTickets(options: String = ""): Expect[Either[ErrorCase, (String, Seq[Ticket])]] = {
-    val defaultValue: Either[ErrorCase, (String, Seq[Ticket])] = Left(UnknownError())
+  def listTickets(options: String = ""): Expect[Seq[Ticket]] = {
     val datetimeRegex = """\d\d/\d\d/\d\d \d\d:\d\d:\d\d"""
     val ticketRegex = s"""(?s)($datetimeRegex)\\s+($datetimeRegex)\\s+([^\n]+)(\\s+renew until $datetimeRegex)?"""
       .stripMargin.r("validStarting", "expires", "servicePrincipal", "renewUtil")
@@ -80,16 +69,15 @@ object KadminUtils extends LazyLogging {
       date.toDateTime(time)
     }
 
-    val e = new Expect(s"klist $options", defaultValue)
+    val e = new Expect(s"klist $options", Seq.empty[Ticket])
     e.expect(
       s"""Ticket cache: FILE:[^\n]+
-          |Default principal: ([^\n]+)
+          |Default principal: [^\n]+
           |
           |Valid starting\\s+Expires\\s+Service principal
           |(.+?)$$""".stripMargin.r)
       .returning { m: Match =>
-        val principal = m.group(1)
-        val tickets = ticketRegex.findAllMatchIn(m.group(2)).map { m =>
+        ticketRegex.findAllMatchIn(m.group(1)).map { m =>
           Ticket(
             parseDateTime(m.group("validStarting")),
             parseDateTime(m.group("expires")),
@@ -97,28 +85,16 @@ object KadminUtils extends LazyLogging {
             Option(m.group("renewUtil")).map(parseDateTime)
           )
         }.toSeq
-
-        Right((principal, tickets))
       }
     e
   }
-
   /**
-    * Destroys the default credencials cache.
-    *
-    * @param options options to pass to the `kdestroy` command.
-    * @return
+    * Destroys the user's tickets.
     */
-  def destroyTickets(options: String = ""): Expect[Either[ErrorCase, Unit]] = {
-    val defaultValue: Either[ErrorCase, Unit] = Left(UnknownError())
-    val e = new Expect(s"kdestroy", defaultValue)
-    e.expect
-      .when(EndOfFile)
-        .returning(Right(()))
-      /*.when("(?s)(.+?)".r)
-        .returning { m =>
-          Left(UnknownError(Some(new Exception(m.group(1)))))
-        }*/
+  def destroyTickets(): Expect[Unit] = {
+    val e = new Expect("kdestroy", ())
+    e.expect(EndOfFile)
+      .returning(())
     e
   }
 
@@ -185,7 +161,6 @@ object KadminUtils extends LazyLogging {
       case Failure(e) => Left(UnknownError(Some(e)))
     }
   }
-
   /**
     * Parses `durationString` into a FiniteDuration.
     *
@@ -202,6 +177,9 @@ object KadminUtils extends LazyLogging {
       }
       .getOrElse(Duration.Zero)
   }
+
+
+  def defaultUnknownError[R]: Either[ErrorCase, R] = Left(UnknownError())
 
   def insufficientPermission[R](expectBlock: ExpectBlock[Either[ErrorCase, R]]) = {
     expectBlock.when("""Operation requires ``([^']+)'' privilege""".r)

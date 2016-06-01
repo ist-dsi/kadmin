@@ -5,7 +5,8 @@ import java.nio.file.Files
 
 import com.typesafe.config.Config
 import com.typesafe.scalalogging.LazyLogging
-import work.martins.simon.expect.fluent.{Expect, ExpectBlock}
+import work.martins.simon.expect.fluent.{Expect => FluentExpect, ExpectBlock}
+import work.martins.simon.expect.core.Expect
 
 import scala.util.matching.Regex.Match
 import pt.tecnico.dsi.kadmin.KadminUtils._
@@ -46,8 +47,8 @@ class Kadmin(val settings: Settings = new Settings()) extends LazyLogging {
     * @tparam R the type for the Right of the Either returned by the Expect.
     * @return an Expect that performs the operation `f` and then quits kadmin.
     */
-  def doOperation[R](f: Expect[Either[ErrorCase, R]] => Unit): Expect[Either[ErrorCase, R]] = {
-    val e = new Expect(command, defaultUnknownError[R])
+  def doOperation[R](f: FluentExpect[Either[ErrorCase, R]] => Unit): Expect[Either[ErrorCase, R]] = {
+    val e = new FluentExpect(command, defaultUnknownError[R])
     if (passwordAuthentication) {
       e.expect(s"Password for ${getFullPrincipalName(principal)}: ")
         .sendln(password)
@@ -78,16 +79,18 @@ class Kadmin(val settings: Settings = new Settings()) extends LazyLogging {
     e.expect(kadminPrompt)
       .sendln("quit")
       .exit()
-    e
+    e.toCore
   }
 
   /**
-    * Creates `principal` using `options`.
+    * Creates `principal` using `options`. If `principal` already exists `modifyPrincipal` will be
+    * invoked to make this operation idempotent (see the caveats bellow).
     *
-    * $idempotentOperation Except if `options` contains any of:
-    *  - `-randkey`
-    *  - `-pw ''password''`
-    *  - `-e ''enc:salt''`
+    * $idempotentOperation However there are some <b>caveats</b>: if `principal` already exists
+    * and any of `newPassword`, `randKey` or `keysalt` is defined, then `changePassword` will be invoked
+    * after the `modifyPrincipal`. Since `changePassword` is not always idempotent this method might also not be.
+    *
+    * The password is not sent with the "-pw" option so it will not be exposed via the system process list.
     *
     * $startedWithDoOperation
     *
@@ -97,18 +100,43 @@ class Kadmin(val settings: Settings = new Settings()) extends LazyLogging {
     * Principal (MIT Kerberos)]] for a full list. The parameters are not checked for validity.
     * @return an Expect that creates `principal`.
     */
-  def addPrincipal(options: String, principal: String): Expect[Either[ErrorCase, Unit]] = {
+  def addPrincipal(options: String, principal: String, newPassword: Option[String] = None,
+                  randKey: Boolean = false, keysalt: Option[String] = None): Expect[Either[ErrorCase, Unit]] = {
     val fullPrincipal = getFullPrincipalName(principal)
+    val randKeyOption = if (randKey) "-randkey" else ""
+    val saltOption = keysalt.map(s => s"""-e "$s"""").getOrElse("")
+
     doOperation { e =>
       e.expect(kadminPrompt)
-        .sendln(s"add_principal $options $fullPrincipal")
+        .sendln(s"add_principal $options $randKeyOption $saltOption $fullPrincipal")
+
+      newPassword.foreach { pass =>
+        e.expect(s"""password for principal "$fullPrincipal"""")
+          .sendln(pass)
+        e.expect(s"""password for principal "$fullPrincipal"""")
+          .sendln(pass)
+      }
+
       e.expect
+        .when("Password is too short")
+          .returning(Left(PasswordTooShort))
+        .when("Password does not contain enough character classes")
+          .returning(Left(PasswordWithoutEnoughCharacterClasses))
         .when(s"""Principal "$fullPrincipal" (created|added).""".r)
-          .returning(Right(Unit): Either[ErrorCase, Unit])
+          .returning(Right(()))
         .when("Principal or policy already exists")
-          //TODO: If options contains any of (-pw, -e or -randkey) the modify will fail.
-          //maybe we could invoke changePassword for these options to solve the problem
-          .returningExpect(modifyPrincipal(options, principal))
+          .returningExpect{
+            val m = modifyPrincipal(options, principal)
+            if (newPassword.nonEmpty || randKey) {
+              m.transform[Either[ErrorCase, Unit]] {
+                case Left(ec) => Left(ec)
+              }{
+                case Right(()) => changePassword(principal, newPassword, randKey, keysalt)
+              }
+            } else {
+              m
+            }
+          }
         .addWhen(insufficientPermission)
         .addWhen(unknownError)
     }
@@ -165,7 +193,7 @@ class Kadmin(val settings: Settings = new Settings()) extends LazyLogging {
         .sendln(s"""modify_principal $cleanedOptions $fullPrincipal""")
       val w = e.expect
         .when(s"""Principal "$fullPrincipal" modified.""")
-          .returning(Right(Unit))
+          .returning(Right(()))
       if (clearPolicy == false) {
         //We just need to check for these cases when the policy was not cleared. Because in the case the policy
         //was cleared these cases will already have been caught.
@@ -252,12 +280,13 @@ class Kadmin(val settings: Settings = new Settings()) extends LazyLogging {
   }
 
   /**
-    * Changes the `principal` password to `newPassword` and/or sets its key to a random value
-    * and/or sets its salt to `salt`.
+    * Changes the `principal` password to `newPassword` or sets its key to a random value. Optionally its salt to `salt`.
     *
     * In some cases this operation might not be idempotent. For example: if the policy assigned to `principal`
     * does not allow the same password to be reused, the first time the password is changed it will be successful,
     * however on the second time it will fail with an ErrorCase `PasswordIsBeingReused`.
+    *
+    * The password is not sent with the "-pw" option so it will not be exposed via the system process list.
     *
     * $startedWithDoOperation
     *
@@ -267,31 +296,42 @@ class Kadmin(val settings: Settings = new Settings()) extends LazyLogging {
     */
   def changePassword(principal: String, newPassword: Option[String] = None,
                      randKey: Boolean = false, keysalt: Option[String] = None): Expect[Either[ErrorCase, Unit]] = {
-    require(newPassword.nonEmpty || randKey || keysalt.nonEmpty,
-      "At least one of newPassword, randKey or salt must be defined " +
-      "(be a Some, for newPassword and salt. Or set to true, for the randKey).")
-
-    val newPasswordOption = newPassword.map(p => s"""-pw "$p"""").getOrElse("")
+    require(newPassword.nonEmpty ^ randKey, "Either newPassword must be a Some or randKey must be true.")
     val randKeyOption = if (randKey) "-randkey" else ""
     val saltOption = keysalt.map(s => s"""-e "$s"""").getOrElse("")
-    val options = Seq(newPasswordOption, randKeyOption, saltOption).mkString(" ")
 
     val fullPrincipal = getFullPrincipalName(principal)
     doOperation { e =>
       e.expect(kadminPrompt)
-        .sendln(s"""change_password $options $fullPrincipal""")
-      e.expect
-        .when(s"""Password for "$fullPrincipal" changed.""")
-          .returning(Right(Unit))
-        .when("Password is too short")
-          .returning(Left(PasswordTooShort))
-        .when("Password does not contain enough character classes")
-          .returning(Left(PasswordWithoutEnoughCharacterClasses))
-        .when("Cannot reuse password")
-          .returning(Left(PasswordIsBeingReused))
-        .addWhen(principalDoesNotExist)
-        .addWhen(insufficientPermission)
-        .addWhen(unknownError)
+        .sendln(s"""change_password $randKeyOption $saltOption $fullPrincipal""")
+
+      newPassword match {
+        case None =>
+          //If newPassword is a None then randKey must be true
+          e.expect
+            .addWhen(principalDoesNotExist)
+            .addWhen(insufficientPermission)
+            .when(s"""Key for "$fullPrincipal" randomized""")
+              .returning(Right(()))
+            .addWhen(unknownError)
+        case Some(pass) =>
+          e.expect(s"""password for principal "$fullPrincipal":""")
+            .sendln(pass)
+          e.expect(s"""password for principal "$fullPrincipal":""")
+            .sendln(pass)
+          e.expect
+            .when("Password is too short")
+              .returning(Left(PasswordTooShort))
+            .when("Password does not contain enough character classes")
+              .returning(Left(PasswordWithoutEnoughCharacterClasses))
+            .when("Cannot reuse password")
+              .returning(Left(PasswordIsBeingReused))
+            .when(s"""Password for "$fullPrincipal" changed.""")
+              .returning(Right(()))
+            .addWhen(principalDoesNotExist) //Seems like kadmin does not fail fast
+            .addWhen(insufficientPermission) //Seems like kadmin does not fail fast
+            .addWhen(unknownError)
+      }
     }
   }
   //endregion
@@ -455,7 +495,7 @@ class Kadmin(val settings: Settings = new Settings()) extends LazyLogging {
     //val e = new Expect(s"""kinit -V -l 0:00:01 $fullPrincipal""", defaultValue)
 
     //-c sets the credential cache to /dev/null. This ensures no ticket is ever created.
-    val e = new Expect(s"""kinit -V -c /dev/null $fullPrincipal""", defaultUnknownError[Unit])
+    val e = new FluentExpect(s"""kinit -V -c /dev/null $fullPrincipal""", defaultUnknownError[Unit])
 
     e.expect
       .when(s"Password for $fullPrincipal:")
@@ -466,12 +506,12 @@ class Kadmin(val settings: Settings = new Settings()) extends LazyLogging {
       .when("Internal credentials cache error while storing credentials")
         //Because we set the credential cache to /dev/null kadmin fails when trying to write the ticket to the cache.
         //This means the authentication was successful and thus the password is correct.
-        .returning(Right(Unit))
+        .returning(Right(()))
       .when("Authenticated to Kerberos")
-        .returning(Right(Unit))
+        .returning(Right(()))
       .addWhen(passwordIncorrect)
       .addWhen(passwordExpired)
-    e
+    e.toCore
   }
   //endregion
 
@@ -568,7 +608,7 @@ class Kadmin(val settings: Settings = new Settings()) extends LazyLogging {
           .returning { m: Match =>
             val error = m.group(1)
             if (error.trim == command) {
-              Right(Unit)
+              Right(())
             } else {
               Left(UnknownError(error))
             }
@@ -600,7 +640,7 @@ class Kadmin(val settings: Settings = new Settings()) extends LazyLogging {
           .returning { m: Match =>
             val error = m.group(1)
             if (error.trim == command) {
-              Right(Unit)
+              Right(())
             } else {
               Left(UnknownError(error))
             }
@@ -628,13 +668,13 @@ class Kadmin(val settings: Settings = new Settings()) extends LazyLogging {
           .returning(Left(PolicyIsInUse))
         .addWhen(policyDoesNotExist)
           //This is what makes this operation idempotent
-          .returning(Right(Unit))
+          .returning(Right(()))
         .addWhen(insufficientPermission)
         .addWhen(unknownError)
           .returning { m: Match =>
             val error = m.group(1)
             if (error.trim == command) {
-              Right(Unit)
+              Right(())
             } else {
               Left(UnknownError(error))
             }

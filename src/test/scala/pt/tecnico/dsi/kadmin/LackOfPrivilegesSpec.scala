@@ -35,6 +35,11 @@ class LackOfPrivilegesSpec extends WordSpec with TestUtils {
           changePassword(principal, newPassword = Some("a super shiny new pa$$w0rd"))
         }
       }
+      "fail when randomizing the principal keys" in {
+        testInsufficientPermission("change-password") {
+          changePassword(principal, randKey = true)
+        }
+      }
 
       "fail while getting a principal" in {
         testInsufficientPermission("get") {

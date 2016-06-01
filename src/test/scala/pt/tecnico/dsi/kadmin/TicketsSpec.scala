@@ -1,5 +1,7 @@
 package pt.tecnico.dsi.kadmin
 
+import java.io.File
+
 import com.typesafe.config.ConfigFactory
 import org.scalatest.{BeforeAndAfterEach, FlatSpec}
 
@@ -26,15 +28,24 @@ class TicketsSpec extends FlatSpec with TestUtils with BeforeAndAfterEach {
       command = "kadmin -c /tmp/krb5cc_0"
     }"""))
 
-  "obtainTicketGrantingTicket with password" should "succeed" in {
+  "obtainTicketGrantingTicket" should "throw IllegalArgumentException if neither password or keytab is specified" in {
+    intercept[IllegalArgumentException]{
+      KadminUtils.obtainTGT("", principal)
+    }
+  }
+  it should "throw IllegalArgumentException if both password and keytab are specified" in {
+    intercept[IllegalArgumentException]{
+      KadminUtils.obtainTGT("", principal, password = Some(password), keytab = Some(new File(".")))
+    }
+  }
+  it should "succeed with password" in {
     //obtain a TGT. We pass the -S flag so we can later use kadmin with the obtained ticket
     KadminUtils.obtainTGT(s"-S $principal", principal, password = Some(password)).rightValueShouldBeUnit()
 
     //Try to access kadmin using the credencial cache created when obtaining the TGT
     kadmin.getPrincipal(principal).rightValue.name should startWith (principal)
   }
-
-  "obtainTicketGrantingTicket with keytab" should "succeed" in {
+  it should "succeed with keytab" in {
     //Create the keytab
     val principalWithKeytab = "test/admin"
     fullPermissionsKadmin.addPrincipal("-randkey", principalWithKeytab).rightValueShouldBeUnit()

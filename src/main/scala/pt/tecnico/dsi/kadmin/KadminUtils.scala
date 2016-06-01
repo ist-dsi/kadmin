@@ -7,7 +7,8 @@ import com.typesafe.scalalogging.LazyLogging
 import org.joda.time.{DateTime, DateTimeZone}
 import org.joda.time.format.DateTimeFormat
 import work.martins.simon.expect.EndOfFile
-import work.martins.simon.expect.fluent.{Expect, ExpectBlock, When}
+import work.martins.simon.expect.fluent.{Expect => FluentExpect, ExpectBlock, When}
+import work.martins.simon.expect.core.Expect
 
 import scala.concurrent.duration.{Duration, DurationInt, FiniteDuration}
 import scala.util.matching.Regex.Match
@@ -26,7 +27,7 @@ object KadminUtils extends LazyLogging {
     require(password.isDefined ^ keytab.isDefined, "cannot perform authentication with a password AND a keytab.")
 
     val keytabOption = keytab.map(file => s"-kt ${file.getAbsolutePath}").getOrElse("")
-    val e = new Expect(s"kinit $options $keytabOption $principal", defaultUnknownError[Unit])
+    val e = new FluentExpect(s"kinit $options $keytabOption $principal", defaultUnknownError[Unit])
     val block = e.expect
     password.foreach { pass =>
       block.when(s"Password for $principal")
@@ -46,7 +47,7 @@ object KadminUtils extends LazyLogging {
           .returning(Right(()))
     }
 
-    e
+    e.toCore
   }
   /**
     * Lists cached tickets.
@@ -69,7 +70,7 @@ object KadminUtils extends LazyLogging {
       date.toDateTime(time)
     }
 
-    val e = new Expect(s"klist $options", Seq.empty[Ticket])
+    val e = new FluentExpect(s"klist $options", Seq.empty[Ticket])
     e.expect(
       s"""Ticket cache: FILE:[^\n]+
           |Default principal: [^\n]+
@@ -86,16 +87,16 @@ object KadminUtils extends LazyLogging {
           )
         }.toSeq
       }
-    e
+    e.toCore
   }
   /**
     * Destroys the user's tickets.
     */
   def destroyTickets(): Expect[Unit] = {
-    val e = new Expect("kdestroy", ())
+    val e = new FluentExpect("kdestroy", ())
     e.expect(EndOfFile)
       .returning(())
-    e
+    e.toCore
   }
 
 

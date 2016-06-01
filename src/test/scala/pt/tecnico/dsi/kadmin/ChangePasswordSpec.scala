@@ -9,6 +9,44 @@ class ChangePasswordSpec extends WordSpec with TestUtils {
   import fullPermissionsKadmin._
 
   "ChangePassword" when {
+    "wrong options are specified" should {
+      "throw IllegalArgumentException if no option is specified" in {
+        intercept[IllegalArgumentException]{
+          changePassword("changePasswordWrongOptions")
+        }
+      }
+      "throw IllegalArgumentException if both newPassword and randkey are defined" in {
+        intercept[IllegalArgumentException]{
+          changePassword("changePasswordWrongOptions", newPassword = Some("new password"), randKey = true)
+        }
+      }
+      "throw IllegalArgumentException if only keysalt is specified" in {
+        intercept[IllegalArgumentException]{
+          changePassword("changePasswordWrongOptions", keysalt = Some("aes256-cts-hmac-sha1-96:normal"))
+        }
+      }
+    }
+    "the principal does not exits" should {
+      "return NoSuchPrincipal when randomizing the keys" in {
+        testNoSuchPrincipal {
+          changePassword("changePasswordToRandKey", randKey = true)
+        }
+      }
+      "return NoSuchPrincipal when setting the password" in {
+        testNoSuchPrincipal {
+          changePassword("changePasswordToNewPassword", newPassword = Some("new apssword"))
+        }
+      }
+    }
+
+    "the keys are being randomized" should {
+      "idempotently succeed" in {
+        val principal = "changePasswordToRandKey"
+        addPrincipal("-clearpolicy -nokey", principal).rightValueShouldBeUnit()
+        changePassword(principal, randKey = true).rightValueShouldIdempotentlyBeUnit()
+      }
+    }
+
     "the principal has no policy" should {
       "idempotently succeed" in {
         val principal = "changePasswordWithoutPolicy"

@@ -3,8 +3,6 @@ package pt.tecnico.dsi.kadmin
 import org.joda.time.{DateTime, DateTimeZone}
 import org.scalatest.FlatSpec
 
-import scala.util.matching.Regex.Match
-
 /**
   * $assumptions
   */
@@ -20,6 +18,19 @@ class PrincipalSpec extends FlatSpec with TestUtils {
     //This also tests adding a principal when a principal already exists
     //TODO: test with all the options, maybe property based testing is helpful for this
     addPrincipal("-nokey", principal).rightValueShouldIdempotentlyBeUnit()
+
+    //Ensure it was in fact created
+    getPrincipal(principal).rightValue.name shouldBe getFullPrincipalName(principal)
+  }
+  it should "idempotently succeed when setting a password" in {
+    val principal = "add"
+    //Ensure the principal does not exist
+    deletePrincipal(principal).rightValueShouldBeUnit()
+
+    //Create the principal
+    //This also tests adding a principal when a principal already exists
+    //TODO: test with all the options, maybe property based testing is helpful for this
+    addPrincipal("", principal, newPassword = Some("aShinyN3wPassword")).rightValueShouldIdempotentlyBeUnit()
 
     //Ensure it was in fact created
     getPrincipal(principal).rightValue.name shouldBe getFullPrincipalName(principal)
@@ -83,7 +94,7 @@ class PrincipalSpec extends FlatSpec with TestUtils {
     //Read it
     withPrincipal[Boolean](principal){ expectBlock =>
       expectBlock.when("""Principal: ([^\n]+)\n""".r)
-        .returning { m: Match =>
+        .returning { m =>
           Right(m.group(1) == getFullPrincipalName(principal))
         }
     } rightValueShouldIdempotentlyBe true

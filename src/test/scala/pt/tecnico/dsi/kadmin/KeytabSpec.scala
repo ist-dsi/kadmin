@@ -1,7 +1,6 @@
 package pt.tecnico.dsi.kadmin
 
 import com.typesafe.config.ConfigFactory
-import org.joda.time.DateTime
 import org.scalatest.FlatSpec
 
 /**

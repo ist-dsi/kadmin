@@ -62,7 +62,7 @@ scmInfo := Some(ScmInfo(homepage.value.get, git.remoteRepo.value))
 publishMavenStyle := true
 publishTo := Some(if (isSnapshot.value) Opts.resolver.sonatypeSnapshots else Opts.resolver.sonatypeStaging)
 publishArtifact in Test := false
-sonatypeProfileName := organization.value.split('.').take(2).mkString(".")
+sonatypeProfileName := organization.value
 
 pomIncludeRepository := { _ => false }
 pomExtra :=

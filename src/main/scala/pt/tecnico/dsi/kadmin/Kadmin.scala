@@ -67,9 +67,7 @@ class Kadmin(val settings: Settings = new Settings()) extends LazyLogging {
     }
     expectBlock
       .when("(.+) while initializing kadmin interface".r)
-        .returning { m =>
-          Left(UnknownError(m.group(1)))
-        }
+        .returning(m => Left(UnknownError(m.group(1))))
         .exit()
       .when(kadminPrompt)
         //All good. We can continue. We need to send a newline in order for `f` to see the KadminPrompt

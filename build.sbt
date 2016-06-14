@@ -43,7 +43,7 @@ libraryDependencies ++= Seq(
   //as to why this library must be included
   "org.joda" % "joda-convert" % "1.8.1",
 
-  "work.martins.simon" %% "scala-expect" % "2.2.0"
+  "work.martins.simon" %% "scala-expect" % "4.0.0"
 )
 resolvers += Opts.resolver.sonatypeReleases
 
@@ -87,5 +87,6 @@ releaseProcess := Seq[ReleaseStep](
   ReleaseStep(action = Command.process("publishSigned", _)),
   ReleaseStep(action = Command.process("sonatypeRelease", _)),
   pushChanges,
-  setNextVersion
+  setNextVersion,
+  commitNextVersion
 )

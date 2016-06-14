@@ -129,9 +129,9 @@ class Kadmin(val settings: Settings = new Settings()) extends LazyLogging {
             val m = modifyPrincipal(options, principal)
             if (newPassword.nonEmpty || randKey) {
               m.transform[Either[ErrorCase, Unit]] {
-                case Left(ec) => Left(ec)
-              }{
                 case Right(()) => changePassword(principal, newPassword, randKey, keysalt)
+              }{
+                case Left(ec) => Left(ec)
               }
             } else {
               m

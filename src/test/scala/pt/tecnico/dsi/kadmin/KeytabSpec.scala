@@ -20,7 +20,7 @@ class KeytabSpec extends FlatSpec with TestUtils {
   it should "succeed if a keytab exists" in {
     val principal = "obtainKeytab"
 
-    addPrincipal("-randkey", principal).rightValueShouldBeUnit()
+    addPrincipal("", principal, randKey = true).rightValueShouldBeUnit()
 
     createKeytab("", principal).rightValueShouldBeUnit()
 
@@ -30,7 +30,7 @@ class KeytabSpec extends FlatSpec with TestUtils {
   "create keytab" should "succeed" in {
     val principal = "createKeytab"
 
-    addPrincipal("-randkey", principal).rightValueShouldBeUnit()
+    addPrincipal("", principal, randKey = true).rightValueShouldBeUnit()
 
     //This also changes the principal password
     createKeytab("", principal).rightValueShouldBeUnit()

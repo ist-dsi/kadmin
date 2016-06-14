@@ -5,7 +5,8 @@ import java.nio.file.Files
 
 import com.typesafe.config.Config
 import com.typesafe.scalalogging.LazyLogging
-import work.martins.simon.expect.fluent.{Expect => FluentExpect, ExpectBlock}
+import org.joda.time.DateTime
+import work.martins.simon.expect.fluent.{ExpectBlock, Expect => FluentExpect}
 import work.martins.simon.expect.core.Expect
 
 import scala.util.matching.Regex.Match
@@ -225,7 +226,7 @@ class Kadmin(val settings: Settings = new Settings()) extends LazyLogging {
     * @param expirationDateTime the datetime to set as the principal expiration date. The timezone will be ignored.
     * @return an Expect that expires `principal`.
     */
-  def expirePrincipal(principal: String, expirationDateTime: ExpirationDateTime = Now()): Expect[Either[ErrorCase, Unit]] = {
+  def expirePrincipal(principal: String, expirationDateTime: ExpirationDateTime = DateTime.now()): Expect[Either[ErrorCase, Unit]] = {
     val dateTimeString = expirationDateTime.toKadminRepresentation
     modifyPrincipal(s"""-expire "$dateTimeString"""", principal)
   }
@@ -256,7 +257,7 @@ class Kadmin(val settings: Settings = new Settings()) extends LazyLogging {
     * @param force whether or not to clear the principal policy. By default this is set to false.
     * @return an Expect that sets the password expiration date of `principal` to `date`.
     */
-  def expirePrincipalPassword(principal: String, expirationDateTime: ExpirationDateTime = Now(),
+  def expirePrincipalPassword(principal: String, expirationDateTime: ExpirationDateTime = DateTime.now(),
                               force: Boolean = false): Expect[Either[ErrorCase, Unit]] = {
     val dateTimeString = expirationDateTime.toKadminRepresentation
     modifyPrincipal(s"""${if (force) "-clearpolicy " else ""}-pwexpire "$dateTimeString"""", principal)

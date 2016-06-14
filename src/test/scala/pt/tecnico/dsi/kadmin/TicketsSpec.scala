@@ -28,6 +28,7 @@ class TicketsSpec extends FlatSpec with TestUtils with BeforeAndAfterEach {
       command = "kadmin -c /tmp/krb5cc_0"
     }"""))
 
+
   "obtainTicketGrantingTicket" should "throw IllegalArgumentException if neither password or keytab is specified" in {
     intercept[IllegalArgumentException]{
       KadminUtils.obtainTGT("", principal)
@@ -48,7 +49,7 @@ class TicketsSpec extends FlatSpec with TestUtils with BeforeAndAfterEach {
   it should "succeed with keytab" in {
     //Create the keytab
     val principalWithKeytab = "test/admin"
-    fullPermissionsKadmin.addPrincipal("-randkey", principalWithKeytab).rightValueShouldBeUnit()
+    fullPermissionsKadmin.addPrincipal("", principalWithKeytab, randKey = true).rightValueShouldBeUnit()
     fullPermissionsKadmin.createKeytab("", principalWithKeytab).rightValueShouldBeUnit()
 
     val keytabFile = fullPermissionsKadmin.getKeytabFile(principalWithKeytab)

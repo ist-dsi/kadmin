@@ -38,13 +38,10 @@ trait TestUtils extends ScalaFutures with Matchers with EitherValues with LazyLo
   def createConfigFor(principal: String) = ConfigFactory.parseString(s"""
     kadmin {
       realm = "EXAMPLE.COM"
-
-      password-authentication = true
       principal = "$principal"
       password = "MITiys4K5"
-
-      command = "kadmin -p $$FULL_PRINCIPAL"
-    }""")
+    }
+    """)
   val fullPermissionsKadmin = new Kadmin(createConfigFor("kadmin/admin"))
   val noPermissionsKadmin = new Kadmin(createConfigFor("noPermissions"))
 

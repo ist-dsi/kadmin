@@ -24,10 +24,11 @@ class TicketsSpec extends FlatSpec with TestUtils with BeforeAndAfterEach {
   val kadmin = new Kadmin(ConfigFactory.parseString(s"""
     kadmin {
       realm = "EXAMPLE.COM"
-      password-authentication = false
-      command = "kadmin -c /tmp/krb5cc_0"
+      keytab = "notEmpty" //To ensure command-keytab is used
+      command-keytab = "kadmin -c /tmp/krb5cc_0"
     }"""))
 
+  println(kadmin.settings)
 
   "obtainTicketGrantingTicket" should "throw IllegalArgumentException if neither password or keytab is specified" in {
     intercept[IllegalArgumentException]{
@@ -61,9 +62,8 @@ class TicketsSpec extends FlatSpec with TestUtils with BeforeAndAfterEach {
     val kadminWithKeytab = new Kadmin(ConfigFactory.parseString(s"""
     kadmin {
       realm = "EXAMPLE.COM"
-      password-authentication = false
       principal = "$principalWithKeytab"
-      command = "kadmin -kt ${keytabFile.getAbsolutePath} -p $$FULL_PRINCIPAL"
+      keytab = "${keytabFile.getAbsolutePath}"
     }"""))
 
     //Then we try to access kadmin using the keytab

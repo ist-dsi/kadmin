@@ -1,7 +1,9 @@
 package pt.tecnico.dsi.kadmin
 
 import com.typesafe.config.{Config, ConfigFactory, ConfigValueType}
-import work.martins.simon.expect.StringUtils.splitBySpaces
+import work.martins.simon.expect.StringUtils.{splitBySpaces, escape, IndentableString}
+import work.martins.simon.expect.{Settings => ScalaExpectSettings}
+
 import scala.collection.JavaConverters._
 
 /**
@@ -29,7 +31,7 @@ import scala.collection.JavaConverters._
   *
   * @param config
   */
-class Settings(config: Config = ConfigFactory.load()) {
+final class Settings(config: Config = ConfigFactory.load()) {
   val kadminConfig: Config = {
     val reference = ConfigFactory.defaultReference()
     val finalConfig = config.withFallback(reference)
@@ -39,31 +41,91 @@ class Settings(config: Config = ConfigFactory.load()) {
   import kadminConfig._
 
   val realm = getString("realm")
-
-  val passwordAuthentication = getBoolean("password-authentication")
+  require(realm.nonEmpty, "Realm cannot be empty.")
 
   val principal = getString("principal")
-  if (passwordAuthentication && principal.isEmpty)
-    throw new IllegalArgumentException("When performing password authentication principal cannot be empty.")
-  val password = getString("password")
-  if (passwordAuthentication && password.isEmpty)
-    throw new IllegalArgumentException("When performing password authentication password cannot be empty.")
+  require(principal.nonEmpty, "Principal cannot be empty.")
 
-  val command: Seq[String] = {
-    val configName = "command"
-    val commandArray: Seq[String] = getValue(configName).valueType() match {
-      case ConfigValueType.STRING => splitBySpaces(getString(configName))
-      case ConfigValueType.LIST => getStringList(configName).asScala
-      case _ => throw new IllegalArgumentException(s"$configName can only be String or Array of String")
+  val password = getString("password")
+  val keytab = getString("keytab")
+  require(password.nonEmpty || keytab.nonEmpty, "Either password or keytab must be defined.")
+
+  val passwordAuthentication = keytab.isEmpty
+
+  def getCommand(path: String): Seq[String] = {
+    val commandArray: Seq[String] = getValue(path).valueType() match {
+      case ConfigValueType.STRING => splitBySpaces(getString(path))
+      case ConfigValueType.LIST => getStringList(path).asScala
+      case _ => throw new IllegalArgumentException(s"$path can only be String or Array of String")
     }
-    require(commandArray.nonEmpty, s"$configName cannot be empty.")
-    commandArray.map(_.replaceAllLiterally("$FULL_PRINCIPAL", s"$principal@$realm"))
+    require(commandArray.nonEmpty, s"$path cannot be empty.")
+    commandArray
+      .map(_.replaceAllLiterally("$FULL_PRINCIPAL", s"$principal@$realm"))
+      .map(_.replaceAllLiterally("$KEYTAB", s"$keytab"))
   }
+  val commandKeytab = getCommand("command-keytab")
+  val commandPassword = getCommand("command-password")
+
+  val command = if (passwordAuthentication) commandPassword else commandKeytab
 
   val keytabsLocation = getString("keytabs-location")
 
   val kadminPrompt = getString("prompt").r
 
-  override def toString: String = kadminConfig.root.render
+  val scalaExpectSettings = {
+    val path = "scala-expect"
+    if (kadminConfig.hasPath(path)) {
+      val c = if (config.hasPath(path)) {
+        kadminConfig.getConfig(path).withFallback(config.getConfig(path))
+      } else {
+        kadminConfig.getConfig(path)
+      }
+      new ScalaExpectSettings(c.atPath(path))
+    } else if (config.hasPath(path)) {
+      new ScalaExpectSettings(config.getConfig(path).atPath(path))
+    } else {
+      new ScalaExpectSettings()
+    }
+  }
+
+  override def equals(other: Any): Boolean = other match {
+    case that: Settings =>
+      realm == that.realm &&
+      principal == that.principal &&
+      password == that.password &&
+      keytab == that.keytab &&
+      commandKeytab == that.commandKeytab &&
+      commandPassword == that.commandPassword &&
+      keytabsLocation == that.keytabsLocation &&
+      kadminPrompt == that.kadminPrompt &&
+      scalaExpectSettings == that.scalaExpectSettings
+    case _ => false
+  }
+  override def hashCode(): Int = {
+    val state: Seq[Any] = Seq(realm, principal, password, keytab, commandKeytab, commandPassword,
+      keytabsLocation, kadminPrompt, scalaExpectSettings)
+    state.map(_.hashCode()).foldLeft(0)((a, b) => 31 * a + b)
+  }
+  override def toString: String =
+    s"""Kadmin Settings:
+       |\tRealm: $realm
+       |
+       |\tPrincipal: $principal
+       |
+       |\tPassword: $password
+       |\tKeytab: $keytab
+       |
+       |${if (passwordAuthentication) "Password" else "Keytab"} authentication will be performed using command:
+       |\t$command
+       |
+       |\tCommand keytab: $commandKeytab
+       |\tCommand password: $commandPassword
+       |
+       |\tKeytabs location: $keytabsLocation
+       |
+       |\tPrompt: ${escape(kadminPrompt.regex)}
+       |
+       |${scalaExpectSettings.toString.indent()}
+     """.stripMargin
 }
 

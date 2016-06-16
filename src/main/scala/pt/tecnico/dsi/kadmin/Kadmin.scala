@@ -49,7 +49,7 @@ class Kadmin(val settings: Settings = new Settings()) extends LazyLogging {
     * @return an Expect that performs the operation `f` and then quits kadmin.
     */
   def doOperation[R](f: FluentExpect[Either[ErrorCase, R]] => Unit): Expect[Either[ErrorCase, R]] = {
-    val e = new FluentExpect(command, defaultUnknownError[R])
+    val e = new FluentExpect(command, defaultUnknownError[R], scalaExpectSettings)
     if (passwordAuthentication) {
       e.expect(s"Password for ${getFullPrincipalName(principal)}: ")
         .sendln(password)
@@ -496,7 +496,7 @@ class Kadmin(val settings: Settings = new Settings()) extends LazyLogging {
     //val e = new Expect(s"""kinit -V -l 0:00:01 $fullPrincipal""", defaultValue)
 
     //-c sets the credential cache to /dev/null. This ensures no ticket is ever created.
-    val e = new FluentExpect(s"""kinit -V -c /dev/null $fullPrincipal""", defaultUnknownError[Unit])
+    val e = new FluentExpect(s"""kinit -V -c /dev/null $fullPrincipal""", defaultUnknownError[Unit], scalaExpectSettings)
 
     e.expect
       .when(s"Password for $fullPrincipal:")

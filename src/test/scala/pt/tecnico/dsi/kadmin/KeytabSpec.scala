@@ -38,9 +38,8 @@ class KeytabSpec extends FlatSpec with TestUtils {
     val kadmin = new Kadmin(ConfigFactory.parseString(s"""
     kadmin {
       realm = "EXAMPLE.COM"
-      password-authentication = false
       principal = "$principal"
-      command = "kadmin -kt $keytabsLocation/$principal.keytab -p $$FULL_PRINCIPAL"
+      keytab = "$keytabsLocation/$principal.keytab"
     }"""))
 
     //This will test whether the keytab was successfully created

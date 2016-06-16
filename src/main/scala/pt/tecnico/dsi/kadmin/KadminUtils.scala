@@ -15,6 +15,9 @@ import scala.util.matching.Regex.Match
 import scala.util.{Failure, Success, Try}
 
 object KadminUtils extends LazyLogging {
+  //The expects declared here DO NOT use the scalaExpectSettings declared in Settings because they are not accessible here.
+
+
   /**
     * Obtains a ticket granting ticket for `principal` either using `password` or `keytab`.
     *

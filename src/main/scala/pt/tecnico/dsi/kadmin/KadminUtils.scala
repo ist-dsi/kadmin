@@ -17,7 +17,6 @@ import scala.util.{Failure, Success, Try}
 object KadminUtils extends LazyLogging {
   //The expects declared here DO NOT use the scalaExpectSettings declared in Settings because they are not accessible here.
 
-
   /**
     * Obtains a ticket granting ticket for `principal` either using `password` or `keytab`.
     *
@@ -50,7 +49,7 @@ object KadminUtils extends LazyLogging {
           .returning(Right(()))
     }
 
-    e.toCore
+    e
   }
   /**
     * Lists cached tickets.
@@ -90,7 +89,7 @@ object KadminUtils extends LazyLogging {
           )
         }.toSeq
       }
-    e.toCore
+    e
   }
   /**
     * Destroys the user's tickets.
@@ -99,7 +98,7 @@ object KadminUtils extends LazyLogging {
     val e = new FluentExpect("kdestroy", ())
     e.expect(EndOfFile)
       .returning(())
-    e.toCore
+    e
   }
 
 

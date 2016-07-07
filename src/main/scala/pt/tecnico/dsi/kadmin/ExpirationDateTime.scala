@@ -16,8 +16,7 @@ case class AbsoluteDateTime(_dateTime: DateTime) extends ExpirationDateTime {
   val dateTime = _dateTime.withMillisOfSecond(0)
 
   //We cannot include the timezone in the format because kadmin cannot interpret some timezones such as WEST
-  val format = DateTimeFormat.forPattern("yyyy-MM-dd HH:mm:ss")
-  val toKadminRepresentation: String = format.print(dateTime)
+  lazy val toKadminRepresentation: String = DateTimeFormat.forPattern("yyyy-MM-dd HH:mm:ss").print(dateTime)
   override def toString = s"AbsoluteDateTime($toKadminRepresentation)"
 
   override def hashCode(): Int = dateTime.hashCode()

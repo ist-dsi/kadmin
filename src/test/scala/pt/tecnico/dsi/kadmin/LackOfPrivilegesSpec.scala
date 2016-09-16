@@ -1,11 +1,11 @@
 package pt.tecnico.dsi.kadmin
 
-import org.scalatest.WordSpec
+import org.scalatest.AsyncWordSpec
 
 /**
   * $assumptions
   */
-class LackOfPrivilegesSpec extends WordSpec with TestUtils {
+class LackOfPrivilegesSpec extends AsyncWordSpec with TestUtils {
   import noPermissionsKadmin._
 
   "An Expect" when {

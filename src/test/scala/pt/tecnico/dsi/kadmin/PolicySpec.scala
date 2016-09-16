@@ -1,65 +1,69 @@
 package pt.tecnico.dsi.kadmin
 
-import org.scalatest.FlatSpec
+import org.scalatest.AsyncFlatSpec
 import scala.util.matching.Regex.Match
 
 /**
   * $assumptions
   */
-class PolicySpec extends FlatSpec with TestUtils {
+class PolicySpec extends AsyncFlatSpec with TestUtils {
   import fullPermissionsKadmin._
 
   "addPolicy" should "idempotently succeed" in {
     val policy = "add"
-    //Ensure the policy does not exist
-    deletePolicy(policy).rightValueShouldBeUnit()
+    for {
+      //Ensure the policy does not exist
+      _ ← deletePolicy(policy).rightValueShouldBeUnit()
+    
+      //Create the policy
+      //This also tests adding a policy when a policy already exists
+      //TODO: test with all the options, maybe property based testing is helpful for this
+      _ ← addPolicy("-minlength 6 -minclasses 2", policy).rightValueShouldIdempotentlyBeUnit()
 
-    //Create the policy
-    //This also tests adding a policy when a policy already exists
-    //TODO: test with all the options, maybe property based testing is helpful for this
-    addPolicy("-minlength 6 -minclasses 2", policy).rightValueShouldIdempotentlyBeUnit()
-
-    //Ensure it was in fact created
-    getPolicy(policy).rightValue.minimumCharacterClasses shouldBe 2
+      //Ensure it was in fact created
+      resultingFuture ← getPolicy(policy).rightValue (_.minimumCharacterClasses shouldBe 2)
+    } yield resultingFuture
   }
 
   "deletePolicy" should "idempotently succeed" in {
     val policy = "delete"
-    //Ensure the policy exists
-    addPolicy("-minlength 6", policy).rightValueShouldBeUnit()
+    for {
+      //Ensure the policy exists
+      _ ← addPolicy("-minlength 6", policy).rightValueShouldBeUnit()
 
-    //Delete the policy
-    //This also tests deleting a policy when there is no longer a policy
-    deletePolicy(policy).rightValueShouldIdempotentlyBeUnit()
+      //Delete the policy
+      //This also tests deleting a policy when there is no longer a policy
+      _ ← deletePolicy(policy).rightValueShouldIdempotentlyBeUnit()
 
-    //Ensure the policy was in fact deleted
-    testNoSuchPolicy{
-      getPolicy(policy)
-    }
+      //Ensure the policy was in fact deleted
+      resultingFuture ← testNoSuchPolicy(getPolicy(policy))
+    } yield resultingFuture
   }
 
   "modifyPolicy" should "return NoSuchPolicy when the policy does not exists" in {
     val policy = "modifyNoSuchPolicy"
-    //Ensure the policy does not exist
-    deletePolicy(policy).rightValueShouldBeUnit()
-
-    //Try to modify it
-    testNoSuchPolicy {
-      modifyPolicy("-minlength 6", policy)
-    }
+    for {
+      //Ensure the policy does not exist
+      _ <- deletePolicy(policy).rightValueShouldBeUnit()
+  
+      //Try to modify it
+      resultingFuture <- testNoSuchPolicy(modifyPolicy("-minlength 6", policy))
+    } yield resultingFuture
   }
   it should "idempotently succeed" in {
     val policy = "modify"
     val minLength = 9
-    //Ensure the policy exists
-    addPolicy(s"-minlength $minLength", policy).rightValueShouldBeUnit()
-
-    //Modify the policy
-    //TODO: test with all the options, maybe property based testing is helpful for this
-    modifyPolicy(s"-minlength $minLength", policy).rightValueShouldIdempotentlyBeUnit()
-
-    //Ensure it was in fact modified
-    getPolicy(policy).rightValue.minimumLength shouldBe minLength
+    for {
+      //Ensure the policy exists
+      _ ← addPolicy(s"-minlength $minLength", policy).rightValueShouldBeUnit()
+  
+      //Modify the policy
+      //TODO: test with all the options, maybe property based testing is helpful for this
+      _ ← modifyPolicy(s"-minlength $minLength", policy).rightValueShouldIdempotentlyBeUnit()
+  
+      //Ensure it was in fact modified
+      resultingFuture ← getPolicy(policy) rightValue (_.minimumLength shouldBe minLength)
+    } yield resultingFuture
   }
 
   "withPolicy" should "return NoSuchPolicy when the policy does not exists" in {
@@ -77,27 +81,32 @@ class PolicySpec extends FlatSpec with TestUtils {
   it should "idempotently succeed" in {
     val policy = "withPolicy"
     val minLength = 13
-    //Ensure the principal exists
-    addPolicy(s"-minlength $minLength", policy).rightValueShouldBeUnit()
-
-    //Read it
-
-    withPolicy[Int](policy) { expectBlock =>
-      expectBlock.when("""Minimum password length: (\d+)\n""".r)
-        .returning { m: Match =>
-          Right(m.group(1).toInt)
-        }
-    } rightValueShouldIdempotentlyBe minLength
+    
+    for {
+      //Ensure the principal exists
+      _ <- addPolicy(s"-minlength $minLength", policy).rightValueShouldBeUnit()
+  
+      //Read it
+      resultingFuture ← withPolicy[Int](policy) { expectBlock =>
+        expectBlock.when( """Minimum password length: (\d+)\n""".r)
+          .returning { m: Match =>
+            Right(m.group(1).toInt)
+          }
+      } rightValueShouldIdempotentlyBe minLength
+    } yield resultingFuture
   }
 
   "getPolicy" should "idempotently succeed" in {
     val policy = "get"
     val minLength = 9
-    //Ensure the policy exists
-    addPolicy(s"-minlength $minLength", policy).rightValueShouldBeUnit()
-
-    //Get it
-    getPolicy(policy) idempotentRightValue (_.minimumLength shouldBe minLength)
+    
+    for {
+      //Ensure the policy exists
+      _ <- addPolicy(s"-minlength $minLength", policy).rightValueShouldBeUnit()
+  
+      //Get it
+      resultingFuture ← getPolicy(policy) idempotentRightValue (_.minimumLength shouldBe minLength)
+    } yield resultingFuture
 
   }
 }

@@ -3,22 +3,24 @@ package pt.tecnico.dsi.kadmin
 import java.io.File
 
 import com.typesafe.config.ConfigFactory
-import org.scalatest.{BeforeAndAfterEach, FlatSpec}
+import org.scalatest.{BeforeAndAfterEach, AsyncFlatSpec}
 
 /**
   * $assumptions
   */
-class TicketsSpec extends FlatSpec with TestUtils with BeforeAndAfterEach {
+class TicketsSpec extends AsyncFlatSpec with TestUtils with BeforeAndAfterEach {
   import fullPermissionsKadmin.settings.{principal, password, realm}
 
   override protected def beforeEach(): Unit = {
     super.beforeEach()
-    KadminUtils.destroyTickets().value
+    //TODO: await result
+    KadminUtils.destroyTickets().run()
   }
 
   override protected def afterEach(): Unit = {
     super.afterEach()
-    KadminUtils.destroyTickets().value
+    //TODO: await result
+    KadminUtils.destroyTickets().run()
   }
 
   val kadmin = new Kadmin(ConfigFactory.parseString(s"""
@@ -28,62 +30,66 @@ class TicketsSpec extends FlatSpec with TestUtils with BeforeAndAfterEach {
       command-keytab = "kadmin -c /tmp/krb5cc_0"
     }"""))
 
-  println(kadmin.settings)
+  //println(kadmin.settings)
 
   "obtainTicketGrantingTicket" should "throw IllegalArgumentException if neither password or keytab is specified" in {
-    intercept[IllegalArgumentException]{
+    assertThrows[IllegalArgumentException]{
       KadminUtils.obtainTGT("", principal)
     }
   }
   it should "throw IllegalArgumentException if both password and keytab are specified" in {
-    intercept[IllegalArgumentException]{
+    assertThrows[IllegalArgumentException]{
       KadminUtils.obtainTGT("", principal, password = Some(password), keytab = Some(new File(".")))
     }
   }
   it should "succeed with password" in {
+    for {
     //obtain a TGT. We pass the -S flag so we can later use kadmin with the obtained ticket
-    KadminUtils.obtainTGT(s"-S $principal", principal, password = Some(password)).rightValueShouldBeUnit()
-
-    //Try to access kadmin using the credencial cache created when obtaining the TGT
-    kadmin.getPrincipal(principal).rightValue.name should startWith (principal)
+      _ <- KadminUtils.obtainTGT(s"-S $principal", principal, password = Some(password)).rightValueShouldBeUnit()
+  
+      //Try to access kadmin using the credencial cache created when obtaining the TGT
+      resultingFuture ← kadmin.getPrincipal(principal) rightValue (_.name should startWith(principal))
+    } yield resultingFuture
   }
   it should "succeed with keytab" in {
-    //Create the keytab
     val principalWithKeytab = "test/admin"
-    fullPermissionsKadmin.addPrincipal("", principalWithKeytab, randKey = true).rightValueShouldBeUnit()
-    fullPermissionsKadmin.createKeytab("", principalWithKeytab).rightValueShouldBeUnit()
-
     val keytabFile = fullPermissionsKadmin.getKeytabFile(principalWithKeytab)
-
-    //Obtain a TGT using the keytab. We pass the -S flag so we can later use kadmin with the obtained ticket.
-    KadminUtils.obtainTGT(s"-S $principal", principalWithKeytab, keytab = Some(keytabFile)).rightValueShouldBeUnit()
-
-
     val kadminWithKeytab = new Kadmin(ConfigFactory.parseString(s"""
     kadmin {
       realm = "EXAMPLE.COM"
       principal = "$principalWithKeytab"
       keytab = "${keytabFile.getAbsolutePath}"
     }"""))
-
-    //Then we try to access kadmin using the keytab
-    kadminWithKeytab.getPrincipal(principalWithKeytab).rightValue.name should startWith (principalWithKeytab)
+    
+    for {
+      //Create the keytab
+      _ <- fullPermissionsKadmin.addPrincipal("", principalWithKeytab, randKey = true).rightValueShouldBeUnit()
+      _ ← fullPermissionsKadmin.createKeytab("", principalWithKeytab).rightValueShouldBeUnit()
+  
+      //Obtain a TGT using the keytab. We pass the -S flag so we can later use kadmin with the obtained ticket.
+      _ ← KadminUtils.obtainTGT(s"-S $principal", principalWithKeytab, keytab = Some(keytabFile)).rightValueShouldBeUnit()
+  
+      //Then we try to access kadmin using the keytab
+      resultingFuture ← kadminWithKeytab.getPrincipal(principalWithKeytab) rightValue (_.name should startWith(principalWithKeytab))
+    } yield resultingFuture
   }
 
   "listTickets" should "succeed" in {
-    //Obtain a TGT
-    KadminUtils.obtainTGT(principal = principal, password = Some(password)).rightValueShouldBeUnit()
-
-    val tickets = KadminUtils.listTickets().value
-    tickets.exists(_.servicePrincipal == s"krbtgt/$realm@$realm") shouldBe true
+    for {
+      //Obtain a TGT
+      _ <- KadminUtils.obtainTGT(principal = principal, password = Some(password)).rightValueShouldBeUnit()
+      tickets ← KadminUtils.listTickets().run()
+    } yield tickets.exists(_.servicePrincipal == s"krbtgt/$realm@$realm") shouldBe true
   }
 
   "destroyTickets" should "succeed" in {
-    //Ensure we have the ticket and it is working
-    KadminUtils.obtainTGT(s"-S $principal", principal, password = Some(password)).rightValueShouldBeUnit()
-    kadmin.getPrincipal(principal).rightValue.name should startWith (principal)
-
-    KadminUtils.destroyTickets().value.shouldBe(())
-    kadmin.getPrincipal(principal).leftValue shouldBe a [UnknownError]
+    for {
+      //Ensure we have the ticket and it is working
+      _ <- KadminUtils.obtainTGT(s"-S $principal", principal, password = Some(password)).rightValueShouldBeUnit()
+      _ ← kadmin.getPrincipal(principal).rightValue (_.name should startWith(principal))
+  
+      destroyedTickets ← KadminUtils.destroyTickets().run() if destroyedTickets.equals(())
+      resultingFuture ← kadmin.getPrincipal(principal).leftValue(_ shouldBe a[UnknownError])
+    } yield resultingFuture
   }
 }

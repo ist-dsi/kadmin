@@ -14,7 +14,7 @@ javacOptions ++= Seq(
   "-Dfile.encoding=utf-8"
 )
 
-scalaVersion := "2.11.8"
+scalaVersion := "2.12.0-RC1"
 scalacOptions ++= Seq(
   "-target:jvm-1.8",
   "-deprecation",                   //Emit warning and location for usages of deprecated APIs.
@@ -24,18 +24,18 @@ scalacOptions ++= Seq(
   "-unchecked",                     //Enable detailed unchecked (erasure) warnings
   "-Xfatal-warnings",               //Fail the compilation if there are any warnings.
   "-Xlint",                         //Enable recommended additional warnings.
-  "-Yinline-warnings",              //Emit inlining warnings.
+  //"-Yinline-warnings",              //Emit inlining warnings.
   "-Yno-adapted-args",              //Do not adapt an argument list (either by inserting () or creating a tuple) to match the receiver.
   "-Ywarn-dead-code"                //Warn when dead code is identified.
 )
 
 libraryDependencies ++= Seq(
   //Logging
-  "com.typesafe.scala-logging" %% "scala-logging" % "3.4.0" % Test,
+  "com.typesafe.scala-logging" %% "scala-logging" % "3.5.0" % Test,
   "ch.qos.logback" % "logback-classic" % "1.1.7" % Test,
   //Testing
   "org.scalatest" %% "scalatest" % "3.0.0" % Test,
-  //Configuration
+  //Configurationrage
   "com.typesafe" % "config" % "1.3.0",
   //Time and dates
   "joda-time" % "joda-time" % "2.9.4",
@@ -43,7 +43,7 @@ libraryDependencies ++= Seq(
   //as to why this library must be included
   "org.joda" % "joda-convert" % "1.8.1",
 
-  "work.martins.simon" %% "scala-expect" % "4.1.0"
+  "work.martins.simon" %% "scala-expect" % "5.0.0"
 )
 resolvers += Opts.resolver.sonatypeReleases
 

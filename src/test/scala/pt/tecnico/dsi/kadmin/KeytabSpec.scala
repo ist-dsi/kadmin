@@ -15,7 +15,7 @@ class KeytabSpec extends AsyncFlatSpec with TestUtils {
   
     for {
       _ ← deletePrincipal(principal).rightValueShouldBeUnit()
-      resultingFuture ← obtainKeytab(principal).left.value shouldBe KeytabDoesNotExist
+      resultingFuture ← obtainKeytab(principal) shouldBe Left(KeytabDoesNotExist)
     } yield resultingFuture
   }
   it should "succeed if a keytab exists" in {
@@ -24,7 +24,7 @@ class KeytabSpec extends AsyncFlatSpec with TestUtils {
     for {
       _ ← addPrincipal("", principal, randKey = true).rightValueShouldBeUnit()
       _ ← createKeytab("", principal).rightValueShouldBeUnit()
-      resultingFuture ← obtainKeytab(principal).right.value.length should be > 0
+      resultingFuture ← obtainKeytab(principal).toOption.value.length should be > 0
     } yield resultingFuture
   }
 

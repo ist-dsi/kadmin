@@ -46,7 +46,7 @@ trait TestUtils extends ScalaFutures with Matchers with OptionValues with LazyLo
     
     def idempotentTest(test: Either[ErrorCase, T] => Assertion, repetitions: Int = 3): Future[Assertion] = {
       require(repetitions >= 2, "To test for idempotency at least 2 repetitions must be made")
-    
+      
       expect.run().flatMap { firstResult ⇒
         //If this fails we do not want to catch its exception, because failing in the first attempt means
         //whatever is being tested in `test` is not implemented correctly. Therefore we do not want to mask

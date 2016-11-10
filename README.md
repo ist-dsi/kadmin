@@ -1,11 +1,11 @@
 # kadmin
-[![Maven Central](https://maven-badges.herokuapp.com/maven-central/pt.tecnico.dsi/kadmin_2.11/badge.svg?maxAge=604800)](https://maven-badges.herokuapp.com/maven-central/pt.tecnico.dsi/kadmin_2.11)
-[![Dependency Status](https://www.versioneye.com/java/pt.tecnico.dsi:kadmin_2.11/badge.svg?style=plastic&maxAge=604800)](https://www.versioneye.com/java/pt.tecnico.dsi:kadmin_2.11)
-[![Reference Status](https://www.versioneye.com/java/pt.tecnico.dsi:kadmin_2.11/reference_badge.svg?style=plastic&maxAge=604800)](https://www.versioneye.com/java/pt.tecnico.dsi:kadmin_2.11/references)
+[![Maven Central](https://maven-badges.herokuapp.com/maven-central/pt.tecnico.dsi/kadmin_2.12/badge.svg?maxAge=604800)](https://maven-badges.herokuapp.com/maven-central/pt.tecnico.dsi/kadmin_2.12)
+[![Dependency Status](https://www.versioneye.com/java/pt.tecnico.dsi:kadmin_2.12/badge.svg?style=plastic&maxAge=604800)](https://www.versioneye.com/java/pt.tecnico.dsi:kadmin_2.12)
+[![Reference Status](https://www.versioneye.com/java/pt.tecnico.dsi:kadmin_2.12/reference_badge.svg?style=plastic&maxAge=604800)](https://www.versioneye.com/java/pt.tecnico.dsi:kadmin_2.12/references)
 [![Build Status](https://travis-ci.org/ist-dsi/kadmin.svg?branch=master&style=plastic&maxAge=604800)](https://travis-ci.org/ist-dsi/kadmin)
 [![Codacy Badge](https://api.codacy.com/project/badge/coverage/a5fead3a55db40cd96470ed7a8efe9c5)](https://www.codacy.com/app/IST-DSI/kadmin)
 [![Codacy Badge](https://api.codacy.com/project/badge/grade/a5fead3a55db40cd96470ed7a8efe9c5)](https://www.codacy.com/app/IST-DSI/kadmin)
-[![Scaladoc](http://javadoc-badge.appspot.com/pt.tecnico.dsi/kadmin_2.11.svg?label=scaladoc&style=plastic&maxAge=604800)](https://ist-dsi.github.io/kadmin/latest/api/#pt.tecnico.dsi.kadmin.package)
+[![Scaladoc](http://javadoc-badge.appspot.com/pt.tecnico.dsi/kadmin_2.12.svg?label=scaladoc&style=plastic&maxAge=604800)](https://ist-dsi.github.io/kadmin/latest/api/pt/tecnico/dsi/kadmin/index.html)
 [![license](http://img.shields.io/:license-MIT-blue.svg)](LICENSE)
 
 A type-safe wrapper around the kadmin command for Scala.
@@ -17,12 +17,12 @@ We solve the problem of Kerberos administration in JVM via the only other altern
 command and write to its standard input and read from its standard output.
 To simplify this process we use [scala-expect](https://github.com/Lasering/scala-expect).
 
-[Latest scaladoc documentation](http://ist-dsi.github.io/kadmin/latest/api/)
+[Latest scaladoc documentation](https://ist-dsi.github.io/kadmin/latest/api/pt/tecnico/dsi/kadmin/index.html)
 
 ## Install
 Add the following dependency to your `build.sbt`:
 ```sbt
-libraryDependencies += "pt.tecnico.dsi" %% "kadmin" % "5.3.1"
+libraryDependencies += "pt.tecnico.dsi" %% "kadmin" % "7.0.0"
 ```
 We use [semantic versioning](http://semver.org).
 

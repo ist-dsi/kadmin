@@ -1,20 +1,13 @@
 organization := "pt.tecnico.dsi"
 name := "kadmin"
 
-val javaVersion = "1.8"
-initialize := {
-  val current  = sys.props("java.specification.version")
-  assert(current == javaVersion, s"Unsupported JDK: expected JDK $javaVersion installed, but instead got JDK $current.")
-}
 javacOptions ++= Seq(
-  "-source", javaVersion,
-  "-target", javaVersion,
   "-Xlint",
   "-encoding", "UTF-8",
   "-Dfile.encoding=utf-8"
 )
 
-scalaVersion := "2.12.0-RC1"
+scalaVersion := "2.12.0"
 scalacOptions ++= Seq(
   "-target:jvm-1.8",
   "-deprecation",                   //Emit warning and location for usages of deprecated APIs.
@@ -34,16 +27,16 @@ libraryDependencies ++= Seq(
   "com.typesafe.scala-logging" %% "scala-logging" % "3.5.0" % Test,
   "ch.qos.logback" % "logback-classic" % "1.1.7" % Test,
   //Testing
-  "org.scalatest" %% "scalatest" % "3.0.0" % Test,
+  "org.scalatest" %% "scalatest" % "3.0.1" % Test,
   //Configurationrage
-  "com.typesafe" % "config" % "1.3.0",
+  "com.typesafe" % "config" % "1.3.1",
   //Time and dates
-  "joda-time" % "joda-time" % "2.9.4",
+  "joda-time" % "joda-time" % "2.9.5",
   //See http://stackoverflow.com/questions/13856266/class-broken-error-with-joda-time-using-scala
   //as to why this library must be included
   "org.joda" % "joda-convert" % "1.8.1",
 
-  "work.martins.simon" %% "scala-expect" % "5.0.0"
+  "work.martins.simon" %% "scala-expect" % "6.0.0"
 )
 resolvers += Opts.resolver.sonatypeReleases
 
@@ -74,20 +67,18 @@ pomExtra :=
     </developer>
   </developers>
 
-coverageScalacPluginVersion := "1.3.0-RC1"
-
 import ReleaseTransformations._
 releaseProcess := Seq[ReleaseStep](
   checkSnapshotDependencies,
   inquireVersions,
   runClean,
-  ReleaseStep(action = Command.process("doc", _)),
-  //runTest, how to run ./test.sh??
+  releaseStepCommand("doc"),
+  releaseStepCommand("""eval "./test.sh" !"""),
   setReleaseVersion,
   tagRelease,
-  ReleaseStep(action = Command.process("ghpagesPushSite", _)),
-  ReleaseStep(action = Command.process("publishSigned", _)),
-  ReleaseStep(action = Command.process("sonatypeRelease", _)),
+  releaseStepCommand("ghpagesPushSite"),
+  releaseStepCommand("publishSigned"),
+  releaseStepCommand("sonatypeRelease"),
   pushChanges,
   setNextVersion
 )

@@ -69,6 +69,7 @@ pomExtra :=
 
 import ReleaseTransformations._
 releaseProcess := Seq[ReleaseStep](
+  releaseStepCommand("dependencyUpdates"),
   checkSnapshotDependencies,
   inquireVersions,
   runClean,

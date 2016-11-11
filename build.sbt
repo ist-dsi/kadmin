@@ -67,6 +67,7 @@ pomExtra :=
     </developer>
   </developers>
 
+dependencyUpdatesFailBuild := true
 import ReleaseTransformations._
 releaseProcess := Seq[ReleaseStep](
   releaseStepCommand("dependencyUpdates"),

@@ -1,12 +1,14 @@
 # kadmin
 [![Maven Central](https://maven-badges.herokuapp.com/maven-central/pt.tecnico.dsi/kadmin_2.12/badge.svg?maxAge=604800)](https://maven-badges.herokuapp.com/maven-central/pt.tecnico.dsi/kadmin_2.12)
-[![Dependency Status](https://www.versioneye.com/user/projects/5717b800fcd19a004544172f/badge.svg?style=plastic&maxAge=604800)](https://www.versioneye.com/user/projects/5717b800fcd19a004544172f)
+[![Dependency Status](https://www.versioneye.com/user/projects/5717b800fcd19a004544172f/badge.svg?style=flat-square)](https://www.versioneye.com/user/projects/5717b800fcd19a004544172f)
 [![Reference Status](https://www.versioneye.com/java/pt.tecnico.dsi:kadmin_2.12/reference_badge.svg?style=plastic&maxAge=604800)](https://www.versioneye.com/java/pt.tecnico.dsi:kadmin_2.12/references)
+[![Scaladoc](http://javadoc-badge.appspot.com/pt.tecnico.dsi/kadmin_2.12.svg?label=scaladoc&style=plastic&maxAge=604800)](https://ist-dsi.github.io/kadmin/latest/api/pt/tecnico/dsi/kadmin/index.html)
+[![license](http://img.shields.io/:license-MIT-blue.svg)](LICENSE)
+
 [![Build Status](https://travis-ci.org/ist-dsi/kadmin.svg?branch=master&style=plastic&maxAge=604800)](https://travis-ci.org/ist-dsi/kadmin)
 [![Codacy Badge](https://api.codacy.com/project/badge/coverage/a5fead3a55db40cd96470ed7a8efe9c5)](https://www.codacy.com/app/IST-DSI/kadmin)
 [![Codacy Badge](https://api.codacy.com/project/badge/grade/a5fead3a55db40cd96470ed7a8efe9c5)](https://www.codacy.com/app/IST-DSI/kadmin)
-[![Scaladoc](http://javadoc-badge.appspot.com/pt.tecnico.dsi/kadmin_2.12.svg?label=scaladoc&style=plastic&maxAge=604800)](https://ist-dsi.github.io/kadmin/latest/api/pt/tecnico/dsi/kadmin/index.html)
-[![license](http://img.shields.io/:license-MIT-blue.svg)](LICENSE)
+[![BCH compliance](https://bettercodehub.com/edge/badge/ist-dsi/kadmin)](https://bettercodehub.com/)
 
 A type-safe wrapper around the kadmin command for Scala.
 
@@ -45,8 +47,7 @@ Every command is idempotent except when changing either a password, a salt or a 
 Besides these kadmin commands the following functions are also available:
 
  - [`getFullPrincipalName`](https://ist-dsi.github.io/kadmin/latest/api/index.html#pt.tecnico.dsi.kadmin.Kadmin@getFullPrincipalName(principal:String):String) - returns the principal name with the realm, eg: kadmin/admin@EXAMPLE.COM.
- - [`doOperation`](https://ist-dsi.github.io/kadmin/latest/api/index.html#pt.tecnico.dsi.kadmin.Kadmin@doOperation[R](f:work.martins.simon.expect.fluent.Expect[Either[pt.tecnico.dsi.kadmin.ErrorCase,R]]=>Unit):work.martins.simon.expect.fluent.Expect[Either[pt.tecnico.dsi.kadmin.ErrorCase,R]]) - performs a kadmin command which will use password authentication or not
-    according to the configuration `password-authentication`.
+ - [`doOperation`](https://ist-dsi.github.io/kadmin/latest/api/index.html#pt.tecnico.dsi.kadmin.Kadmin@doOperation[R](f:work.martins.simon.expect.fluent.Expect[Either[pt.tecnico.dsi.kadmin.ErrorCase,R]]=>Unit):work.martins.simon.expect.fluent.Expect[Either[pt.tecnico.dsi.kadmin.ErrorCase,R]]) - performs a kadmin command which will use password authentication or not according to the configuration, see below.
  - [`obtainTGT`](https://ist-dsi.github.io/kadmin/latest/api/index.html#pt.tecnico.dsi.kadmin.KadminUtils$@obtainTGT(options:String,principal:String,password:Option[String],keytab:Option[File]):work.martins.simon.expect.fluent.Expect[Either[pt.tecnico.dsi.kadmin.ErrorCase,Unit]]) - invokes `kinit` to obtain a ticket for a given principal. Authentication is either performed with a password or with a keytab.
  - [`listTickets`](https://ist-dsi.github.io/kadmin/latest/api/index.html#pt.tecnico.dsi.kadmin.KadminUtils$@listTickets(options:String):work.martins.simon.expect.fluent.Expect[Seq[pt.tecnico.dsi.kadmin.Ticket]])) - invokes `klist` to obtain the cached tickets.
  - [`destroyTickets`](https://ist-dsi.github.io/kadmin/latest/api/index.html#pt.tecnico.dsi.kadmin.KadminUtils$@destroyTickets(options:String):work.martins.simon.expect.fluent.Expect[Unit]) - invokes `kdestroy` to destroy the ticket cache.

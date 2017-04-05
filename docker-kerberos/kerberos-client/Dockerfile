@@ -2,16 +2,19 @@
 FROM debian:jessie-backports
 MAINTAINER Simão Martins "simao.martins@tecnico.ulisboa.pt"
 
-RUN apt-get -qq -y update && \
-  apt-get install -y apt-transport-https locales
+RUN apt-get -qq --yes update
+RUN apt-get install --yes apt-transport-https locales
+
+RUN locale-gen "en_US.UTF-8"
+RUN echo "LC_ALL=\"en_US.UTF-8\"" >> /etc/default/locale
 
 # We need JDK and SBT because we are going to perform the tests inside this container
-RUN apt-key adv --keyserver hkp://keyserver.ubuntu.com:80 --recv 642AC823
-RUN echo "deb https://dl.bintray.com/sbt/debian /" | tee -a /etc/apt/sources.list
+RUN echo "deb https://dl.bintray.com/sbt/debian /" | tee -a /etc/apt/sources.list.d/sbt.list
+RUN apt-key adv --keyserver hkp://keyserver.ubuntu.com:80 --recv 2EE0EA64E40A89B84B2DF73499E82A75642AC823
 
-RUN apt-get -qq -y update && \
-  DEBIAN_FRONTEND=noninteractive apt-get install -y krb5-user openjdk-8-jdk sbt && \
-  apt-get clean
+RUN apt-get -qq -y update
+RUN DEBIAN_FRONTEND=noninteractive apt-get install -t jessie-backports --yes krb5-user sbt
+RUN apt-get clean
 
 # This ensures that sbt does its initial thing. Such as:
 # Getting org.scala-sbt sbt 0.13.11 ...

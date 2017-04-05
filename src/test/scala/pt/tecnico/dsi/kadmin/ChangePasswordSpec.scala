@@ -44,8 +44,8 @@ class ChangePasswordSpec extends AsyncWordSpec with TestUtils {
         val principal = "changePasswordToRandKey"
   
         for {
-          _ ← addPrincipal("-clearpolicy -nokey", principal).rightValueShouldBeUnit()
-          resultingFuture ← changePassword(principal, randKey = true).rightValueShouldIdempotentlyBeUnit()
+          _ <- addPrincipal("-clearpolicy -nokey", principal).rightValueShouldBeUnit()
+          resultingFuture <- changePassword(principal, randKey = true).rightValueShouldIdempotentlyBeUnit()
         } yield resultingFuture
       }
     }
@@ -54,11 +54,11 @@ class ChangePasswordSpec extends AsyncWordSpec with TestUtils {
       "idempotently succeed" in {
         val principal = "changePasswordWithoutPolicy"
         for {
-          _ ← addPrincipal("-clearpolicy -nokey", principal).rightValueShouldBeUnit()
-          //This password is simultaneously very small, with just one character class and it is being reused.
-          //But because this principal has no policy this should always return unit
-          _ ← changePassword(principal, newPassword = Some("abc")).rightValueShouldIdempotentlyBeUnit()
-          resultingFuture ← checkPassword(principal, "abc").rightValueShouldBeUnit()
+          _ <- addPrincipal("-clearpolicy -nokey", principal).rightValueShouldBeUnit()
+          // This password is simultaneously very small, with just one character class and it is being reused.
+          // But because this principal has no policy this should always return unit
+          _ <- changePassword(principal, newPassword = Some("abc")).rightValueShouldIdempotentlyBeUnit()
+          resultingFuture <- checkPassword(principal, "abc").rightValueShouldBeUnit()
         } yield resultingFuture
       }
     }
@@ -66,8 +66,8 @@ class ChangePasswordSpec extends AsyncWordSpec with TestUtils {
       val principal = "changePasswordWithPolicy"
       val policy = "restrictive"
       for {
-        _ ← addPolicy("-minlength 6 -minclasses 3 -history 2", policy).rightValueShouldBeUnit()
-        resultingFuture ← addPrincipal(s"-policy $policy -nokey", principal).rightValueShouldBeUnit()
+        _ <- addPolicy("-minlength 6 -minclasses 3 -history 2", policy).rightValueShouldBeUnit()
+        resultingFuture <- addPrincipal(s"-policy $policy -nokey", principal).rightValueShouldBeUnit()
       } yield resultingFuture
       
       "return PasswordTooShort" in {
@@ -79,16 +79,16 @@ class ChangePasswordSpec extends AsyncWordSpec with TestUtils {
       "return PasswordIsBeingReused" in {
         val firstPassword = "a1b2c3ABC"
         for {
-          _ ← changePassword(principal, newPassword = Some(firstPassword)).rightValueShouldBeUnit()
-          _ ← changePassword(principal, newPassword = Some("abc1A2B3C")).rightValueShouldBeUnit()
-          resultingFuture ← changePassword(principal, newPassword = Some(firstPassword)) leftValueShouldBe PasswordIsBeingReused
+          _ <- changePassword(principal, newPassword = Some(firstPassword)).rightValueShouldBeUnit()
+          _ <- changePassword(principal, newPassword = Some("abc1A2B3C")).rightValueShouldBeUnit()
+          resultingFuture <- changePassword(principal, newPassword = Some(firstPassword)) leftValueShouldBe PasswordIsBeingReused
         } yield resultingFuture
       }
       "succeed if the password is valid according to the policy" in {
         val password = "yey DIDN'T I say we n33ded a new password"
         for {
-          _ ← changePassword(principal, newPassword = Some(password)).rightValueShouldBeUnit()
-          resultingFuture ← checkPassword(principal, password).rightValueShouldBeUnit()
+          _ <- changePassword(principal, newPassword = Some(password)).rightValueShouldBeUnit()
+          resultingFuture <- checkPassword(principal, password).rightValueShouldBeUnit()
         } yield resultingFuture
       }
     }

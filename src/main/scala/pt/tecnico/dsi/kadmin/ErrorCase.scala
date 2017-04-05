@@ -11,6 +11,8 @@ case object PasswordIsBeingReused extends ErrorCase
 case object PasswordExpired extends ErrorCase
 case object KeytabDoesNotExist extends ErrorCase
 case object KeytabIsNotReadable extends ErrorCase
+case object UnableToAccessDatabase extends ErrorCase
+case object CommunicationFailure extends ErrorCase
 
 case class InsufficientPermissions(missingPrivilege: String) extends ErrorCase
 

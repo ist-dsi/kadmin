@@ -8,7 +8,7 @@ import org.scalatest.AsyncWordSpec
 class LackOfPrivilegesSpec extends AsyncWordSpec with TestUtils {
   import noPermissionsKadmin._
 
-  "An Expect" when {
+  "Kadmin" when {
     "the authenticating principal does not have sufficient permissions" should {
       val principal = "kadmin/admin"
 

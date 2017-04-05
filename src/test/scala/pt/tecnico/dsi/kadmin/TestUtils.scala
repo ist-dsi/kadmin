@@ -48,13 +48,13 @@ trait TestUtils extends ScalaFutures with Matchers with OptionValues with LazyLo
       require(repetitions >= 2, "To test for idempotency at least 2 repetitions must be made")
       
       expect.run().flatMap { firstResult ⇒
-        //If this fails we do not want to catch its exception, because failing in the first attempt means
-        //whatever is being tested in `test` is not implemented correctly. Therefore we do not want to mask
-        //the failure with a "Operation is not idempotent".
+        // If this fails we do not want to catch its exception, because failing in the first attempt means
+        // whatever is being tested in `test` is not implemented correctly. Therefore we do not want to mask
+        // the failure with a "Operation is not idempotent".
         test(firstResult)
       
-        //This code will only be executed if the previous test succeed.
-        //And now we want to catch the exception because if `test` fails here it means it is not idempotent.
+        // This code will only be executed if the previous test succeed.
+        // And now we want to catch the exception because if `test` fails here it means it is not idempotent.
         val remainingResults: Future[Seq[Either[ErrorCase, T]]] = Future.sequence {
           (1 until repetitions) map { _ =>
             expect.run()
@@ -67,8 +67,8 @@ trait TestUtils extends ScalaFutures with Matchers with OptionValues with LazyLo
             succeed
           } catch {
             case e: TestFailedException =>
-              val otherResultsString = (1 until repetitions).map { i =>
-                f"  $i%2d\t${results(i)}"
+              val otherResultsString = results.zipWithIndex.tail.map { case (result, i) =>
+                f"  $i%2d\t$result"
               }.mkString("\n")
               throw new TestFailedException(s"""Operation is not idempotent. Results:
                                                 |  01:\t$firstResult

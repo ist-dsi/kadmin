@@ -12,10 +12,10 @@ case object Never extends ExpirationDateTime {
 }
 
 case class AbsoluteDateTime(_dateTime: DateTime) extends ExpirationDateTime {
-  //Expiration dates in kadmin have a resolution to the second
+  // Expiration dates in kadmin have a resolution to the second
   val dateTime = _dateTime.withMillisOfSecond(0)
 
-  //We cannot include the timezone in the format because kadmin cannot interpret some timezones such as WEST
+  // We cannot include the timezone in the format because kadmin cannot interpret some timezones such as WEST
   lazy val toKadminRepresentation: String = DateTimeFormat.forPattern("yyyy-MM-dd HH:mm:ss").print(dateTime)
   override def toString = s"AbsoluteDateTime($toKadminRepresentation)"
 

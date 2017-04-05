@@ -1,7 +1,7 @@
 package pt.tecnico.dsi.kadmin
 
 import com.typesafe.config.ConfigFactory
-import org.scalatest.{AsyncFlatSpec, FlatSpec}
+import org.scalatest.AsyncFlatSpec
 
 /**
   * $assumptions
@@ -14,17 +14,17 @@ class KeytabSpec extends AsyncFlatSpec with TestUtils {
     val principal = "obtainKeytab"
   
     for {
-      _ ← deletePrincipal(principal).rightValueShouldBeUnit()
-      resultingFuture ← obtainKeytab(principal) shouldBe Left(KeytabDoesNotExist)
+      _ <- deletePrincipal(principal).rightValueShouldBeUnit()
+      resultingFuture <- obtainKeytab(principal) shouldBe Left(KeytabDoesNotExist)
     } yield resultingFuture
   }
   it should "succeed if a keytab exists" in {
     val principal = "obtainKeytab"
   
     for {
-      _ ← addPrincipal("", principal, randKey = true).rightValueShouldBeUnit()
-      _ ← createKeytab("", principal).rightValueShouldBeUnit()
-      resultingFuture ← obtainKeytab(principal).toOption.value.length should be > 0
+      _ <- addPrincipal("", principal, randKey = true).rightValueShouldBeUnit()
+      _ <- createKeytab("", principal).rightValueShouldBeUnit()
+      resultingFuture <- obtainKeytab(principal).toOption.value.length should be > 0
     } yield resultingFuture
   }
 
@@ -38,13 +38,13 @@ class KeytabSpec extends AsyncFlatSpec with TestUtils {
     }"""))
     
     for {
-      _ ← addPrincipal("", principal, randKey = true).rightValueShouldBeUnit()
+      _ <- addPrincipal("", principal, randKey = true).rightValueShouldBeUnit()
     
-      //This also changes the principal password
-      _ ← createKeytab("", principal).rightValueShouldBeUnit()
+      // This also changes the principal password
+      _ <- createKeytab("", principal).rightValueShouldBeUnit()
     
-      //This will test whether the keytab was successfully created
-      resultingFuture ← kadmin.getPrincipal(principal).rightValue (_.name should startWith (principal))
+      // This will test whether the keytab was successfully created
+      resultingFuture <- kadmin.getPrincipal(principal).rightValue (_.name should startWith (principal))
     } yield resultingFuture
   }
 }

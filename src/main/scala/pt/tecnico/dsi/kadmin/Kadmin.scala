@@ -6,10 +6,10 @@ import java.nio.file.Files
 import com.typesafe.config.Config
 import com.typesafe.scalalogging.LazyLogging
 import org.joda.time.DateTime
-import work.martins.simon.expect.fluent.{ExpectBlock, Expect => FluentExpect}
+import work.martins.simon.expect.fluent.{ExpectBlock, RegexWhen, Expect => FluentExpect}
 import work.martins.simon.expect.core.Expect
-
 import scala.util.matching.Regex.Match
+
 import pt.tecnico.dsi.kadmin.KadminUtils._
 
 /**
@@ -58,21 +58,21 @@ class Kadmin(val settings: Settings = new Settings()) extends LazyLogging {
     val expectBlock = e.expect
     if (passwordAuthentication) {
       expectBlock
-        //Due to the fantastic consistency in kerberos commands we cannot use:
-        //  addWhen(passwordIncorrect)
-        //because in kadmin the error is "Incorrect password" and the `passwordIncorrect` function will add a when with:
-        //  when("Password incorrect")
-        //</sarcasm>
+        // Due to the fantastic consistency in kerberos commands we cannot use:
+        //   addWhen(passwordIncorrect)
+        // because in kadmin the error is "Incorrect password" and the `passwordIncorrect` function will add a when with:
+        //   when("Password incorrect")
+        // </sarcasm>
         .when("Incorrect password")
           .returning(Left(PasswordIncorrect))
           .addActions(preemptiveExit)
     }
     expectBlock
       .when("(.+) while initializing kadmin interface".r)
-        .returning(m => Left(UnknownError(m.group(1))))
+        .returning(m => Left(UnknownError(m.group(0))))
         .exit()
       .when(kadminPrompt)
-        //All good. We can continue. We need to send a newline in order for `f` to see the KadminPrompt
+        // All good. We can continue. We need to send a newline in order for `f` to see the KadminPrompt
         .sendln("")
       .addWhen(unknownError)
         .addActions(preemptiveExit)
@@ -160,7 +160,7 @@ class Kadmin(val settings: Settings = new Settings()) extends LazyLogging {
     val clearPolicy = options.contains("-clearpolicy")
     val cleanedOptions = options
       .replaceAll("-clearpolicy", "")
-      //Contrary to what is stated in the documentation the option -nokey is not valid in modify.
+      // Contrary to what is stated in the documentation the option -nokey is not valid in modify.
       .replaceAll("""-nokey\b""", "")
 
     doOperation { e =>
@@ -176,13 +176,13 @@ class Kadmin(val settings: Settings = new Settings()) extends LazyLogging {
           .sendln(s"modify_principal -clearpolicy $fullPrincipal")
         e.expect
           .when(s"""Principal "$fullPrincipal" modified.""")
-            //Its all good. We can continue.
+            // Its all good. We can continue.
           .when("User modification failed: No such attribute")
-            //This happens when the principal already has no policy. (This error happens in kadmin.local)
-            //Its all good. We can continue.
+            // This happens when the principal already has no policy. (This error happens in kadmin.local)
+            // Its all good. We can continue.
           .when("Database store error")
-            //This happens when the principal already has no policy. (This error happens in kadmin)
-            //Its all good. We can continue.
+            // This happens when the principal already has no policy. (This error happens in kadmin)
+            // Its all good. We can continue.
           .addWhen(principalDoesNotExist)
             .addActions(preemptiveExit)
           .addWhen(insufficientPermission)
@@ -196,8 +196,8 @@ class Kadmin(val settings: Settings = new Settings()) extends LazyLogging {
         .when(s"""Principal "$fullPrincipal" modified.""")
           .returning(Right(()))
       if (clearPolicy == false) {
-        //We just need to check for these cases when the policy was not cleared. Because in the case the policy
-        //was cleared these cases will already have been caught.
+        // We just need to check for these cases when the policy was not cleared. Because in the case the policy
+        // was cleared these cases will already have been caught.
         w.addWhen(principalDoesNotExist)
           .addWhen(insufficientPermission)
           .addWhen(unknownError)
@@ -308,7 +308,7 @@ class Kadmin(val settings: Settings = new Settings()) extends LazyLogging {
 
       newPassword match {
         case None =>
-          //If newPassword is a None then randKey must be true
+          // If newPassword is a None then randKey must be true
           e.expect
             .addWhen(principalDoesNotExist)
             .addWhen(insufficientPermission)
@@ -351,13 +351,13 @@ class Kadmin(val settings: Settings = new Settings()) extends LazyLogging {
     val fullPrincipal = getFullPrincipalName(principal)
     doOperation { e =>
       e.expect(kadminPrompt)
-        //With the -force option it no longer prompts for deletion.
+        // With the -force option it no longer prompts for deletion.
         .sendln(s"delete_principal -force $fullPrincipal")
       e.expect
         .when(s"""Principal "$fullPrincipal" deleted.""")
           .returning(Right(Unit))
         .addWhen(principalDoesNotExist)
-          //This is what makes this operation idempotent
+          // This is what makes this operation idempotent
           .returning(Right(Unit))
         .addWhen(insufficientPermission)
         .addWhen(unknownError)
@@ -394,6 +394,7 @@ class Kadmin(val settings: Settings = new Settings()) extends LazyLogging {
       e.expect
         .addWhen(principalDoesNotExist)
         .addWhen(insufficientPermission)
+        .addWhen(communicationFailure)
         .addWhens(f)
     }
   }
@@ -407,7 +408,7 @@ class Kadmin(val settings: Settings = new Settings()) extends LazyLogging {
     * @return an Expect that returns the `Principal`.
     */
   def getPrincipal(principal: String): Expect[Either[ErrorCase, Principal]] = withPrincipal(principal){ expectBlock =>
-    //(?s) inline regex flag for dotall mode. In this mode '.' matches any character, including a line terminator.
+    // (?s) inline regex flag for dotall mode. In this mode '.' matches any character, including a line terminator.
     expectBlock.when("""(?s)Expiration date: ([^\n]+)
                       |Last password change: ([^\n]+)
                       |Password expiration date: ([^\n]+)
@@ -426,7 +427,7 @@ class Kadmin(val settings: Settings = new Settings()) extends LazyLogging {
             "lastModifiedDateTime", "lastModifiedBy",
             "lastSuccessfulAuthenticationDateTime", "lastFailedAuthenticationDateTime", "failedPasswordAttempts",
             "keys", "masterKey", "attributes", "policy"))
-      .returning { m: Match =>
+      .returning { m =>
         val groups = m.groupNames.map(name => (name, m.group(name))).toMap
         val (datesString, others) = groups.partition { case (name, _) => name.contains("DateTime") }
         val datesStream = datesString.toStream.map { case (key, value) => (key, parseDateTime(value)) }
@@ -435,7 +436,7 @@ class Kadmin(val settings: Settings = new Settings()) extends LazyLogging {
           case (_, Left(errorCase)) => Left(errorCase)
         } getOrElse {
           val dates = datesStream.collect { case (name, Right(date)) => (name, date) }.toMap
-          Right(new Principal(getFullPrincipalName(principal), dates("expirationDateTime"),
+          Right(Principal(getFullPrincipalName(principal), dates("expirationDateTime"),
             dates("lastPasswordChangeDateTime"), dates("passwordExpirationDateTime"),
             parseDuration(others("maximumTicketLife")), parseDuration(others("maximumRenewableLife")),
             dates("lastModifiedDateTime"), m.group("lastModifiedBy"),
@@ -457,22 +458,21 @@ class Kadmin(val settings: Settings = new Settings()) extends LazyLogging {
     * @return an Expect that returns the list of principals.
     */
   def listPrincipals(expressionGlob: String): Expect[Either[ErrorCase, Seq[String]]] = {
-    val command = s"list_principals $expressionGlob"
+    val expression = if (expressionGlob.isEmpty || expressionGlob.endsWith(s"@$realm")) {
+      expressionGlob
+    } else {
+      expressionGlob.replaceAll("@.*$", "") + s"@$realm"
+    }
+    val command = s"list_principals $expression"
     doOperation { e =>
       e.expect(kadminPrompt)
         .sendln(command)
       e.expect
         .addWhen(insufficientPermission)
-        .addWhen(unknownError)
+        .addWhen(unableToAccessDatabase)
+        .when(s"${expression.replace("*", "\\*").replace("?", "\\?")}\\s+((?>[^@]+@$realm\n)*)(?=$kadminPrompt\\s*)".r)
           .returning { m: Match =>
-            val splits = m.group(1).split("\n")
-            val isOutput = splits.headOption.exists(_.trim.contains(command)) && splits.exists(_.matches(s"[^@]+@$realm"))
-            if (isOutput) {
-              //The first element is the command, so we drop it
-              Right(splits.drop(1).toSeq)
-            } else {
-              Left(UnknownError(m.group(1)))
-            }
+            Right(m.group(1).split("\n").toSeq)
           }
     }
   }
@@ -492,10 +492,10 @@ class Kadmin(val settings: Settings = new Settings()) extends LazyLogging {
     */
   def checkPassword(principal: String, password: String): Expect[Either[ErrorCase, Unit]] = {
     val fullPrincipal = getFullPrincipalName(principal)
-    //-l sets the lifetime of the obtained ticket to 1 second
-    //val e = new Expect(s"""kinit -V -l 0:00:01 $fullPrincipal""", defaultValue)
+    // -l sets the lifetime of the obtained ticket to 1 second
+    // val e = new Expect(s"""kinit -V -l 0:00:01 $fullPrincipal""", defaultValue)
 
-    //-c sets the credential cache to /dev/null. This ensures no ticket is ever created.
+    // -c sets the credential cache to /dev/null. This ensures no ticket is ever created.
     val e = new FluentExpect(s"""kinit -V -c /dev/null $fullPrincipal""", defaultUnknownError[Unit], scalaExpectSettings)
 
     e.expect
@@ -505,8 +505,8 @@ class Kadmin(val settings: Settings = new Settings()) extends LazyLogging {
         .returning(Left(NoSuchPrincipal))
     e.expect
       .when("Internal credentials cache error while storing credentials")
-        //Because we set the credential cache to /dev/null kadmin fails when trying to write the ticket to the cache.
-        //This means the authentication was successful and thus the password is correct.
+        // Because we set the credential cache to /dev/null kadmin fails when trying to write the ticket to the cache.
+        // This means the authentication was successful and thus the password is correct.
         .returning(Right(()))
       .when("Authenticated to Kerberos")
         .returning(Right(()))
@@ -660,7 +660,7 @@ class Kadmin(val settings: Settings = new Settings()) extends LazyLogging {
     */
   def deletePolicy(policy: String): Expect[Either[ErrorCase, Unit]] = {
     doOperation { e =>
-      //With the -force option kadmin no longer prompts for deletion.
+      // With the -force option kadmin no longer prompts for deletion.
       val command = s"delete_policy -force $policy"
       e.expect(kadminPrompt)
         .sendln(command)
@@ -668,7 +668,7 @@ class Kadmin(val settings: Settings = new Settings()) extends LazyLogging {
         .when("Policy is in use")
           .returning(Left(PolicyIsInUse))
         .addWhen(policyDoesNotExist)
-          //This is what makes this operation idempotent
+          // This is what makes this operation idempotent
           .returning(Right(()))
         .addWhen(insufficientPermission)
         .addWhen(unknownError)
@@ -738,7 +738,7 @@ class Kadmin(val settings: Settings = new Settings()) extends LazyLogging {
           m.group(1).split(",").flatMap(KeySalt.fromString).toSet
         }
 
-        Right(new Policy(
+        Right(Policy(
           policy, parseDuration(m.group("maximumLife")), parseDuration(m.group("minimumLife")),
           m.group("minimumLength").toInt, m.group("minimumCharacterClasses").toInt,
           m.group("oldKeysKept").toInt, m.group("maximumFailuresBeforeLockout").toInt,
@@ -749,7 +749,7 @@ class Kadmin(val settings: Settings = new Settings()) extends LazyLogging {
   }
   //endregion
 
-  def unknownError[R](expectBlock: ExpectBlock[Either[ErrorCase, R]]) = {
+  def unknownError[R](expectBlock: ExpectBlock[Either[ErrorCase, R]]): RegexWhen[Either[ErrorCase, R]] = {
     //(?s) inline regex flag for dotall mode. In this mode '.' matches any character, including a line terminator.
     expectBlock.when(s"(?s)(.+?)(?=\n$kadminPrompt)".r)
       .returning { m: Match =>

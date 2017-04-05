@@ -23,6 +23,7 @@ services:
       # This bootstraps running sbt inside the container
       - ~/.sbt:/root/.sbt
       - ~/.ivy2:/root/.ivy2
+      - ~/.coursier:/root/.coursier
 
 # NOTE:
 #  "env_file: kerberos.env" is optional.

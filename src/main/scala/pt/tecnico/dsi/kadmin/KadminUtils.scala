@@ -7,15 +7,14 @@ import com.typesafe.scalalogging.LazyLogging
 import org.joda.time.{DateTime, DateTimeZone}
 import org.joda.time.format.DateTimeFormat
 import work.martins.simon.expect.EndOfFile
-import work.martins.simon.expect.fluent.{Expect => FluentExpect, ExpectBlock, When}
+import work.martins.simon.expect.fluent.{ExpectBlock, RegexWhen, StringWhen, When, Expect => FluentExpect}
 import work.martins.simon.expect.core.Expect
-
 import scala.concurrent.duration.{Duration, DurationInt, FiniteDuration}
 import scala.util.matching.Regex.Match
 import scala.util.{Failure, Success, Try}
 
 object KadminUtils extends LazyLogging {
-  //The expects declared here DO NOT use the scalaExpectSettings declared in Settings because they are not accessible here.
+  // The expects declared here DO NOT use the scalaExpectSettings declared in Settings because they are not accessible here.
 
   /**
     * Obtains a ticket granting ticket for `principal` either using `password` or `keytab`.
@@ -131,33 +130,33 @@ object KadminUtils extends LazyLogging {
       dateTimeString.trim match {
         case "[never]" | "[none]" => Never
         case trimmedDateString =>
-          //dateString must be in the format: EEE MMM 19 15:49:03 z* 2016 .*
-          //EEE = three letter day of the week, eg: English: Tue, Portuguese: Ter
-          //MMM = three letter month of the year, eg: English: Feb, Portuguese: Fev
-          //zzz = the timezone
+          // dateString must be in the format: EEE MMM 19 15:49:03 z* 2016 .*
+          // EEE = three letter day of the week, eg: English: Tue, Portuguese: Ter
+          // MMM = three letter month of the year, eg: English: Feb, Portuguese: Fev
+          // zzz = the timezone
           val parts = trimmedDateString.split("""\s+""")
           require(parts.size >= 6, s"""Not enough fields in "$trimmedDateString" for format "EEE MMM dd HH:mm:ss zzz yyyy".""")
 
-          //Discards any field after the year
+          // Discards any field after the year
           val Array(dayOfWeek, month, day, time, timezone, year, _*) = parts
 
           val finalTimeZone = if (DateTimeZone.getAvailableIDs.contains(timezone)) {
             DateTimeZone.forID(timezone)
           } else {
             val default = DateTimeZone.getDefault
-            logger.info(s"Unknown timezone: $timezone. Using the default one: $default.")
+            logger.warn(s"Unknown timezone: $timezone. Using the default one: $default.")
             default
           }
 
           val fmt = DateTimeFormat.forPattern("EEE MMM dd HH:mm:ss yyyy")
-            //We cannot parse the time zone with the DateTimeFormat because is does not support it.
+            // We cannot parse the time zone with the DateTimeFormat because is does not support it.
             .withZone(finalTimeZone)
-            //We define the locale because the text corresponding to the EEE and MMM patterns
-            //mostly likely is locale specific.
+            // We define the locale because the text corresponding to the EEE and MMM patterns
+            // mostly likely is locale specific.
             .withLocale(Locale.getDefault)
 
           val dateTime = fmt.parseDateTime(s"$dayOfWeek $month $day $time $year")
-          new AbsoluteDateTime(dateTime)
+          AbsoluteDateTime(dateTime)
       }
     } match {
       case Success(datetime) => Right(datetime)
@@ -184,35 +183,43 @@ object KadminUtils extends LazyLogging {
 
   def defaultUnknownError[R]: Either[ErrorCase, R] = Left(UnknownError())
 
-  def insufficientPermission[R](expectBlock: ExpectBlock[Either[ErrorCase, R]]) = {
+  def insufficientPermission[R](expectBlock: ExpectBlock[Either[ErrorCase, R]]): RegexWhen[Either[ErrorCase, R]] = {
     expectBlock.when("""Operation requires ``([^']+)'' privilege""".r)
       .returning { m: Match =>
         Left(InsufficientPermissions(m.group(1)))
       }
   }
-  def principalDoesNotExist[R](expectBlock: ExpectBlock[Either[ErrorCase, R]]) = {
+  def principalDoesNotExist[R](expectBlock: ExpectBlock[Either[ErrorCase, R]]): StringWhen[Either[ErrorCase, R]] = {
     expectBlock.when("Principal does not exist")
       .returning(Left(NoSuchPrincipal))
   }
-  def policyDoesNotExist[R](expectBlock: ExpectBlock[Either[ErrorCase, R]]) = {
+  def policyDoesNotExist[R](expectBlock: ExpectBlock[Either[ErrorCase, R]]): StringWhen[Either[ErrorCase, R]] = {
     expectBlock.when("Policy does not exist")
       .returning(Left(NoSuchPolicy))
   }
-  def passwordIncorrect[R](expectBlock: ExpectBlock[Either[ErrorCase, R]]) = {
+  def passwordIncorrect[R](expectBlock: ExpectBlock[Either[ErrorCase, R]]): StringWhen[Either[ErrorCase, R]] = {
     expectBlock.when("Password incorrect")
       .returning(Left(PasswordIncorrect))
   }
-  def passwordExpired[R](expectBlock: ExpectBlock[Either[ErrorCase, R]]) = {
+  def passwordExpired[R](expectBlock: ExpectBlock[Either[ErrorCase, R]]): StringWhen[Either[ErrorCase, R]] = {
     expectBlock.when("Password expired")
       .returning(Left(PasswordExpired))
+  }
+  def communicationFailure[R](expectBlock: ExpectBlock[Either[ErrorCase, R]]): StringWhen[Either[ErrorCase, R]] = {
+    expectBlock.when("Communication failure with server")
+      .returning(Left(CommunicationFailure))
+  }
+  def unableToAccessDatabase[R](expectBlock: ExpectBlock[Either[ErrorCase, R]]): StringWhen[Either[ErrorCase, R]] = {
+    expectBlock.when(s"Unable to access Kerberos database.")
+      .returning(Left(UnableToAccessDatabase))
   }
 
   def preemptiveExit[R](when: When[Either[ErrorCase, R]]): Unit = {
     when
-      //We send the quit to allow kadmin a graceful shutdown
+      // We send the quit to allow kadmin a graceful shutdown
       .sendln("quit")
-      //This ensures the next expect(s) (if any) do not get executed and
-      //we don't end up returning something else by mistake.
+      // This ensures the next expect(s) (if any) do not get executed and
+      // we don't end up returning something else by mistake.
       .exit()
   }
 }

@@ -1,9 +1,9 @@
 #!/bin/bash
 START=$(date +%s)
 
-# This allows us to chmod the current directory back to its original owner (instead of root).
-export UID
-
+# Compile the code before entering the containers. This allows us to fail early
+# and not pay the price of setting up the containers if the only thing we would
+# get out of it would be a compiler error.
 sbt test:compile
 END_COMPILE=$(date +%s)
 echo -e "\n\t" $(($END_COMPILE-$START)) " seconds - Compiling\n"
@@ -11,6 +11,8 @@ echo -e "\n\t" $(($END_COMPILE-$START)) " seconds - Compiling\n"
 cd docker-kerberos
 
 # Build the containers
+# This allows us to chmod the current directory back to its original owner (instead of root).
+export UID
 docker-compose build
 END_BUILDING=$(date +%s)
 echo -e "\n\t" $(($END_BUILDING-$END_COMPILE)) " seconds - Docker-compose build\n"

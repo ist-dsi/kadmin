@@ -49,7 +49,7 @@ Besides these kadmin commands the following functions are also available:
  - [`getFullPrincipalName`](https://ist-dsi.github.io/kadmin/latest/api/index.html#pt.tecnico.dsi.kadmin.Kadmin@getFullPrincipalName(principal:String):String) - returns the principal name with the realm, eg: kadmin/admin@EXAMPLE.COM.
  - [`doOperation`](https://ist-dsi.github.io/kadmin/latest/api/index.html#pt.tecnico.dsi.kadmin.Kadmin@doOperation[R](f:work.martins.simon.expect.fluent.Expect[Either[pt.tecnico.dsi.kadmin.ErrorCase,R]]=>Unit):work.martins.simon.expect.fluent.Expect[Either[pt.tecnico.dsi.kadmin.ErrorCase,R]]) - performs a kadmin command which will use password authentication or not according to the configuration, see below.
  - [`obtainTGT`](https://ist-dsi.github.io/kadmin/latest/api/index.html#pt.tecnico.dsi.kadmin.KadminUtils$@obtainTGT(options:String,principal:String,password:Option[String],keytab:Option[File]):work.martins.simon.expect.fluent.Expect[Either[pt.tecnico.dsi.kadmin.ErrorCase,Unit]]) - invokes `kinit` to obtain a ticket for a given principal. Authentication is either performed with a password or with a keytab.
- - [`listTickets`](https://ist-dsi.github.io/kadmin/latest/api/index.html#pt.tecnico.dsi.kadmin.KadminUtils$@listTickets(options:String):work.martins.simon.expect.fluent.Expect[Seq[pt.tecnico.dsi.kadmin.Ticket]])) - invokes `klist` to obtain the cached tickets.
+ - [`listTickets`](https://ist-dsi.github.io/kadmin/latest/api/index.html#pt.tecnico.dsi.kadmin.KadminUtils$@listTickets(options:String):work.martins.simon.expect.fluent.Expect[Seq[pt.tecnico.dsi.kadmin.Ticket]]) - invokes `klist` to obtain the cached tickets.
  - [`destroyTickets`](https://ist-dsi.github.io/kadmin/latest/api/index.html#pt.tecnico.dsi.kadmin.KadminUtils$@destroyTickets(options:String):work.martins.simon.expect.fluent.Expect[Unit]) - invokes `kdestroy` to destroy the ticket cache.
 
 ## Configurations
@@ -61,11 +61,12 @@ kadmin {
   realm = "EXAMPLE.COM"
 
   principal = "kadmin/admin"
-  // If password is not empty "command-password" will be used.
   // If keytab is not empty "command-keytab" will be used.
-  // If both password and keytab are not empty "command-keytab" will be used.
-  password = ""
+  // If password is not empty "command-password" will be used.
+  // If both keytab and password are not empty "command-keytab" will be used.
   keytab = ""
+  password = ""
+  
 
   // This is the command used to start kadmin.
   // The literal string "$FULL_PRINCIPAL" will be replaced with s"$principal@$realm"

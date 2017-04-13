@@ -46,8 +46,8 @@ class Settings(config: Config = ConfigFactory.load()) {
   val principal = getString("principal")
   require(principal.nonEmpty, "Principal cannot be empty.")
 
-  val password = getString("password")
   val keytab = getString("keytab")
+  val password = getString("password")
   require(password.nonEmpty || keytab.nonEmpty, "Either password or keytab must be defined.")
 
   val passwordAuthentication = keytab.isEmpty
@@ -109,21 +109,16 @@ class Settings(config: Config = ConfigFactory.load()) {
   override def toString: String =
     s"""Kadmin Settings:
        |\tRealm: $realm
-       |
        |\tPrincipal: $principal
-       |
-       |\tPassword: $password
        |\tKeytab: $keytab
+       |\tPassword: $password
+       |\tCommand keytab: $commandKeytab
+       |\tCommand password: $commandPassword
+       |\tKeytabs location: $keytabsLocation
+       |\tPrompt: ${escape(kadminPrompt.regex)}
        |
        |${if (passwordAuthentication) "Password" else "Keytab"} authentication will be performed using command:
        |\t$command
-       |
-       |\tCommand keytab: $commandKeytab
-       |\tCommand password: $commandPassword
-       |
-       |\tKeytabs location: $keytabsLocation
-       |
-       |\tPrompt: ${escape(kadminPrompt.regex)}
        |
        |${scalaExpectSettings.toString.indent()}
      """.stripMargin

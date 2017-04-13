@@ -1,9 +1,9 @@
-# kadmin
+# kadmin [![license](http://img.shields.io/:license-MIT-blue.svg)](LICENSE)
+[![Scaladoc](http://javadoc-badge.appspot.com/pt.tecnico.dsi/kadmin_2.12.svg?label=scaladoc&style=plastic&maxAge=604800)](https://ist-dsi.github.io/kadmin/latest/api/pt/tecnico/dsi/kadmin/index.html)
 [![Maven Central](https://maven-badges.herokuapp.com/maven-central/pt.tecnico.dsi/kadmin_2.12/badge.svg?maxAge=604800)](https://maven-badges.herokuapp.com/maven-central/pt.tecnico.dsi/kadmin_2.12)
 [![Dependency Status](https://www.versioneye.com/user/projects/5717b800fcd19a004544172f/badge.svg?style=flat-square)](https://www.versioneye.com/user/projects/5717b800fcd19a004544172f)
 [![Reference Status](https://www.versioneye.com/java/pt.tecnico.dsi:kadmin_2.12/reference_badge.svg?style=plastic&maxAge=604800)](https://www.versioneye.com/java/pt.tecnico.dsi:kadmin_2.12/references)
-[![Scaladoc](http://javadoc-badge.appspot.com/pt.tecnico.dsi/kadmin_2.12.svg?label=scaladoc&style=plastic&maxAge=604800)](https://ist-dsi.github.io/kadmin/latest/api/pt/tecnico/dsi/kadmin/index.html)
-[![license](http://img.shields.io/:license-MIT-blue.svg)](LICENSE)
+
 
 [![Build Status](https://travis-ci.org/ist-dsi/kadmin.svg?branch=master&style=plastic&maxAge=604800)](https://travis-ci.org/ist-dsi/kadmin)
 [![Codacy Badge](https://api.codacy.com/project/badge/coverage/a5fead3a55db40cd96470ed7a8efe9c5)](https://www.codacy.com/app/IST-DSI/kadmin)

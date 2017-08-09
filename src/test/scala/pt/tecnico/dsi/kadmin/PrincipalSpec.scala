@@ -9,8 +9,8 @@ import org.scalatest.AsyncFlatSpec
 class PrincipalSpec extends AsyncFlatSpec with TestUtils {
   import fullPermissionsKadmin._
 
-  "addPrincipal" should "idempotently succeed" in {
-    val principal = "add"
+  "addPrincipal" should "idempotently succeed when setting nokey" in {
+    val principal = "addNoKey"
     
     for {
       //Ensure the principal does not exist
@@ -25,7 +25,7 @@ class PrincipalSpec extends AsyncFlatSpec with TestUtils {
     } yield resultingFuture
   }
   it should "idempotently succeed when setting a password" in {
-    val principal = "add"
+    val principal = "addPassword"
     
     for {
       // Ensure the principal does not exist
@@ -33,10 +33,32 @@ class PrincipalSpec extends AsyncFlatSpec with TestUtils {
   
       // Create the principal
       // This also tests adding a principal when a principal already exists
-      _ <- addPrincipal("", principal, newPassword = Some("aShinyN3wPassword")).rightValueShouldIdempotentlyBeUnit()
+      _ <- addPrincipal("", principal, password = Some("aShinyN3wPassword")).rightValueShouldIdempotentlyBeUnit()
   
       // Ensure it was in fact created
       resultingFuture <- getPrincipal(principal).rightValue (_.name shouldBe getFullPrincipalName(principal))
+    } yield resultingFuture
+  }
+
+  // Maybe these two tests should be in the PasswordSpec
+  it should "return PasswordToShort when the password is too short" in {
+    val principal = "addPasswordTooShort"
+    val policy = "addPasswordTooShort"
+
+    for {
+      _ <- deletePrincipal(principal).rightValueShouldBeUnit()
+      _ <- addPolicy("-minlength 5", policy).rightValueShouldBeUnit()
+      resultingFuture <- addPrincipal(s"-policy $policy", principal, password = Some("a")) leftValueShouldIdempotentlyBe PasswordTooShort
+    } yield resultingFuture
+  }
+  it should "return PasswordWithoutEnoughCharacterClasses when the password has too few character classes" in {
+    val principal = "addPasswordTooShort"
+    val policy = "addPasswordTooShort"
+
+    for {
+      _ <- deletePrincipal(principal).rightValueShouldBeUnit()
+      _ <- addPolicy("-minclasses 5", policy).rightValueShouldBeUnit()
+      resultingFuture <- addPrincipal(s"-policy $policy", principal, password = Some("aaaaaaaaaaaa")) leftValueShouldIdempotentlyBe PasswordWithoutEnoughCharacterClasses
     } yield resultingFuture
   }
 
@@ -143,10 +165,10 @@ class PrincipalSpec extends AsyncFlatSpec with TestUtils {
   }
   it should "idempotently succeed" in {
     val principal = "get"
-    
+    val everySaltType = "aes256-cts:normal,aes256-cts:v4,aes256-cts:norealm,aes256-cts:onlyrealm,des:afs3,aes256-cts:special"
     for {
-      // Ensure the principal exists
-      _ <- addPrincipal("-nokey", principal).rightValueShouldBeUnit()
+      // Ensure the principal exists. We are using every type of salt to test whether getPrincipal can handle them all.
+      _ <- addPrincipal(s"-e $everySaltType", principal, password = Some("a shiny new insecure password")).rightValueShouldBeUnit()
 
       // Get it
       resultingFuture <- getPrincipal(principal) idempotentRightValue (_ shouldBe a[Principal])

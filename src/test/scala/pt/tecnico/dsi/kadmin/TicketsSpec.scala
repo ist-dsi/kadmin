@@ -30,8 +30,6 @@ class TicketsSpec extends AsyncFlatSpec with TestUtils with BeforeAndAfterEach {
       command-keytab = "kadmin -c /tmp/krb5cc_0"
     }"""))
 
-  //println(kadmin.settings)
-
   "obtainTicketGrantingTicket" should "throw IllegalArgumentException if neither password or keytab is specified" in {
     assertThrows[IllegalArgumentException]{
       KadminUtils.obtainTGT("", principal)
@@ -40,6 +38,11 @@ class TicketsSpec extends AsyncFlatSpec with TestUtils with BeforeAndAfterEach {
   it should "throw IllegalArgumentException if both password and keytab are specified" in {
     assertThrows[IllegalArgumentException]{
       KadminUtils.obtainTGT("", principal, password = Some(password), keytab = Some(new File(".")))
+    }
+  }
+  it should "throw IllegalArgumentException principal is empty" in {
+    assertThrows[IllegalArgumentException]{
+      KadminUtils.obtainTGT("", "", password = Some(password))
     }
   }
   it should "succeed with password" in {

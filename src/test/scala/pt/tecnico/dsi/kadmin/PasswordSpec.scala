@@ -1,11 +1,12 @@
 package pt.tecnico.dsi.kadmin
 
 import org.scalatest.AsyncWordSpec
+import work.martins.simon.expect.fluent.Expect
 
 /**
   * $assumptions
   */
-class ChangePasswordSpec extends AsyncWordSpec with TestUtils {
+class PasswordSpec extends AsyncWordSpec with TestUtils {
   import fullPermissionsKadmin._
 
   "ChangePassword" when {
@@ -22,11 +23,12 @@ class ChangePasswordSpec extends AsyncWordSpec with TestUtils {
       }
       "throw IllegalArgumentException if only keysalt is specified" in {
         assertThrows[IllegalArgumentException]{
-          changePassword("changePasswordWrongOptions", keysalt = Some("aes256-cts-hmac-sha1-96:normal"))
+          changePassword("changePasswordWrongOptions", keysalt = Some(KeySalt("aes256-cts-hmac-sha1-96", Salt.Special)))
         }
       }
     }
-    "the principal does not exits" should {
+
+    "the principal does not exists" should {
       "return NoSuchPrincipal when randomizing the keys" in {
         testNoSuchPrincipal {
           changePassword("changePasswordToRandKey", randKey = true)
@@ -34,9 +36,14 @@ class ChangePasswordSpec extends AsyncWordSpec with TestUtils {
       }
       "return NoSuchPrincipal when setting the password" in {
         testNoSuchPrincipal {
-          changePassword("changePasswordToNewPassword", newPassword = Some("new apssword"))
+          changePassword("changePasswordToNewPassword", newPassword = Some("new password"))
         }
       }
+      /*"return NoSuchPrincipal when checking the password" in {
+        testNoSuchPrincipal {
+          checkPassword("changePasswordToNewPassword", password = "new password")
+        }
+      }*/
     }
 
     "the keys are being randomized" should {
@@ -62,6 +69,7 @@ class ChangePasswordSpec extends AsyncWordSpec with TestUtils {
         } yield resultingFuture
       }
     }
+
     "the principal has a restrictive policy" should {
       val principal = "changePasswordWithPolicy"
       val policy = "restrictive"
@@ -71,25 +79,37 @@ class ChangePasswordSpec extends AsyncWordSpec with TestUtils {
       } yield resultingFuture
       
       "return PasswordTooShort" in {
-        changePassword(principal, newPassword = Some("abc")) leftValueShouldBe PasswordTooShort
+        changePassword(principal, newPassword = Some("abc")) leftValueShouldIdempotentlyBe PasswordTooShort
       }
       "return PasswordWithoutEnoughCharacterClasses" in {
-        changePassword(principal, newPassword = Some("abcabcabc")) leftValueShouldBe PasswordWithoutEnoughCharacterClasses
+        changePassword(principal, newPassword = Some("abcabcabc")) leftValueShouldIdempotentlyBe PasswordWithoutEnoughCharacterClasses
       }
       "return PasswordIsBeingReused" in {
-        val firstPassword = "a1b2c3ABC"
+        val password = "a1b2c3ABC"
         for {
-          _ <- changePassword(principal, newPassword = Some(firstPassword)).rightValueShouldBeUnit()
-          _ <- changePassword(principal, newPassword = Some("abc1A2B3C")).rightValueShouldBeUnit()
-          resultingFuture <- changePassword(principal, newPassword = Some(firstPassword)) leftValueShouldBe PasswordIsBeingReused
+          _ <- changePassword(principal, newPassword = Some(password)).rightValueShouldBeUnit()
+          resultingFuture <- changePassword(principal, newPassword = Some(password)) leftValueShouldIdempotentlyBe PasswordIsBeingReused
         } yield resultingFuture
       }
       "succeed if the password is valid according to the policy" in {
         val password = "yey DIDN'T I say we n33ded a new password"
         for {
+          // We cannot test for idempotency here since the policy records the last 2 passwords but since we
+          // already tested changePassword for idempotency above this is not a problem
           _ <- changePassword(principal, newPassword = Some(password)).rightValueShouldBeUnit()
           resultingFuture <- checkPassword(principal, password).rightValueShouldBeUnit()
         } yield resultingFuture
+      }
+    }
+  }
+
+  "doOperation" when {
+    "the password is incorrect" should {
+      "return PasswordIncorrect" in {
+        val kadmin = new Kadmin(fullPermissionsKadmin.settings.copy(password = "wrong password"))
+        kadmin.doOperation { _: Expect[Either[ErrorCase, Unit]] =>
+          ()
+        } leftValueShouldBe PasswordIncorrect
       }
     }
   }

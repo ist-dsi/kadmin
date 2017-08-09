@@ -44,7 +44,7 @@ We use [semantic versioning](http://semver.org).
 
 Every command is idempotent except when changing either a password, a salt or a key.
 
-Besides these kadmin commands the following functions are also available:
+Besides the above kadmin commands the following functions are also available:
 
  - [`getFullPrincipalName`](https://ist-dsi.github.io/kadmin/latest/api/index.html#pt.tecnico.dsi.kadmin.Kadmin@getFullPrincipalName(principal:String):String) - returns the principal name with the realm, eg: kadmin/admin@EXAMPLE.COM.
  - [`doOperation`](https://ist-dsi.github.io/kadmin/latest/api/index.html#pt.tecnico.dsi.kadmin.Kadmin@doOperation[R](f:work.martins.simon.expect.fluent.Expect[Either[pt.tecnico.dsi.kadmin.ErrorCase,R]]=>Unit):work.martins.simon.expect.fluent.Expect[Either[pt.tecnico.dsi.kadmin.ErrorCase,R]]) - performs a kadmin command which will use password authentication or not according to the configuration, see below.
@@ -86,6 +86,8 @@ kadmin {
   # Kadmin will use as settings for scala-expect library those defined:
   # 1) Here, directly under the path kadmin (these have precedence over the next ones).
   # 2) On the same level as kadmin.
+  # IMPORTANT: if you set the log level of scala-expect to be info or higher the passwords of the principals will appear in the logs.
+  # be sure to set the log level to WARN in production.
 }
 ```
 

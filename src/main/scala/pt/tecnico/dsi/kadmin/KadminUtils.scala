@@ -4,12 +4,13 @@ import java.io.File
 import java.util.Locale
 
 import com.typesafe.scalalogging.LazyLogging
-import org.joda.time.{DateTime, DateTimeZone}
 import org.joda.time.format.DateTimeFormat
+import org.joda.time.{DateTime, DateTimeZone}
 import work.martins.simon.expect.EndOfFile
-import work.martins.simon.expect.fluent.{ExpectBlock, RegexWhen, StringWhen, When, Expect => FluentExpect}
 import work.martins.simon.expect.core.Expect
-import scala.concurrent.duration.{Duration, DurationInt, FiniteDuration}
+import work.martins.simon.expect.fluent.{ExpectBlock, RegexWhen, StringWhen, When, Expect => FluentExpect}
+
+import scala.concurrent.duration.{DurationInt, FiniteDuration}
 import scala.util.matching.Regex.Match
 import scala.util.{Failure, Success, Try}
 
@@ -100,7 +101,6 @@ object KadminUtils extends LazyLogging {
     e
   }
 
-
   /**
     * Tries to parse a date time string returned by a kadmin `get_principal` operation.
     *
@@ -123,9 +123,9 @@ object KadminUtils extends LazyLogging {
     *    constructed in step 4.
     *
     * @param dateTimeString the string containing the date time.
-    * @return `Never` or an `AbsoluteDateTime`
+    * @return An `UnknownError` in case the parsing failed. `Never` or an `AbsoluteDateTime` on success.
     */
-  def parseDateTime(dateTimeString: => String): Either[ErrorCase, ExpirationDateTime] = {
+  def parseDateTime(dateTimeString: => String): Either[UnknownError, ExpirationDateTime] = {
     Try {
       dateTimeString.trim match {
         case "[never]" | "[none]" => Never
@@ -169,17 +169,17 @@ object KadminUtils extends LazyLogging {
     * The expected format is "d days? HH:mm:ss".
     *
     * @param durationString the string to parse.
-    * @return the parsed FiniteDuration or Duration.Zero if an error occurred.
+    * @return An `UnknownError` in case the parsing failed. A `FiniteDuration` on success.
     */
-  def parseDuration(durationString: String): FiniteDuration = {
-    """(\d+) days? (\d+):(\d+):(\d+)""".r
+  def parseDuration(durationString: String): Either[UnknownError, FiniteDuration] = {
+    val regexString = """(\d+) days? (\d+):(\d+):(\d+)"""
+    regexString.r
       .findFirstMatchIn(durationString)
       .map { m =>
         m.group(1).toInt.days + m.group(2).toInt.hours + m.group(3).toInt.minutes + m.group(4).toInt.seconds
       }
-      .getOrElse(Duration.Zero)
+      .toRight(UnknownError(s"""Could not parse the string "$durationString" using regex $regexString"""))
   }
-
 
   def defaultUnknownError[R]: Either[ErrorCase, R] = Left(UnknownError())
 
@@ -205,13 +205,18 @@ object KadminUtils extends LazyLogging {
     expectBlock.when("Password expired")
       .returning(Left(PasswordExpired))
   }
-  def communicationFailure[R](expectBlock: ExpectBlock[Either[ErrorCase, R]]): StringWhen[Either[ErrorCase, R]] = {
-    expectBlock.when("Communication failure with server")
-      .returning(Left(CommunicationFailure))
+  def passwordTooShort[R](expectBlock: ExpectBlock[Either[ErrorCase, R]]): StringWhen[Either[ErrorCase, R]] = {
+    expectBlock.when("Password is too short")
+      .returning(Left(PasswordTooShort))
   }
-  def unableToAccessDatabase[R](expectBlock: ExpectBlock[Either[ErrorCase, R]]): StringWhen[Either[ErrorCase, R]] = {
-    expectBlock.when(s"Unable to access Kerberos database.")
-      .returning(Left(UnableToAccessDatabase))
+  def passwordWithoutEnoughCharacterClasses[R](expectBlock: ExpectBlock[Either[ErrorCase, R]]): StringWhen[Either[ErrorCase, R]] = {
+    expectBlock.when("Password does not contain enough character classes")
+      .returning(Left(PasswordWithoutEnoughCharacterClasses))
+  }
+
+  def expectAndSendPassword[R](principal: String, password: String)(expectBlock: ExpectBlock[Either[ErrorCase, R]]): RegexWhen[Either[ErrorCase, R]] = {
+    expectBlock.when(s"""[pP]assword for (principal )?"?$principal""".r)
+      .send(password)
   }
 
   def preemptiveExit[R](when: When[Either[ErrorCase, R]]): Unit = {

@@ -53,28 +53,21 @@ trait TestUtils extends ScalaFutures with Matchers with OptionValues with LazyLo
         // the failure with a "Operation is not idempotent".
         test(firstResult)
       
-        // This code will only be executed if the previous test succeed.
-        // And now we want to catch the exception because if `test` fails here it means it is not idempotent.
-        val remainingResults: Future[Seq[Either[ErrorCase, T]]] = Future.sequence {
-          (1 until repetitions) map { _ =>
-            expect.run()
-          }
-        }
-      
-        remainingResults map { results ⇒
+        Future.traverse(2 to repetitions) { _ =>
+          expect.run()
+        } map { results ⇒
+          // And now we want to catch the exception because if `test` fails here it means it is not idempotent.
           try {
             results.foreach(test)
             succeed
           } catch {
             case e: TestFailedException =>
-              val otherResultsString = results.zipWithIndex.tail.map { case (result, i) =>
-                f"  $i%2d\t$result"
-              }.mkString("\n")
+              val resultsString = (firstResult +: results).zipWithIndex
+                .map { case (result, i) => s" ${i + 1}: $result"}
+                .mkString("\n")
               throw new TestFailedException(s"""Operation is not idempotent. Results:
-                                                |  01:\t$firstResult
-                                                |$otherResultsString
-                                                |${e.message}""".stripMargin,
-                e, e.failedCodeStackDepth + 1)
+                                                |$resultsString
+                                                |${e.message}""".stripMargin, e, e.failedCodeStackDepth + 1)
           }
         }
       }

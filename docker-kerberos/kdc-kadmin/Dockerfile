@@ -1,4 +1,4 @@
-FROM debian:jessie
+FROM debian:9
 MAINTAINER Simão Martins "simao.martins@tecnico.ulisboa.pt"
 
 EXPOSE 749 88

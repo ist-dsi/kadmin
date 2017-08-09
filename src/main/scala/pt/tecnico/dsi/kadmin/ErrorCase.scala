@@ -2,7 +2,6 @@ package pt.tecnico.dsi.kadmin
 
 sealed trait ErrorCase
 case object NoSuchPolicy extends ErrorCase
-case object PolicyIsInUse extends ErrorCase
 case object NoSuchPrincipal extends ErrorCase
 case object PasswordIncorrect extends ErrorCase
 case object PasswordTooShort extends ErrorCase
@@ -11,8 +10,6 @@ case object PasswordIsBeingReused extends ErrorCase
 case object PasswordExpired extends ErrorCase
 case object KeytabDoesNotExist extends ErrorCase
 case object KeytabIsNotReadable extends ErrorCase
-case object UnableToAccessDatabase extends ErrorCase
-case object CommunicationFailure extends ErrorCase
 
 case class InsufficientPermissions(missingPrivilege: String) extends ErrorCase
 

@@ -1,6 +1,7 @@
 package pt.tecnico.dsi.kadmin
 
 import org.scalatest.AsyncFlatSpec
+
 import scala.util.matching.Regex.Match
 
 /**
@@ -99,14 +100,13 @@ class PolicySpec extends AsyncFlatSpec with TestUtils {
   "getPolicy" should "idempotently succeed" in {
     val policy = "get"
     val minLength = 9
-    
     for {
-      // Ensure the policy exists
-      _ <- addPolicy(s"-minlength $minLength", policy).rightValueShouldBeUnit()
+      // Ensure the policy exists. The allowed keysalts here is a big of a cheat, we put it here to ensure
+      // the pattern matching inside the Keysalt object passes throught the line for normal
+      _ <- addPolicy(s"-allowedkeysalts aes256-cts -minlength $minLength", policy).rightValueShouldBeUnit()
   
       // Get it
       resultingFuture <- getPolicy(policy) idempotentRightValue (_.minimumLength shouldBe minLength)
     } yield resultingFuture
-
   }
 }

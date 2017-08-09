@@ -54,8 +54,7 @@ echo "==========================================================================
 echo "==== Creating realm ==============================================================="
 echo "==================================================================================="
 MASTER_PASSWORD=$(tr -cd '[:alnum:]' < /dev/urandom | fold -w30 | head -n1)
-# This command also starts the krb5-kdc and krb5-admin-server services
-krb5_newrealm <<EOF
+kdb5_util create -s <<EOF
 $MASTER_PASSWORD
 $MASTER_PASSWORD
 EOF

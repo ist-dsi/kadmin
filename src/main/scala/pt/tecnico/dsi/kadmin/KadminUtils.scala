@@ -32,8 +32,7 @@ object KadminUtils extends LazyLogging {
     val e = new FluentExpect(s"kinit $options $keytabOption $principal", defaultUnknownError[Unit])
     val block = e.expect
     password.foreach { pass =>
-      block.when(s"Password for $principal")
-        .sendln(pass)
+      block.addWhen(expectAndSendPassword(principal, pass))
     }
     block.when(s"""Client '[^']+' not found in Kerberos database""".r)
       .returning(Left(NoSuchPrincipal))
@@ -197,8 +196,8 @@ object KadminUtils extends LazyLogging {
     expectBlock.when("Policy does not exist")
       .returning(Left(NoSuchPolicy))
   }
-  def passwordIncorrect[R](expectBlock: ExpectBlock[Either[ErrorCase, R]]): StringWhen[Either[ErrorCase, R]] = {
-    expectBlock.when("Password incorrect")
+  def passwordIncorrect[R](expectBlock: ExpectBlock[Either[ErrorCase, R]]): RegexWhen[Either[ErrorCase, R]] = {
+    expectBlock.when("(Password incorrect|Incorrect password|Preauthentication failed)".r)
       .returning(Left(PasswordIncorrect))
   }
   def passwordExpired[R](expectBlock: ExpectBlock[Either[ErrorCase, R]]): StringWhen[Either[ErrorCase, R]] = {
@@ -216,7 +215,7 @@ object KadminUtils extends LazyLogging {
 
   def expectAndSendPassword[R](principal: String, password: String)(expectBlock: ExpectBlock[Either[ErrorCase, R]]): RegexWhen[Either[ErrorCase, R]] = {
     expectBlock.when(s"""[pP]assword for (principal )?"?$principal""".r)
-      .send(password)
+      .sendln(password)
   }
 
   def preemptiveExit[R](when: When[Either[ErrorCase, R]]): Unit = {

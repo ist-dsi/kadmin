@@ -61,21 +61,14 @@ class Kadmin(val settings: Settings) extends LazyLogging {
   def doOperation[R](f: FluentExpect[Either[ErrorCase, R]] => Unit): Expect[Either[ErrorCase, R]] = {
     val e = new FluentExpect(command, defaultUnknownError[R], scalaExpectSettings)
     if (keytab.isEmpty) {
-      e.expect(s"Password for ${getFullPrincipalName(principal)}: ")
-        .sendln(password)
+      e.expect.addWhen(expectAndSendPassword(principal, password))
     }
 
     val expectBlock = e.expect
     if (keytab.isEmpty) {
       expectBlock
-        // Due to the fantastic consistency in kerberos commands we cannot use:
-        //   addWhen(passwordIncorrect)
-        // because in kadmin the error is "Incorrect password" and the `passwordIncorrect` function will add a when with:
-        //   when("Password incorrect")
-        // </sarcasm>
-        .when("Incorrect password|Preauthentication failed".r)
-          .returning(Left(PasswordIncorrect))
-          .addActions(preemptiveExit)
+        .addWhen(passwordIncorrect)
+        .addActions(preemptiveExit)
     }
     expectBlock
       .when("(.+) while initializing kadmin interface".r)
@@ -124,10 +117,8 @@ class Kadmin(val settings: Settings) extends LazyLogging {
         .sendln(s"add_principal $options $randKeyOption $saltOption $fullPrincipal")
 
       password.foreach { pass =>
-        e.expect(s"""password for principal "$fullPrincipal"""")
-          .sendln(pass)
-        e.expect(s"""password for principal "$fullPrincipal"""")
-          .sendln(pass)
+        e.expect.addWhen(expectAndSendPassword(principal, pass))
+        e.expect.addWhen(expectAndSendPassword(principal, pass))
       }
 
       e.expect
@@ -491,8 +482,7 @@ class Kadmin(val settings: Settings) extends LazyLogging {
     val e = new FluentExpect(s"""kinit -V -c /dev/null $fullPrincipal""", defaultUnknownError[Unit], scalaExpectSettings)
 
     e.expect
-      .when(s"Password for $fullPrincipal:")
-        .sendln(password)
+      .addWhen(expectAndSendPassword(principal, password))
       .when(s"""Client '$fullPrincipal' not found in Kerberos database""")
         .returning(Left(NoSuchPrincipal))
     e.expect

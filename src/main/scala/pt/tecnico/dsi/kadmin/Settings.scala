@@ -24,25 +24,13 @@ object Settings {
     import kadminConfig._
 
     val realm = getString("realm")
-    require(realm.nonEmpty, "Realm cannot be empty.")
-
     val principal = getString("principal")
-    require(principal.nonEmpty, "Principal cannot be empty.")
-
     val keytab = getString("keytab")
-    val password = getString("password")
-    require(password.nonEmpty || keytab.nonEmpty, "Either password or keytab must be defined.")
 
-    def getCommand(path: String): Seq[String] = {
-      val commandArray: Seq[String] = getValue(path).valueType() match {
-        case ConfigValueType.STRING => splitBySpaces(getString(path))
-        case ConfigValueType.LIST => getStringList(path).asScala
-        case _ => throw new IllegalArgumentException(s"$path can only be String or Array of String")
-      }
-      require(commandArray.nonEmpty, s"Command cannot be empty.")
-      commandArray
-        .map(_.replaceAllLiterally("$FULL_PRINCIPAL", s"$principal@$realm"))
-        .map(_.replaceAllLiterally("$KEYTAB", s"$keytab"))
+    def getCommand(path: String): Seq[String] = getValue(path).valueType() match {
+      case ConfigValueType.STRING => splitBySpaces(getString(path))
+      case ConfigValueType.LIST => getStringList(path).asScala
+      case _ => throw new IllegalArgumentException(s"$path can only be String or Array of String")
     }
 
     val scalaExpectSettings = {
@@ -53,24 +41,31 @@ object Settings {
         } else {
           kadminConfig.getConfig(path)
         }
-        new ScalaExpectSettings(c.atPath(path))
+        ScalaExpectSettings.fromConfig(c.atPath(path))
       } else if (config.hasPath(path)) {
-        new ScalaExpectSettings(config.getConfig(path).atPath(path))
+        ScalaExpectSettings.fromConfig(config.getConfig(path).atPath(path))
       } else {
         new ScalaExpectSettings()
       }
     }
 
-    new Settings(realm, principal, keytab, password,
+    new Settings(
+      realm,
+      principal,
+      keytab,
+      getString("password"),
       if (keytab.isEmpty) getCommand("command-password") else getCommand("command-keytab"),
-      new File(getString("keytabs-location")), getString("prompt").r, scalaExpectSettings)
+      new File(getString("keytabs-location")),
+      getString("prompt").r,
+      scalaExpectSettings)
   }
 
-  def withPassword(realm: String, principal: String, password: String): Settings = {
-    new Settings(realm, principal, "", password, command = Seq(s"kadmin -p $principal@$realm"))
-  }
-  def withKeytab(realm: String, principal: String, keytab: String): Settings = {
-    new Settings(realm, principal, keytab, "", command = Seq(s"kadmin -p $principal@$realm -kt $keytab"))
+  def defaultCommand(usingKeytab: Boolean): Seq[String] = {
+    val withPassword = Seq("kadmin", "-p", "$FULL_PRINCIPAL")
+    if (usingKeytab)
+      withPassword ++ Seq("-kt", "$KEYTAB")
+    else
+      withPassword
   }
 }
 /**
@@ -86,11 +81,11 @@ object Settings {
   * @param command
   * @param keytabsLocation
   * @param kadminPrompt
-  * @param scalaExpectSettings
+  * @param expectSettings
   */
 case class Settings(realm: String, principal: String = "kadmin/admin", keytab: String, password: String,
                     command: Seq[String], keytabsLocation: File = new File("/tmp"),
-                    kadminPrompt: Regex = "kadmin(.local)?: ".r, scalaExpectSettings: ScalaExpectSettings = new ScalaExpectSettings()) {
+                    kadminPrompt: Regex = "kadmin(.local)?: ".r, expectSettings: ScalaExpectSettings = new ScalaExpectSettings()) {
   require(realm.nonEmpty, "Realm cannot be empty.")
   require(principal.nonEmpty, "Principal cannot be empty.")
   require(password.nonEmpty || keytab.nonEmpty, "Either password or keytab must be defined.")

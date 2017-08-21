@@ -1,9 +1,9 @@
-sudo: required
-dist: trusty
-
 language: scala
-scala: 2.12.0
+scala: 2.12.3
 jdk: oraclejdk8
+
+services:
+  - docker
 
 cache:
   directories:
@@ -14,9 +14,6 @@ before_cache:
   # Tricks to avoid unnecessary cache updates
   - find $HOME/.ivy2 -name "ivydata-*.properties" -delete
   - find $HOME/.sbt -name "*.lock" -delete
-
-before_install:
-  - sudo bash setupDocker.sh
 
 script:
   # We preserve the environment to ensure the CODACY_PROJECT_TOKEN is accessible inside the containers

@@ -49,7 +49,7 @@ class PasswordSpec extends AsyncWordSpec with TestUtils {
     "the keys are being randomized" should {
       "idempotently succeed" in {
         val principal = "changePasswordToRandKey"
-  
+
         for {
           _ <- addPrincipal("-clearpolicy -nokey", principal).rightValueShouldBeUnit()
           resultingFuture <- changePassword(principal, randKey = true).rightValueShouldIdempotentlyBeUnit()
@@ -107,7 +107,7 @@ class PasswordSpec extends AsyncWordSpec with TestUtils {
     "the password is incorrect" should {
       "return PasswordIncorrect" in {
         val kadmin = new Kadmin(fullPermissionsKadmin.settings.copy(password = "wrong password"))
-        kadmin.doOperation { _: Expect[Either[ErrorCase, Unit]] =>
+        kadmin.doOperation("i'll never be executed") { _: Expect[Either[ErrorCase, Unit]] =>
           ()
         } leftValueShouldBe PasswordIncorrect
       }

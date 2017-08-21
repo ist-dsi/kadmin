@@ -1,6 +1,5 @@
 package pt.tecnico.dsi.kadmin
 
-import com.typesafe.config.ConfigFactory
 import com.typesafe.scalalogging.LazyLogging
 import org.scalatest._
 import org.scalatest.concurrent.ScalaFutures
@@ -8,6 +7,7 @@ import org.scalatest.exceptions.TestFailedException
 import work.martins.simon.expect.core.Expect
 
 import scala.concurrent.Future
+import scala.language.existentials
 
 /**
   * @define assumptions These tests make the following assumptions:
@@ -23,25 +23,19 @@ import scala.concurrent.Future
   *  - Running the tests locally with docker-compose (look at the folder kerberos-docker).
   *  - Running the tests in the Travis CI (look at .travis.yml, which makes use of the kerberos-docker).
   */
-trait TestUtils extends ScalaFutures with Matchers with OptionValues with LazyLogging { self: AsyncTestSuite ⇒
-  def createConfigFor(principal: String) = ConfigFactory.parseString(s"""
-    kadmin {
-      realm = "EXAMPLE.COM"
-      principal = "$principal"
-      password = "MITiys4K5"
-    }
-    """)
-  val fullPermissionsKadmin = new Kadmin(createConfigFor("kadmin/admin"))
-  val noPermissionsKadmin = new Kadmin(createConfigFor("noPermissions"))
+trait TestUtils extends ScalaFutures with Matchers with EitherValues with LazyLogging { self: AsyncTestSuite ⇒
+  def kadminFor(principal: String) = new Kadmin(Settings.fromConfig().copy(principal = principal))
+  val fullPermissionsKadmin: Kadmin = kadminFor("kadmin/admin")
+  val noPermissionsKadmin: Kadmin = kadminFor("noPermissions")
 
   implicit class RichExpect[T](expect: Expect[Either[ErrorCase, T]]) {
-    def test(test: Either[ErrorCase, T] ⇒ Assertion): Future[Assertion] = expect.run().map(test)
+    def test(test: Either[ErrorCase, T] => Assertion): Future[Assertion] = expect.run().map(test)
     
-    def rightValue(testOnRight: T => Assertion): Future[Assertion] = test(t => testOnRight(t.toOption.value))
-    def leftValue(testOnLeft: ErrorCase => Assertion): Future[Assertion] = test(t => testOnLeft(t.swap.toOption.value))
+    def rightValue(testOnRight: T => Assertion): Future[Assertion] = test(t => testOnRight(t.right.value))
+    def leftValue(testOnLeft: ErrorCase => Assertion): Future[Assertion] = test(t => testOnLeft(t.left.value))
     
     def rightValueShouldBe(t: T): Future[Assertion] = rightValue(_ shouldBe t)
-    def rightValueShouldBeUnit()(implicit ev: T =:= Unit): Future[Assertion] = rightValue(_.shouldBe(()))
+    def rightValueShouldBeUnit()(implicit ev: T =:= Unit): Future[Assertion] = rightValue(ev(_).shouldBe(()))
     def leftValueShouldBe(error: ErrorCase): Future[Assertion] = leftValue(_ shouldBe error)
     
     def idempotentTest(test: Either[ErrorCase, T] => Assertion, repetitions: Int = 3): Future[Assertion] = {
@@ -73,17 +67,17 @@ trait TestUtils extends ScalaFutures with Matchers with OptionValues with LazyLo
       }
     }
 
-    def idempotentRightValue(testOnRight: T => Assertion): Future[Assertion] = idempotentTest(t => testOnRight(t.toOption.value))
-    def idempotentLeftValue(testOnLeft: ErrorCase => Assertion): Future[Assertion] = idempotentTest(t => testOnLeft(t.swap.toOption.value))
+    def idempotentRightValue(testOnRight: T => Assertion): Future[Assertion] = idempotentTest(t => testOnRight(t.right.value))
+    def idempotentLeftValue(testOnLeft: ErrorCase => Assertion): Future[Assertion] = idempotentTest(t => testOnLeft(t.left.value))
     
     def rightValueShouldIdempotentlyBe(rightValue: T): Future[Assertion] = idempotentRightValue(_ shouldBe rightValue)
-    def rightValueShouldIdempotentlyBeUnit()(implicit ev: T =:= Unit): Future[Assertion] = idempotentRightValue(_.shouldBe(()))
+    def rightValueShouldIdempotentlyBeUnit()(implicit ev: T =:= Unit): Future[Assertion] = idempotentRightValue(ev(_).shouldBe(()))
     def leftValueShouldIdempotentlyBe(leftValue: ErrorCase): Future[Assertion] = idempotentLeftValue(_ shouldBe leftValue)
   }
 
   def testNoSuchPrincipal[R](e: Expect[Either[ErrorCase, R]]): Future[Assertion] = e leftValueShouldIdempotentlyBe NoSuchPrincipal
   def testNoSuchPolicy[R](e: Expect[Either[ErrorCase, R]]): Future[Assertion] = e leftValueShouldIdempotentlyBe NoSuchPolicy
-  def testInsufficientPermission[R](permission: String)(e: Expect[Either[ErrorCase, R]]): Future[Assertion] = {
+  def testInsufficientPermission(permission: String)(e: Expect[Either[ErrorCase, T forSome { type T }]]): Future[Assertion] = {
     e leftValueShouldIdempotentlyBe InsufficientPermissions(permission)
   }
 }

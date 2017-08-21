@@ -6,7 +6,7 @@ import java.util.Locale
 import com.typesafe.scalalogging.LazyLogging
 import org.joda.time.format.DateTimeFormat
 import org.joda.time.{DateTime, DateTimeZone}
-import work.martins.simon.expect.EndOfFile
+import work.martins.simon.expect.{EndOfFile, StdErr}
 import work.martins.simon.expect.core.Expect
 import work.martins.simon.expect.fluent.{ExpectBlock, RegexWhen, StringWhen, When, Expect => FluentExpect}
 
@@ -34,8 +34,9 @@ object KadminUtils extends LazyLogging {
     password.foreach { pass =>
       block.addWhen(expectAndSendPassword(principal, pass))
     }
-    block.when(s"""Client '[^']+' not found in Kerberos database""".r)
+    block.when(s"""Client '[^']+' not found""".r, readFrom = StdErr)
       .returning(Left(NoSuchPrincipal))
+      .exit()
     block.when(EndOfFile)
       .returning(Right(()))
       .exit()
@@ -183,39 +184,39 @@ object KadminUtils extends LazyLogging {
   def defaultUnknownError[R]: Either[ErrorCase, R] = Left(UnknownError())
 
   def insufficientPermission[R](expectBlock: ExpectBlock[Either[ErrorCase, R]]): RegexWhen[Either[ErrorCase, R]] = {
-    expectBlock.when("""Operation requires ``([^']+)'' privilege""".r)
+    expectBlock.when("""Operation requires ``([^']+)'' privilege""".r, readFrom = StdErr)
       .returning { m: Match =>
         Left(InsufficientPermissions(m.group(1)))
       }
   }
   def principalDoesNotExist[R](expectBlock: ExpectBlock[Either[ErrorCase, R]]): StringWhen[Either[ErrorCase, R]] = {
-    expectBlock.when("Principal does not exist")
+    expectBlock.when("Principal does not exist", readFrom = StdErr)
       .returning(Left(NoSuchPrincipal))
   }
   def policyDoesNotExist[R](expectBlock: ExpectBlock[Either[ErrorCase, R]]): StringWhen[Either[ErrorCase, R]] = {
-    expectBlock.when("Policy does not exist")
+    expectBlock.when("Policy does not exist", readFrom = StdErr)
       .returning(Left(NoSuchPolicy))
   }
   def passwordIncorrect[R](expectBlock: ExpectBlock[Either[ErrorCase, R]]): RegexWhen[Either[ErrorCase, R]] = {
-    expectBlock.when("(Password incorrect|Incorrect password|Preauthentication failed)".r)
+    expectBlock.when("(Password incorrect|Incorrect password|Preauthentication failed)".r, readFrom = StdErr)
       .returning(Left(PasswordIncorrect))
   }
   def passwordExpired[R](expectBlock: ExpectBlock[Either[ErrorCase, R]]): StringWhen[Either[ErrorCase, R]] = {
-    expectBlock.when("Password expired")
+    expectBlock.when("Password expired", readFrom = StdErr)
       .returning(Left(PasswordExpired))
   }
   def passwordTooShort[R](expectBlock: ExpectBlock[Either[ErrorCase, R]]): StringWhen[Either[ErrorCase, R]] = {
-    expectBlock.when("Password is too short")
+    expectBlock.when("Password is too short", readFrom = StdErr)
       .returning(Left(PasswordTooShort))
   }
   def passwordWithoutEnoughCharacterClasses[R](expectBlock: ExpectBlock[Either[ErrorCase, R]]): StringWhen[Either[ErrorCase, R]] = {
-    expectBlock.when("Password does not contain enough character classes")
+    expectBlock.when("Password does not contain enough character classes", readFrom = StdErr)
       .returning(Left(PasswordWithoutEnoughCharacterClasses))
   }
 
   def expectAndSendPassword[R](principal: String, password: String)(expectBlock: ExpectBlock[Either[ErrorCase, R]]): RegexWhen[Either[ErrorCase, R]] = {
-    expectBlock.when(s"""[pP]assword for (principal )?"?$principal""".r)
-      .sendln(password)
+    expectBlock.when(s"""[pP]assword for (principal )?"?$principal"?(: )?""".r)
+      .sendln(password, sensitive = true)
   }
 
   def preemptiveExit[R](when: When[Either[ErrorCase, R]]): Unit = {
@@ -225,5 +226,13 @@ object KadminUtils extends LazyLogging {
       // This ensures the next expect(s) (if any) do not get executed and
       // we don't end up returning something else by mistake.
       .exit()
+  }
+
+  def unknownError[R](expectBlock: ExpectBlock[Either[ErrorCase, R]]): RegexWhen[Either[ErrorCase, R]] = {
+    //(?s) inline regex flag for dotall mode. In this mode '.' matches any character, including a line terminator.
+    expectBlock.when("(?s)(.+)$".r, readFrom = StdErr)
+      .returning { m: Match =>
+        Left(UnknownError(m.group(1)))
+      }
   }
 }

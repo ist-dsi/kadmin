@@ -2,14 +2,13 @@ package pt.tecnico.dsi.kadmin
 
 import java.io.File
 
-import com.typesafe.config.ConfigFactory
-import org.scalatest.{BeforeAndAfterEach, AsyncFlatSpec}
+import org.scalatest.{AsyncFlatSpec, BeforeAndAfterEach}
 
 /**
   * $assumptions
   */
 class TicketsSpec extends AsyncFlatSpec with TestUtils with BeforeAndAfterEach {
-  import fullPermissionsKadmin.settings.{principal, password, realm}
+  import fullPermissionsKadmin.settings.{password, principal, realm}
 
   override protected def beforeEach(): Unit = {
     super.beforeEach()
@@ -23,12 +22,11 @@ class TicketsSpec extends AsyncFlatSpec with TestUtils with BeforeAndAfterEach {
     KadminUtils.destroyTickets().run()
   }
 
-  val kadmin = new Kadmin(ConfigFactory.parseString(s"""
-    kadmin {
-      realm = "EXAMPLE.COM"
-      keytab = "notEmpty" //To ensure command-keytab is used
-      command-keytab = "kadmin -c /tmp/krb5cc_0"
-    }"""))
+  val kadmin = new Kadmin(fullPermissionsKadmin.settings.copy(
+    command = Seq("kadmin", "-c", "/tmp/krb5cc_0"),
+    //To ensure authentication is performed using keytab and not password
+    keytab = "notEmpty"
+  ))
 
   "obtainTicketGrantingTicket" should "throw IllegalArgumentException if neither password or keytab is specified" in {
     assertThrows[IllegalArgumentException]{
@@ -45,6 +43,9 @@ class TicketsSpec extends AsyncFlatSpec with TestUtils with BeforeAndAfterEach {
       KadminUtils.obtainTGT("", "", password = Some(password))
     }
   }
+  "obtainTicketGrantingTicket" should "return NoSuchPrincipal if the principal does not exist" in {
+    KadminUtils.obtainTGT("", "nonExistingPrincipal", password = Some(password)) leftValueShouldBe NoSuchPrincipal
+  }
   it should "succeed with password" in {
     for {
       // obtain a TGT. We pass the -S flag so we can later use kadmin with the obtained ticket
@@ -57,13 +58,8 @@ class TicketsSpec extends AsyncFlatSpec with TestUtils with BeforeAndAfterEach {
   it should "succeed with keytab" in {
     val principalWithKeytab = "test/admin"
     val keytabFile = fullPermissionsKadmin.getKeytabFile(principalWithKeytab)
-    val kadminWithKeytab = new Kadmin(ConfigFactory.parseString(s"""
-    kadmin {
-      realm = "EXAMPLE.COM"
-      principal = "$principalWithKeytab"
-      keytab = "${keytabFile.getAbsolutePath}"
-    }"""))
-    
+    val kadminWithKeytab = new Kadmin(realm, principalWithKeytab, keytabFile)
+
     for {
       // Create the keytab
       _ <- fullPermissionsKadmin.addPrincipal("", principalWithKeytab, randKey = true).rightValueShouldBeUnit()

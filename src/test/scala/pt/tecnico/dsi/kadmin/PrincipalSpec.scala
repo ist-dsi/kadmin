@@ -13,33 +13,22 @@ class PrincipalSpec extends AsyncFlatSpec with TestUtils {
     val principal = "addNoKey"
     
     for {
-      //Ensure the principal does not exist
       _ <- deletePrincipal(principal).rightValueShouldBeUnit()
-  
-      //Create the principal
       //This also tests adding a principal when a principal already exists
       _ <- addPrincipal("-nokey", principal).rightValueShouldIdempotentlyBeUnit()
-  
-      //Ensure it was in fact created
-      resultingFuture <- getPrincipal(principal).rightValue (_.name shouldBe getFullPrincipalName(principal))
+      resultingFuture <- getPrincipal(principal).rightValue (_.name shouldBe fullPrincipalName(principal))
     } yield resultingFuture
   }
   it should "idempotently succeed when setting a password" in {
     val principal = "addPassword"
     
     for {
-      // Ensure the principal does not exist
       _ <- deletePrincipal(principal).rightValueShouldBeUnit()
-  
-      // Create the principal
       // This also tests adding a principal when a principal already exists
       _ <- addPrincipal("", principal, password = Some("aShinyN3wPassword")).rightValueShouldIdempotentlyBeUnit()
-  
-      // Ensure it was in fact created
-      resultingFuture <- getPrincipal(principal).rightValue (_.name shouldBe getFullPrincipalName(principal))
+      resultingFuture <- getPrincipal(principal).rightValue (_.name shouldBe fullPrincipalName(principal))
     } yield resultingFuture
   }
-
   // Maybe these two tests should be in the PasswordSpec
   it should "return PasswordToShort when the password is too short" in {
     val principal = "addPasswordTooShort"
@@ -130,7 +119,7 @@ class PrincipalSpec extends AsyncFlatSpec with TestUtils {
       resultingFuture <- withPrincipal[Boolean](principal) { expectBlock =>
         expectBlock.when( """Principal: ([^\n]+)\n""".r)
           .returning { m =>
-            Right(m.group(1) == getFullPrincipalName(principal))
+            Right(m.group(1) == fullPrincipalName(principal))
           }
       } rightValueShouldIdempotentlyBe true
     } yield resultingFuture

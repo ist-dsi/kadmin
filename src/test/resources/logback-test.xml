@@ -11,12 +11,12 @@
             <!-- With Colors -->
             <!-- <pattern>[%date] %logger%n %highlight([%-5level][%logger{0}] %message) %n%xException</pattern> -->
             <!-- Without Colors -->
-            <pattern>[%-5level][%date][%logger{0}] %message%n%xException</pattern>
+            <pattern>%highlight([%-5level])[%date][%logger{0}] %message%n%xException</pattern>
         </encoder>
     </appender>
 
-    <logger name="org.scalatest" level="DEBUG" />
-    <logger name="work.martins.simon.expect" level="WARN" />
+    <logger name="org.scalatest" level="debug" />
+    <logger name="work.martins.simon.expect" level="warn" />
 
     <root level="DEBUG">
         <!-- <appender-ref ref="FILE"/> -->

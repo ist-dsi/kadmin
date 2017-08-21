@@ -2,8 +2,6 @@ package pt.tecnico.dsi.kadmin
 
 import org.scalatest.AsyncFlatSpec
 
-import scala.util.matching.Regex.Match
-
 /**
   * $assumptions
   */
@@ -80,6 +78,8 @@ class PolicySpec extends AsyncFlatSpec with TestUtils {
     }
   }
   it should "idempotently succeed" in {
+    import scala.util.matching.Regex.Match
+
     val policy = "withPolicy"
     val minLength = 13
     
@@ -107,6 +107,16 @@ class PolicySpec extends AsyncFlatSpec with TestUtils {
   
       // Get it
       resultingFuture <- getPolicy(policy) idempotentRightValue (_.minimumLength shouldBe minLength)
+    } yield resultingFuture
+  }
+
+  "listPolicies" should "idempotently succeed" in {
+    import scala.concurrent.duration.DurationInt
+    for {
+      _ <- addPolicy(Policy(name = "first", 50.days, 5.days, 5, 2, 1)).rightValueShouldBeUnit()
+      _ <- addPolicy(Policy(name = "second", 50.days, 5.days, 5, 2, 1)).rightValueShouldBeUnit()
+      _ <- addPolicy(Policy(name = "third", 50.days, 5.days, 5, 2, 1)).rightValueShouldBeUnit()
+      resultingFuture <- listPolicies("*") idempotentRightValue (_ should contain allOf ("first", "second", "third"))
     } yield resultingFuture
   }
 }

@@ -7,7 +7,6 @@ import org.scalatest.exceptions.TestFailedException
 import work.martins.simon.expect.core.Expect
 
 import scala.concurrent.Future
-import scala.language.existentials
 
 /**
   * @define assumptions These tests make the following assumptions:
@@ -23,10 +22,11 @@ import scala.language.existentials
   *  - Running the tests locally with docker-compose (look at the folder kerberos-docker).
   *  - Running the tests in the Travis CI (look at .travis.yml, which makes use of the kerberos-docker).
   */
-trait TestUtils extends ScalaFutures with Matchers with EitherValues with LazyLogging { self: AsyncTestSuite ⇒
-  def kadminFor(principal: String) = new Kadmin(Settings.fromConfig().copy(principal = principal))
-  val fullPermissionsKadmin: Kadmin = kadminFor("kadmin/admin")
-  val noPermissionsKadmin: Kadmin = kadminFor("noPermissions")
+trait TestUtils extends ScalaFutures with Matchers with EitherValues with LazyLogging { self: AsyncTestSuite =>
+  private val configSettings = Settings.fromConfig()
+  // These are a cheat to test some of the constructors of Kadmin
+  val fullPermissionsKadmin: Kadmin = new Kadmin(configSettings.copy(principal = "kadmin/admin"))
+  val noPermissionsKadmin: Kadmin = new Kadmin(configSettings.realm, "noPermissions", configSettings.password)
 
   implicit class RichExpect[T](expect: Expect[Either[ErrorCase, T]]) {
     def test(test: Either[ErrorCase, T] => Assertion): Future[Assertion] = expect.run().map(test)
@@ -77,7 +77,7 @@ trait TestUtils extends ScalaFutures with Matchers with EitherValues with LazyLo
 
   def testNoSuchPrincipal[R](e: Expect[Either[ErrorCase, R]]): Future[Assertion] = e leftValueShouldIdempotentlyBe NoSuchPrincipal
   def testNoSuchPolicy[R](e: Expect[Either[ErrorCase, R]]): Future[Assertion] = e leftValueShouldIdempotentlyBe NoSuchPolicy
-  def testInsufficientPermission(permission: String)(e: Expect[Either[ErrorCase, T forSome { type T }]]): Future[Assertion] = {
+  def testInsufficientPermission[T](permission: String)(e: Expect[Either[ErrorCase, T]]): Future[Assertion] = {
     e leftValueShouldIdempotentlyBe InsufficientPermissions(permission)
   }
 }

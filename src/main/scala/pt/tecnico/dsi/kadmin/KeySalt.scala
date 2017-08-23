@@ -28,7 +28,7 @@ object KeySalt {
   }
 }
 case class KeySalt(encryptionType: String, salt: Salt) {
-  val toKadminRepresentation: String = s"$encryptionType:${salt.getClass.getSimpleName.toLowerCase}"
+  val toKadminRepresentation: String = s"$encryptionType:${salt.getClass.getSimpleName.dropRight(1).toLowerCase}"
 }
 
 object Key {

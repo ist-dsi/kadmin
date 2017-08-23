@@ -89,6 +89,9 @@ developers += Developer("Lasering", "Simão Martins", "", new URL("https://githu
 // Will fail the build/release if updates for the dependencies are found
 dependencyUpdatesFailBuild := true
 
+coverageFailOnMinimum := true
+coverageMinimum := 90
+
 import ReleaseTransformations._
 releaseProcess := Seq[ReleaseStep](
   releaseStepCommand("dependencyUpdates"),
@@ -101,7 +104,7 @@ releaseProcess := Seq[ReleaseStep](
   tagRelease,
   releaseStepCommand("ghpagesPushSite"),
   releaseStepCommand("publishSigned"),
-  releaseStepCommand("sonatypeRelease"),
+  releaseStepCommand("sonatypeRelease"), // This step is not needed if the release is a snapshot
   pushChanges,
   writeVersions,
 )

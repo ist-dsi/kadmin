@@ -1,5 +1,6 @@
 package pt.tecnico.dsi.kadmin
 
+import org.joda.time.DateTime
 import org.scalatest.AsyncWordSpec
 import work.martins.simon.expect.fluent.Expect
 
@@ -28,7 +29,7 @@ class PasswordSpec extends AsyncWordSpec with TestUtils {
       }
     }
 
-    "the principal does not exists" should {
+    "the principal does not exist" should {
       "return NoSuchPrincipal when randomizing the keys" in {
         testNoSuchPrincipal {
           changePassword("changePasswordToRandKey", randKey = true)
@@ -98,6 +99,20 @@ class PasswordSpec extends AsyncWordSpec with TestUtils {
           // already tested changePassword for idempotency above this is not a problem
           _ <- changePassword(principal, newPassword = Some(password)).rightValueShouldBeUnit()
           resultingFuture <- checkPassword(principal, password).rightValueShouldBeUnit()
+        } yield resultingFuture
+      }
+    }
+  }
+
+  "CheckPassword" when {
+    "the password was expired" should {
+      "return PasswordExpired" in {
+        val principal = "passwordExpired"
+        val password = "some password"
+        for {
+          _ <- addPrincipal("", principal, Some(password)).rightValueShouldBeUnit()
+          _ <- expirePrincipalPassword(principal, DateTime.now().minusDays(5)).rightValueShouldBeUnit()
+          resultingFuture <- checkPassword(principal, password) leftValueShouldIdempotentlyBe PasswordExpired
         } yield resultingFuture
       }
     }

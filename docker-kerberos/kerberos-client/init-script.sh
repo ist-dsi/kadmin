@@ -4,6 +4,7 @@ source `dirname $0`/configureKerberosClient.sh
 
 cd /tmp/kadmin
 
+#sbt "testOnly *Settings*"
 #sbt "testOnly *Privileges*"
 #sbt "testOnly *Policy*"
 #sbt "testOnly *Principal*"

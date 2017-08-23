@@ -22,11 +22,8 @@ class TicketsSpec extends AsyncFlatSpec with TestUtils with BeforeAndAfterEach {
     KadminUtils.destroyTickets().run()
   }
 
-  val kadmin = new Kadmin(fullPermissionsKadmin.settings.copy(
-    command = Seq("kadmin", "-c", "/tmp/krb5cc_0"),
-    //To ensure authentication is performed using keytab and not password
-    keytab = "notEmpty"
-  ))
+  // Keytab was a wierd value to ensure authentication is performed using keytab and not password
+  val kadmin = new Kadmin(realm, principal, keytab = new File("notEmpty"), command = "kadmin -c /tmp/krb5cc_0")
 
   "obtainTicketGrantingTicket" should "throw IllegalArgumentException if neither password or keytab is specified" in {
     assertThrows[IllegalArgumentException]{
@@ -86,8 +83,8 @@ class TicketsSpec extends AsyncFlatSpec with TestUtils with BeforeAndAfterEach {
       // Ensure we have the ticket and it is working
       _ <- KadminUtils.obtainTGT(s"-S $principal", principal, password = Some(password)).rightValueShouldBeUnit()
       _ <- kadmin.getPrincipal(principal) rightValue (_.name should startWith(principal))
-  
-      destroyedTickets <- KadminUtils.destroyTickets().run() if destroyedTickets.equals(())
+
+      _ <- KadminUtils.destroyTickets().run().map(_.shouldBe(()))
       resultingFuture <- kadmin.getPrincipal(principal).leftValue(_ shouldBe a[UnknownError])
     } yield resultingFuture
   }

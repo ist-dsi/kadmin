@@ -3,13 +3,14 @@ package pt.tecnico.dsi.kadmin
 import java.io.File
 
 import com.typesafe.config.{Config, ConfigFactory, ConfigValueType}
+import com.typesafe.scalalogging.LazyLogging
 import work.martins.simon.expect.StringUtils.splitBySpaces
 import work.martins.simon.expect.{Settings => ScalaExpectSettings}
 
 import scala.collection.JavaConverters._
 import scala.util.matching.Regex
 
-object Settings {
+object Settings extends LazyLogging {
   /**
     * Instantiate a `Settings` from a `Config`.
     * @param config The `Config` from which to parse the settings.
@@ -23,14 +24,14 @@ object Settings {
     }
     import kadminConfig._
 
-    val realm = getString("realm")
-    val principal = getString("principal")
     val keytab = getString("keytab")
 
-    def getCommand(path: String): Seq[String] = getValue(path).valueType() match {
-      case ConfigValueType.STRING => splitBySpaces(getString(path))
-      case ConfigValueType.LIST => getStringList(path).asScala
-      case _ => throw new IllegalArgumentException(s"$path can only be String or Array of String")
+    def getCommand(path: String): Seq[String] = {
+      getValue(path).valueType() match {
+        case ConfigValueType.LIST => getStringList(path).asScala
+        case ConfigValueType.STRING => splitBySpaces(getString(path))
+        case _ => throw new IllegalArgumentException(s"$path can only be String or Array of Strings.")
+      }
     }
 
     val scalaExpectSettings = {
@@ -50,8 +51,8 @@ object Settings {
     }
 
     new Settings(
-      realm,
-      principal,
+      getString("realm"),
+      getString("principal"),
       keytab,
       getString("password"),
       if (keytab.isEmpty) getCommand("command-password") else getCommand("command-keytab"),
@@ -89,5 +90,5 @@ case class Settings(realm: String, principal: String = "kadmin/admin", keytab: S
   require(realm.nonEmpty, "Realm cannot be empty.")
   require(principal.nonEmpty, "Principal cannot be empty.")
   require(password.nonEmpty || keytab.nonEmpty, "Either password or keytab must be defined.")
-  require(command.nonEmpty, s"Command cannot be empty.")
+  require(command.nonEmpty, "Command cannot be empty.")
 }

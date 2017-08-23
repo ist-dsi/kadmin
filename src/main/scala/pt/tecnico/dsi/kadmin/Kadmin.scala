@@ -11,7 +11,7 @@ import work.martins.simon.expect.{StdErr, StringUtils}
 import work.martins.simon.expect.core.Expect
 import work.martins.simon.expect.fluent.{ExpectBlock, Expect => FluentExpect}
 
-import scala.util.matching.Regex.Match
+import scala.concurrent.duration.FiniteDuration
 
 /**
   * @define idempotentOperation
@@ -93,7 +93,7 @@ class Kadmin(val settings: Settings) extends LazyLogging {
     if (keytab.isEmpty) {
       expectBlock
         .addWhen(passwordIncorrect)
-        .addActions(preemptiveExit)
+          .exit()
     }
     expectBlock
       .when("(.+) while initializing kadmin interface".r, readFrom = StdErr)
@@ -102,7 +102,7 @@ class Kadmin(val settings: Settings) extends LazyLogging {
       .when(kadminPrompt)
         .sendln(command)
       .addWhen(unknownError)
-        .addActions(preemptiveExit)
+        .exit()
     e.addExpectBlock(f)
     e.expect(kadminPrompt)
       .sendln("quit")
@@ -114,6 +114,9 @@ class Kadmin(val settings: Settings) extends LazyLogging {
   /**
     * Creates `principal` using `options`. If `principal` already exists `modifyPrincipal` will be
     * invoked to make this operation idempotent (see the caveats bellow).
+    *
+    * This method is more general than the one receiving a `Principal`, as it allows to specify only the
+    * pretended options, where as the one receiving a `Principal` will always use the same options.
     *
     * $idempotentOperation However there are some <b>caveats</b>: if `principal` already exists
     * and any of `newPassword`, `randKey` or `keysalt` is defined, then `changePassword` will be invoked
@@ -175,9 +178,32 @@ class Kadmin(val settings: Settings) extends LazyLogging {
         .addWhen(unknownError)
     }
   }
+  /**
+    * Creates `principal` using `options`. The parameters to `add_principal` will be computed from `principal`.
+    * If `principal` already exists `modifyPrincipal` will be invoked to make this
+    * operation idempotent (see the caveats bellow).
+    *
+    * $idempotentOperation However there are some <b>caveats</b>: if `principal` already exists
+    * and any of `newPassword`, `randKey` or `keysalt` is defined, then `changePassword` will be invoked
+    * after the `modifyPrincipal`. Since `changePassword` is not always idempotent this method might also not be.
+    *
+    * The password is not sent with the "-pw" option so it will not be exposed via the system process list.
+    * Nor it will be exposed via the logs.
+    *
+    * $startedWithDoOperation
+    *
+    * @param principal the principal to create.
+    * @return an Expect that creates `principal`.
+    * @group Principal Operations
+    */
+  def addPrincipal(principal: Principal, password: Option[String], randKey: Boolean, keysalt: Option[KeySalt]): Expect[Either[ErrorCase, Unit]] = {
+    addPrincipal(principal.options, principal.name, password, randKey, keysalt)
+  }
 
   /**
-    * Modifies `principal` using `options`.
+    * Modifies `principal` using `options`. This method is more general than the one receiving a `Principal`,
+    * as it allows to specify only the pretended options, where as the one receiving a `Principal` will always use
+    * the same options.
     *
     * $startedWithDoOperation
     *
@@ -202,6 +228,16 @@ class Kadmin(val settings: Settings) extends LazyLogging {
         .addWhen(unknownError)
     }
   }
+  /**
+    * Modifies `principal` using `options`. The parameters to `modify_principal` will be computed from `principal`.
+    *
+    * $startedWithDoOperation
+    *
+    * @param principal the principal to modify.
+    * @return an Expect that modifies `principal`.
+    * @group Principal Operations
+    */
+  def modifyPrincipal(principal: Principal): Expect[Either[ErrorCase, Unit]] = modifyPolicy(principal.options, principal.name)
 
   /**
     * Sets the `principal` expiration date time to `expirationDateTime`.
@@ -479,10 +515,8 @@ class Kadmin(val settings: Settings) extends LazyLogging {
     doOperation(command) { e: FluentExpect[Either[ErrorCase, Seq[String]]] =>
       e.expect
         .addWhen(insufficientPermission)
-        .when(s"${expression.replace("*", "\\*").replace("?", "\\?")}\\s+((?>[^@]+@$realm\n)*)(?=$kadminPrompt\\s*)".r)
-          .returning { m: Match =>
-            Right(m.group(1).split("\n").toSeq)
-          }
+        .when(s"${expression.replace("*", "\\*").replace("?", "\\?")}\n(([^\n]+\n)+)(?=$kadminPrompt)".r)
+          .returning(m => Right(m.group(1).split("\n").toSeq))
     }
   }
 
@@ -514,6 +548,7 @@ class Kadmin(val settings: Settings) extends LazyLogging {
         .returning(Right(()))
       .addWhen(passwordIncorrect)
       .addWhen(passwordExpired)
+        .exit()
     e.toCore
   }
   //endregion
@@ -585,8 +620,6 @@ class Kadmin(val settings: Settings) extends LazyLogging {
   //endregion
 
   //region <Policy commands>
-  // There is a racing condition in the implementation of the policy commands
-
   /**
     * Creates `policy` using `options`. This method is more general than the one receiving a `Policy`,
     * as it allows to specify only the pretended options, where as the one receiving a `Policy` will always use
@@ -612,9 +645,8 @@ class Kadmin(val settings: Settings) extends LazyLogging {
         .addWhen(unknownError)
         .when(kadminPrompt)
           .returning(Right(()))
-          // We need to do a preemptive exit or send a \n because otherwise doOperation won't be able to
-          // match the kadmin prompt and quit. This way is more efficient.
-          .addActions(preemptiveExit)
+          // We need to exit because if we don't doOperation will try to match with kadmin prompt causing a timeout
+          .exit()
     }
   }
   /**
@@ -656,9 +688,8 @@ class Kadmin(val settings: Settings) extends LazyLogging {
         .addWhen(unknownError)
         .when(kadminPrompt)
           .returning(Right(()))
-          // We need to do a preemptive exit or send a \n because otherwise doOperation won't be able to
-          // match the kadmin prompt and quit. This way is more efficient.
-          .addActions(preemptiveExit)
+          // We need to exit because if we don't doOperation will try to match with kadmin prompt causing a timeout
+          .exit()
     }
   }
   /**
@@ -697,7 +728,8 @@ class Kadmin(val settings: Settings) extends LazyLogging {
           .returning(Right(()))
         .when(kadminPrompt)
           .returning(Right(()))
-          .addActions(preemptiveExit)
+          // We need to exit because if we don't doOperation will try to match with kadmin prompt causing a timeout
+          .exit()
         .addWhen(unknownError)
     }
   }
@@ -752,7 +784,8 @@ class Kadmin(val settings: Settings) extends LazyLogging {
     * @group Policy Operations
     */
   def getPolicy(policy: String): Expect[Either[ErrorCase, Policy]] = withPolicy(policy){ expectBlock: ExpectBlock[Either[ErrorCase, Policy]] =>
-    expectBlock.when("""Policy: (\w+)
+    // (?s) inline regex flag for dotall mode. In this mode '.' matches any character, including a line terminator.
+    expectBlock.when(("""(?s)Policy: (\w+)
                        |Maximum password life: ([^\n]+)
                        |Minimum password life: ([^\n]+)
                        |Minimum password length: (\d+)
@@ -760,12 +793,13 @@ class Kadmin(val settings: Settings) extends LazyLogging {
                        |Number of old keys kept: (\d+)
                        |Maximum password failures before lockout: (\d+)
                        |Password failure count reset interval: ([^\n]+)
-                       |Password lockout duration: ([^\n]+)(.*?)""".stripMargin.r(
+                       |Password lockout duration: ([^\n]+)(.*)(?=\n""".stripMargin + kadminPrompt.pattern + ")").r(
       "policy", "maximumLife", "minimumLife",
       "minimumLength", "minimumCharacterClasses",
       "oldKeysKept", "maximumFailuresBeforeLockout",
       "failureCountResetInterval", "lockoutDuration", "allowedKeySalts"))
-      .returning { m: Match =>
+      .returning { m =>
+        logger.info("allowedKeySalts: " + m.group("allowedKeySalts"))
         val keysalts = Option(m.group("allowedKeySalts")).flatMap { s =>
           "Allowed key/salt types: (.*)".r.findFirstMatchIn(s)
         } map { m =>
@@ -780,7 +814,7 @@ class Kadmin(val settings: Settings) extends LazyLogging {
         durationsStream.collectFirst {
           case (_, Left(errorCase)) => Left(errorCase)
         } getOrElse {
-          val durations = durationsStream.collect { case (name, Right(duration)) => (name, duration) }.toMap
+          val durations: Map[String, FiniteDuration] = durationsStream.collect { case (name, Right(duration)) => (name, duration) }.toMap
           Right(Policy(
             policy, durations("maximumLife"), durations("minimumLife"),
             m.group("minimumLength").toInt, m.group("minimumCharacterClasses").toInt,
@@ -806,10 +840,8 @@ class Kadmin(val settings: Settings) extends LazyLogging {
     doOperation(command) { e: FluentExpect[Either[ErrorCase, Seq[String]]] =>
       e.expect
         .addWhen(insufficientPermission)
-        .when(s"${expressionGlob.replace("*", "\\*").replace("?", "\\?")}\\s+((?>[^\n]+\n)*)(?=$kadminPrompt)".r)
-          .returning { m: Match =>
-            Right(m.group(1).split("\n").toSeq)
-          }
+        .when(s"${expressionGlob.replace("*", "\\*").replace("?", "\\?")}\n(([^\n]+\n)*)(?=$kadminPrompt)".r)
+          .returning(m => Right(m.group(1).split("\n").toSeq))
     }
   }
   //endregion

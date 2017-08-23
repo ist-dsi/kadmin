@@ -6,9 +6,9 @@ import java.util.Locale
 import com.typesafe.scalalogging.LazyLogging
 import org.joda.time.format.DateTimeFormat
 import org.joda.time.{DateTime, DateTimeZone}
-import work.martins.simon.expect.{EndOfFile, StdErr}
 import work.martins.simon.expect.core.Expect
-import work.martins.simon.expect.fluent.{ExpectBlock, RegexWhen, StringWhen, When, Expect => FluentExpect}
+import work.martins.simon.expect.fluent.{ExpectBlock, RegexWhen, StringWhen, Expect => FluentExpect}
+import work.martins.simon.expect.{EndOfFile, StdErr}
 
 import scala.concurrent.duration.{DurationInt, FiniteDuration}
 import scala.util.matching.Regex.Match
@@ -202,7 +202,7 @@ object KadminUtils extends LazyLogging {
       .returning(Left(PasswordIncorrect))
   }
   def passwordExpired[R](expectBlock: ExpectBlock[Either[ErrorCase, R]]): StringWhen[Either[ErrorCase, R]] = {
-    expectBlock.when("Password expired", readFrom = StdErr)
+    expectBlock.when("Password expired")
       .returning(Left(PasswordExpired))
   }
   def passwordTooShort[R](expectBlock: ExpectBlock[Either[ErrorCase, R]]): StringWhen[Either[ErrorCase, R]] = {
@@ -219,20 +219,9 @@ object KadminUtils extends LazyLogging {
       .sendln(password, sensitive = true)
   }
 
-  def preemptiveExit[R](when: When[Either[ErrorCase, R]]): Unit = {
-    when
-      // We send the quit to allow kadmin a graceful shutdown
-      .sendln("quit")
-      // This ensures the next expect(s) (if any) do not get executed and
-      // we don't end up returning something else by mistake.
-      .exit()
-  }
-
   def unknownError[R](expectBlock: ExpectBlock[Either[ErrorCase, R]]): RegexWhen[Either[ErrorCase, R]] = {
     //(?s) inline regex flag for dotall mode. In this mode '.' matches any character, including a line terminator.
     expectBlock.when("(?s)(.+)$".r, readFrom = StdErr)
-      .returning { m: Match =>
-        Left(UnknownError(m.group(1)))
-      }
+      .returning(m => Left(UnknownError(m.group(1))))
   }
 }

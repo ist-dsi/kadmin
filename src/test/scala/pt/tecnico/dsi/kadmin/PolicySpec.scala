@@ -60,7 +60,7 @@ class PolicySpec extends AsyncFlatSpec with TestUtils {
 
     val policy = "withPolicy"
     val minLength = 13
-    
+
     for {
       _ <- addPolicy(s"-minlength $minLength", policy).rightValueShouldBeUnit()
       resultingFuture <- withPolicy[Int](policy) { expectBlock =>

@@ -56,9 +56,11 @@ trait TestUtils extends ScalaFutures with Matchers with EitherValues with LazyLo
             succeed
           } catch {
             case e: TestFailedException =>
+              val numberOfDigits = Math.floor(Math.log10(repetitions.toDouble)).toInt + 1
               val resultsString = (firstResult +: results).zipWithIndex
-                .map { case (result, i) => s" ${i + 1}: $result"}
-                .mkString("\n")
+                .map { case (result, i) =>
+                  s" %${numberOfDigits}d: %s".format(i + 1, result)
+                }.mkString("\n")
               throw new TestFailedException(s"""Operation is not idempotent. Results:
                                                 |$resultsString
                                                 |${e.message}""".stripMargin, e, e.failedCodeStackDepth + 1)

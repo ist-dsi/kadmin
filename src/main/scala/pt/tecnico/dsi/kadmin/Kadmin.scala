@@ -620,6 +620,56 @@ class Kadmin(val settings: Settings) extends LazyLogging {
   //endregion
 
   //region <Policy commands>
+  /** Most of policy methods look to be more complicated then they should.
+    * For example modifyPolicy could be (in a perfect world):
+    *
+    * {{{
+    *   doOperation(s"modify_policy $options $policy") { e: FluentExpect[Either[ErrorCase, Unit]] =>
+    *     e.expect
+    *      .addWhen(policyDoesNotExist)
+    *      .addWhen(insufficientPermission)
+    *      .addWhen(unknownError)
+    *      .when(kadminPrompt)
+    *        .returning(Right(()))
+    *        // We need to exit because if we don't doOperation will try to match with kadmin prompt causing a timeout
+    *        .exit()
+    *   }
+    * }}}
+    *
+    * However it is not because if it were it would not be idempotent. It is not trivial to understand why, so we
+    * will try our best to explain it.
+    *
+    * In the ideal implementation we have one expect block with 3 whens
+    *  · the first three handle error situations (therefor reading from StdErr)
+    *  · and the last one handles the success case (reading from StdOut)
+    * Because the expect block has whens reading from both StdOut and StdErr scala-expect will <b>concurrently</b> read
+    * from both InputStreams and match with the one which has output first. The kadmin will output the prompt
+    * and the "Policy does not exist" roughly at the same time, which means scala-expect can see the StdOut before
+    * it sees the StdErr. If one is trying to modify a non existing policy this would mean we would be returning
+    * a success (because scala-expect matched with StdOut) when a error should be returned. The principal commands
+    * do not suffer from this problem because the success case always outputs some text like "Principal "bla@EXAMPLE.COM" modified."
+    *
+    * To overcome this problem we employed the following strategy:
+    *  · If any of the error cases match, we return the error case and exit right away to prevent the next expect
+    *    block from being executed.
+    *  · If we match with the prompt (the success case) we don't consider it a success right away, and "try again"
+    *    by sending a newline, which allows the next expect block to see the prompt again.
+    *  · In the next expect block we again match with the error cases, and with the prompt, but now we consider it
+    *    a success.
+    * Why does this solve the problem? Scala-expect maintains a list of which InputStream was output (change the log
+    * level of scala-expect to TRACE and you will see it).
+    * As the process is generating output scala-expect is populating this list. So in the non existing policy case
+    * this list could be populated with:
+    *  · StdErr then StdOut, aka, the "Policy does not exist" followed by the prompt.
+    *  · StdOut then StdErr, aka, the prompt followed by the "Policy does not exist". Or:
+    * If the first case we catch the error first and all is good. However in the second case we catch the success.
+    * By trying again, we are effectively sending the prompt to the end of the list, and causing the next element
+    * of the list to be retrieved thus matching with the error case.
+    * If no error case ever existed we simply will be matching with the prompt again, and now we are sure it is a
+    * success.
+    */
+
+
   /**
     * Creates `policy` using `options`. This method is more general than the one receiving a `Policy`,
     * as it allows to specify only the pretended options, where as the one receiving a `Policy` will always use
@@ -638,6 +688,16 @@ class Kadmin(val settings: Settings) extends LazyLogging {
     */
   def addPolicy(options: String, policy: String): Expect[Either[ErrorCase, Unit]] = {
     doOperation(s"add_policy $options $policy") { e: FluentExpect[Either[ErrorCase, Unit]] =>
+      e.expect
+        .when("Principal or policy already exists|Unknown code adb 1".r, readFrom = StdErr)
+          .returningExpect(modifyPolicy(options, policy)) // Returning expect already has an implicit exit
+        .addWhen(insufficientPermission)
+          .exit()
+        .addWhen(unknownError)
+          .exit()
+        .when(kadminPrompt)
+          // Lets try again
+          .sendln("")
       e.expect
         .when("Principal or policy already exists|Unknown code adb 1".r, readFrom = StdErr)
           .returningExpect(modifyPolicy(options, policy))
@@ -684,6 +744,16 @@ class Kadmin(val settings: Settings) extends LazyLogging {
     doOperation(s"modify_policy $options $policy") { e: FluentExpect[Either[ErrorCase, Unit]] =>
       e.expect
         .addWhen(policyDoesNotExist)
+          .exit()
+        .addWhen(insufficientPermission)
+          .exit()
+        .addWhen(unknownError)
+          .exit()
+        .when(kadminPrompt)
+          // Lets try again
+          .sendln("")
+      e.expect
+        .addWhen(policyDoesNotExist)
         .addWhen(insufficientPermission)
         .addWhen(unknownError)
         .when(kadminPrompt)
@@ -723,14 +793,25 @@ class Kadmin(val settings: Settings) extends LazyLogging {
     doOperation(s"delete_policy -force $policy") { e: FluentExpect[Either[ErrorCase, Unit]] =>
       e.expect
         .addWhen(insufficientPermission)
+          .exit()
         .addWhen(policyDoesNotExist)
           // This is what makes this operation idempotent
           .returning(Right(()))
+          .exit()
+        .addWhen(unknownError)
+          .exit()
+        .when(kadminPrompt)
+          // Lets try again
+          .sendln("")
+      e.expect
+        .addWhen(insufficientPermission)
+        .addWhen(policyDoesNotExist)
+          .returning(Right(()))
+        .addWhen(unknownError)
         .when(kadminPrompt)
           .returning(Right(()))
           // We need to exit because if we don't doOperation will try to match with kadmin prompt causing a timeout
           .exit()
-        .addWhen(unknownError)
     }
   }
   /**
@@ -799,7 +880,6 @@ class Kadmin(val settings: Settings) extends LazyLogging {
       "oldKeysKept", "maximumFailuresBeforeLockout",
       "failureCountResetInterval", "lockoutDuration", "allowedKeySalts"))
       .returning { m =>
-        logger.info("allowedKeySalts: " + m.group("allowedKeySalts"))
         val keysalts = Option(m.group("allowedKeySalts")).flatMap { s =>
           "Allowed key/salt types: (.*)".r.findFirstMatchIn(s)
         } map { m =>

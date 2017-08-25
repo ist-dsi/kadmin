@@ -99,7 +99,7 @@ releaseProcess := Seq[ReleaseStep](
   inquireVersions,
   runClean,
   releaseStepCommand("doc"),
-  releaseStepCommand("""eval "./test.sh" !"""),
+  releaseStepCommand("""eval scala.sys.process.Process("./test.sh").!"""),
   setReleaseVersion,
   tagRelease,
   releaseStepCommand("ghpagesPushSite"),

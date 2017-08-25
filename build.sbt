@@ -102,7 +102,7 @@ releaseProcess := Seq[ReleaseStep](
   releaseStepCommand("""eval scala.sys.process.Process("./test.sh").!"""),
   setReleaseVersion,
   tagRelease,
-  releaseStepCommand("ghpagesPushSite"),
+  //releaseStepCommand("ghpagesPushSite"),
   releaseStepCommand("publishSigned"),
   releaseStepCommand("sonatypeRelease"), // This step is not needed if the release is a snapshot
   pushChanges,

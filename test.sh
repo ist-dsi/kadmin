@@ -23,7 +23,7 @@ docker-compose rm --force
 echo -e "\n\t" $(($(date +%s)-$START)) " seconds - TOTAL"
 
 COVERAGE_REPORT="../target/scala-2.12/scoverage-report/index.html"
-if [ $EXIT_CODE -eq 0 ] && ( [[ -z $CI ]] || [[ "$CI" == "false" ]] ) && [[ -f $COVERAGE_REPORT ]]; then
+if [[ $EXIT_CODE -eq 0 && ( -z $CI || "$CI" == "false" ) && -f $COVERAGE_REPORT ]]; then
   xdg-open $COVERAGE_REPORT
 fi
 

@@ -2,15 +2,15 @@ package pt.tecnico.dsi.kadmin
 
 import java.io.File
 
+import scala.collection.JavaConverters._
+import scala.util.matching.Regex
+
 import com.typesafe.config.{Config, ConfigFactory, ConfigValueType}
 import com.typesafe.scalalogging.LazyLogging
 import work.martins.simon.expect.StringUtils.splitBySpaces
 import work.martins.simon.expect.{Settings => ScalaExpectSettings}
 
-import scala.collection.JavaConverters._
-import scala.util.matching.Regex
-
-object Settings extends LazyLogging {
+object Settings {
   /**
     * Instantiate a `Settings` from a `Config`.
     * @param config The `Config` from which to parse the settings.
@@ -36,18 +36,12 @@ object Settings extends LazyLogging {
 
     val scalaExpectSettings = {
       val path = "scala-expect"
-      if (kadminConfig.hasPath(path)) {
-        val c = if (config.hasPath(path)) {
-          kadminConfig.getConfig(path).withFallback(config.getConfig(path))
-        } else {
-          kadminConfig.getConfig(path)
-        }
-        ScalaExpectSettings.fromConfig(c.atPath(path))
-      } else if (config.hasPath(path)) {
-        ScalaExpectSettings.fromConfig(config.getConfig(path).atPath(path))
+      lazy val scalaExpectConfig = if (config.hasPath(path)) {
+        kadminConfig.withOnlyPath(path).withFallback(config.withOnlyPath(path))
       } else {
-        new ScalaExpectSettings()
+        kadminConfig.withOnlyPath(path)
       }
+      ScalaExpectSettings.fromConfig(if (kadminConfig.hasPath(path)) scalaExpectConfig else config)
     }
 
     new Settings(
@@ -82,13 +76,27 @@ object Settings extends LazyLogging {
   * @param command
   * @param keytabsLocation
   * @param kadminPrompt
-  * @param expectSettings
+  * @param scalaExpectSettings
   */
-case class Settings(realm: String, principal: String = "kadmin/admin", keytab: String, password: String,
+final case class Settings(realm: String, principal: String = "kadmin/admin", keytab: String, password: String,
                     command: Seq[String], keytabsLocation: File = new File("/tmp"),
-                    kadminPrompt: Regex = "kadmin(.local)?: ".r, expectSettings: ScalaExpectSettings = new ScalaExpectSettings()) {
+                    kadminPrompt: Regex = "kadmin(.local)?: ".r, scalaExpectSettings: ScalaExpectSettings = new ScalaExpectSettings()) extends LazyLogging {
   require(realm.nonEmpty, "Realm cannot be empty.")
   require(principal.nonEmpty, "Principal cannot be empty.")
   require(password.nonEmpty || keytab.nonEmpty, "Either password or keytab must be defined.")
   require(command.nonEmpty, "Command cannot be empty.")
+  
+  // We have to redefine equals because Regex does not implement equals :(
+  override def equals(other: Any): Boolean = other match {
+    case that: Settings =>
+      realm == that.realm &&
+        principal == that.principal &&
+        keytab == that.keytab &&
+        password == that.password &&
+        command == that.command &&
+        keytabsLocation == that.keytabsLocation &&
+        kadminPrompt.regex == that.kadminPrompt.regex &&
+        scalaExpectSettings == that.scalaExpectSettings
+    case _ => false
+  }
 }

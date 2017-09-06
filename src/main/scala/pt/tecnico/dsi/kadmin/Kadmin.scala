@@ -3,15 +3,14 @@ package pt.tecnico.dsi.kadmin
 import java.io.File
 import java.nio.file.Files
 
-import com.typesafe.config.Config
+import scala.concurrent.duration.FiniteDuration
+
 import com.typesafe.scalalogging.LazyLogging
 import org.joda.time.DateTime
 import pt.tecnico.dsi.kadmin.KadminUtils._
-import work.martins.simon.expect.{StdErr, StringUtils}
 import work.martins.simon.expect.core.Expect
 import work.martins.simon.expect.fluent.{ExpectBlock, Expect => FluentExpect}
-
-import scala.concurrent.duration.FiniteDuration
+import work.martins.simon.expect.{StdErr, StringUtils}
 
 /**
   * @define idempotentOperation
@@ -23,7 +22,6 @@ import scala.concurrent.duration.FiniteDuration
   *  will performed as specified in the configuration.
   */
 class Kadmin(val settings: Settings) extends LazyLogging {
-  def this(config: Config) = this(Settings.fromConfig(config))
   def this(realm: String, principal: String, password: String, command: Seq[String]) = {
     this(new Settings(realm, principal, "", password, command))
   }
@@ -84,7 +82,7 @@ class Kadmin(val settings: Settings) extends LazyLogging {
     val finalCommand = settings.command
       .map(_.replaceAllLiterally("$FULL_PRINCIPAL", s"$principal@$realm"))
       .map(_.replaceAllLiterally("$KEYTAB", keytab))
-    val e = new FluentExpect(finalCommand, defaultUnknownError[R], expectSettings)
+    val e = new FluentExpect(finalCommand, defaultUnknownError[R], scalaExpectSettings)
     if (keytab.isEmpty) {
       e.expect.addWhen(expectAndSendPassword(fullPrincipalName(principal), password))
     }
@@ -538,7 +536,7 @@ class Kadmin(val settings: Settings) extends LazyLogging {
     val fullPrincipal = fullPrincipalName(principal)
     // -V turns on verbose output
     // -c sets the credential cache to /dev/null. This ensures no ticket is ever created.
-    val e = new FluentExpect(s"""kinit -V -c /dev/null $fullPrincipal""", defaultUnknownError[Unit], expectSettings)
+    val e = new FluentExpect(s"""kinit -V -c /dev/null $fullPrincipal""", defaultUnknownError[Unit], scalaExpectSettings)
     e.expect
       .addWhen(expectAndSendPassword(fullPrincipal, password))
       .when(s"""Client '$fullPrincipal' not found in Kerberos database""", readFrom = StdErr)

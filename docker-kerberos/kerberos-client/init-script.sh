@@ -16,7 +16,7 @@ sbt clean coverage test coverageReport
 
 TEST_EXIT_CODE=$?
 
-if [[ -z $CI ]] || [[ "$CI" == "false" ]]; then
+if [[ -z $CI || "$CI" == "false" ]]; then
   # If we are not in CI we chown the current directory back to its original owner (instead of root).
   chown -R $HOST_USER_ID:$HOST_USER_ID . /root/.sbt /root/.ivy2 /root/.coursier
 #else

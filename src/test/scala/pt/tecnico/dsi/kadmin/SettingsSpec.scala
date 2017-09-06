@@ -6,6 +6,7 @@ import com.typesafe.config.ConfigFactory
 import org.scalatest.AsyncWordSpec
 import scala.concurrent.duration.DurationInt
 
+
 /**
   * $assumptions
   */
@@ -57,8 +58,7 @@ class SettingsSpec extends AsyncWordSpec with TestUtils {
     "an array command is used" should {
       "work correctly" in {
         noException should be thrownBy {
-          // This one is a little cheat to test the kadmin constructor receiving a Config
-          new Kadmin(ConfigFactory.parseString(
+          Settings.fromConfig(ConfigFactory.parseString(
             """kadmin {
               |  realm = "EXAMPLE.COM"
               |  keytab = "somekeytab"
@@ -95,7 +95,7 @@ class SettingsSpec extends AsyncWordSpec with TestUtils {
             |    timeout = 20 seconds
             |  }
             |}
-          """.stripMargin)).expectSettings.timeout shouldBe 20.seconds
+          """.stripMargin)).scalaExpectSettings.timeout shouldBe 20.seconds
       }
     }
 
@@ -110,7 +110,7 @@ class SettingsSpec extends AsyncWordSpec with TestUtils {
             |scala-expect {
             |  timeout = 10 seconds
             |}
-          """.stripMargin)).expectSettings
+          """.stripMargin)).scalaExpectSettings
         expectSettings.timeout shouldBe 10.seconds
       }
     }
@@ -130,9 +130,48 @@ class SettingsSpec extends AsyncWordSpec with TestUtils {
             |  charset = "UTF-16"
             |  timeout = 10 seconds
             |}
-          """.stripMargin)).expectSettings
+          """.stripMargin)).scalaExpectSettings
         expectSettings.timeout shouldBe 20.seconds
         expectSettings.charset shouldBe Charset.forName("UTF-16")
+      }
+    }
+    
+    "created via config and via the domain class" should {
+      "have the same default values when using keytab" in {
+        val realm = "TEST.COM"
+        val keytab = "a keytab"
+        val password = ""
+        val kadminConfig = ConfigFactory.parseString(
+          s"""kadmin {
+            |  realm = "$realm"
+            |  keytab = "$keytab"
+            |  password = "$password"
+            |}
+          """.stripMargin)
+      
+        val configSettings = Settings.fromConfig(kadminConfig)
+        val domainClassSettings = Settings(realm = realm, keytab = keytab, password = password,
+          command = Settings.defaultCommand(usingKeytab = true))
+        
+        configSettings shouldBe domainClassSettings
+      }
+      "have the same default values when using passsword" in {
+        val realm = "TEST.COM"
+        val keytab = ""
+        val password = "a password"
+        val kadminConfig = ConfigFactory.parseString(
+          s"""kadmin {
+             |  realm = "$realm"
+             |  keytab = "$keytab"
+             |  password = "$password"
+             |}
+          """.stripMargin)
+    
+        val configSettings = Settings.fromConfig(kadminConfig)
+        val domainClassSettings = Settings(realm = realm, keytab = keytab, password = password,
+          command = Settings.defaultCommand(usingKeytab = false))
+    
+        configSettings shouldBe domainClassSettings
       }
     }
   }
